@@ -25,13 +25,13 @@ import io.github.awidesky.jCipher.dataIO.MessageConsumer;
 import io.github.awidesky.jCipher.dataIO.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 
-public class AESGCMEncrypter extends AbstractCipher {
+public class AESGCMCipher extends AbstractCipher {
 
 	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12, 256);
 	public final static int GCM_TAG_LENGTH = 16;
 	public final static int SALT_LENGTH = 64;
 	
-	public AESGCMEncrypter(int bufsize) {
+	public AESGCMCipher(int bufsize) {
 		super(METADATA, bufsize);
 	}
 	
