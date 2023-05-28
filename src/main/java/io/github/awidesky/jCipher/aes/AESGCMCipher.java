@@ -62,12 +62,6 @@ public class AESGCMCipher extends AbstractCipher {
 			e.printStackTrace();
 			return;
 		}
-		/*
-		System.out.println("Encrypt : ");
-		System.out.println("salt : " + HexFormat.of().formatHex(salt));
-		System.out.println("iter : " + iteration);
-		System.out.println("IV : " + HexFormat.of().formatHex(IV));
-		*/
 		mc.consumeResult(IV);
 		mc.consumeResult(salt);
 		mc.consumeResult(ByteBuffer.allocate(4).putInt(iteration).array());
@@ -87,12 +81,6 @@ public class AESGCMCipher extends AbstractCipher {
 		read = 0;
 		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
 		iteration = ByteBuffer.wrap(iterationByte).getInt();
-		/*
-		System.out.println("Decrypt : ");
-		System.out.println("salt : " + HexFormat.of().formatHex(salt));
-		System.out.println("iter : " + iteration);
-		System.out.println("IV : " + HexFormat.of().formatHex(IV));
-		*/
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException

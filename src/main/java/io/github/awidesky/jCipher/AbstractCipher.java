@@ -90,13 +90,6 @@ public abstract class AbstractCipher implements CipherUtil {
 			int read = mp.getSrc(buf);
 			if(read == -1) break;
 			byte[] result = cipher.update(buf, 0, read);
-		/*	if(b) {
-				System.out.println();
-				System.out.println("src : " + HexFormat.of().formatHex(buf));
-				System.out.println("result : " + HexFormat.of().formatHex(result));
-				System.out.println();
-				b = false;
-			}*/
 			if(result != null) mc.consumeResult(result);
 		}
 		mc.consumeResult(cipher.doFinal());
