@@ -89,19 +89,7 @@ public interface CipherUtil {
 	 * @throws IllegalBlockSizeException 
 	 * */
 	public String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
-	
-	/**
-	 * Encrypt a <code>String</code> as given encoding
-	 * 
-	 * @param str <code>String</code> to be encrypted
-	 * @param encoding character set that decode the <code>str</code>
-	 * @param mc Encrypted data Consumer
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	public void encryptFromString(String str, Charset encoding, MessageConsumer mc) throws IllegalBlockSizeException, BadPaddingException, IOException;
-	
+
 	/**
 	 * Decrypts whole data into single <code>byte[]</code> and return it
 	 * 
