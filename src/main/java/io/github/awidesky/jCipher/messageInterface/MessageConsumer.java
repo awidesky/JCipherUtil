@@ -26,12 +26,20 @@ public interface MessageConsumer {
 	 * @throws IOException 
 	 * */
 	public void consumeResult(byte[] buffer) throws IOException;
-	
+	/**
+	 * Close attached resource if there is.
+	 * */
+	public void closeResource() throws IOException;
 
+	
+	
 	public static MessageConsumer to(File f) throws FileNotFoundException {
 		return to(new FileOutputStream(f));
 	}
 	public static MessageConsumer to(OutputStream os) {
+		return to(os, true);
+	}
+	public static MessageConsumer to(OutputStream os, boolean close) {
 		return new MessageConsumer() {
 			private OutputStream out = os;
 			@Override
@@ -43,9 +51,16 @@ public interface MessageConsumer {
 					throw e;
 				}
 			}
+			@Override
+			public void closeResource() throws IOException {
+				if(close) out.close();
+			}
 		};
 	}
 	public static MessageConsumer to(WritableByteChannel ch) {
+		return to(ch, true);
+	}
+	public static MessageConsumer to(WritableByteChannel ch, boolean close) {
 		return new MessageConsumer() {
 			private WritableByteChannel out = ch;
 			@Override
@@ -57,6 +72,10 @@ public interface MessageConsumer {
 					out.close();
 					throw e;
 				}
+			}
+			@Override
+			public void closeResource() throws IOException {
+				if(close) out.close();
 			}
 		};
 	}

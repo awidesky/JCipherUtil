@@ -70,6 +70,8 @@ public abstract class AbstractCipher implements CipherUtil {
 			throws IOException, IllegalBlockSizeException, BadPaddingException {
 		initEncrypt(mc);
 		processCipher(mp, mc);
+		mc.closeResource();
+		mp.closeResource();
 	}
 
 	@Override
@@ -77,7 +79,8 @@ public abstract class AbstractCipher implements CipherUtil {
 			throws IOException, IllegalBlockSizeException, BadPaddingException {
 		initDecrypt(mp);
 		processCipher(mp, mc);
-		
+		mc.closeResource();
+		mp.closeResource();
 	}
 	
 	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws IOException, IllegalBlockSizeException, BadPaddingException {

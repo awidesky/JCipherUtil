@@ -42,6 +42,11 @@ public interface MessageProvider {
 	 * 
 	 * */
 	public int getSrc(byte[] buffer, int off) throws IOException;
+	/**
+	 * Close attached resource if there is.
+	 * */
+	public void closeResource() throws IOException;
+	
 	
 	
 	//TODO : add comment
@@ -64,6 +69,9 @@ public interface MessageProvider {
 		return MessageProvider.from(HexFormat.of().parseHex(hex.toLowerCase()));
 	}
 	public static MessageProvider from(InputStream src) {
+		return from(src, true);
+	}
+	public static MessageProvider from(InputStream src, boolean close) {
 		return new MessageProvider() {
 			private InputStream in = src;
 			@Override
@@ -75,6 +83,10 @@ public interface MessageProvider {
 					throw e;
 				}
 			}
+			@Override
+			public void closeResource() throws IOException {
+				if(close) in.close();
+			}
 		};
 	}
 	
@@ -83,6 +95,9 @@ public interface MessageProvider {
 	 * Returned <code>MessageProvider</code> does not close <code>InputStream</code> if <code>len</code> bytes are successfully read
 	 * */
 	public static MessageProvider from(InputStream src, long len) {
+		return from(src, len, true);
+	}
+	public static MessageProvider from(InputStream src, long len, boolean close) {
 		return new MessageProvider() {
 			private InputStream in = src;
 			private long length = len;
@@ -100,9 +115,16 @@ public interface MessageProvider {
 					throw e;
 				}
 			}
+			@Override
+			public void closeResource() throws IOException {
+				if(close) in.close();
+			}
 		};
 	}
 	public static MessageProvider from(ReadableByteChannel src) {
+		return from(src, true);
+	}
+	public static MessageProvider from(ReadableByteChannel src, boolean close) {
 		return new MessageProvider() {
 			private ReadableByteChannel in = src;
 			@Override
@@ -115,6 +137,10 @@ public interface MessageProvider {
 					throw e;
 				}
 			}
+			@Override
+			public void closeResource() throws IOException {
+				if(close) in.close();
+			}
 		};
 	}
 	/**
@@ -122,6 +148,9 @@ public interface MessageProvider {
 	 * Returned <code>MessageProvider</code> does not close <code>ReadableByteChannel</code> if <code>len</code> bytes are successfully read
 	 * */
 	public static MessageProvider from(ReadableByteChannel src, long len) {
+		return from(src, len, true);
+	}
+	public static MessageProvider from(ReadableByteChannel src, long len, boolean close) {
 		return new MessageProvider() {
 			private ReadableByteChannel in = src;
 			private long length = len;
@@ -140,6 +169,10 @@ public interface MessageProvider {
 					in.close();
 					throw e;
 				}
+			}
+			@Override
+			public void closeResource() throws IOException {
+				if(close) in.close();
 			}
 		};
 	}
