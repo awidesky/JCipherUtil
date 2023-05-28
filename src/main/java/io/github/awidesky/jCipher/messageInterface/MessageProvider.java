@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
 
@@ -49,6 +50,12 @@ public interface MessageProvider {
 	}
 	public static MessageProvider from(File src) throws FileNotFoundException {
 		return from(new FileInputStream(src));
+	}
+	public static MessageProvider from(String str) {
+		return from(str, Charset.defaultCharset());
+	}
+	public static MessageProvider from(String str, Charset encoding) {
+		return MessageProvider.from(new ByteArrayInputStream(str.getBytes(encoding)));
 	}
 	public static MessageProvider fromBase64(String base64) {
 		return from(Base64.getDecoder().decode(base64));
