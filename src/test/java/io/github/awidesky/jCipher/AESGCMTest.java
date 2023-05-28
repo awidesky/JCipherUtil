@@ -47,7 +47,7 @@ import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 
 @DisplayName("AES GCM")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AESGCMTestAll {
+class AESGCMTest {
 
 	public static final Charset TESTCHARSET = Charset.forName("UTF-16"); // TODO : param test? 
 	static SecureRandom ran = new SecureRandom();
