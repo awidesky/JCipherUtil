@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher.dataIO;
+package io.github.awidesky.jCipher.messageInterface;
 
 import java.io.File;
 import java.io.FileNotFoundException;

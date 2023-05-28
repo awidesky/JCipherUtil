@@ -6,4 +6,4 @@
  *
  * 
  */
-package io.github.awidesky.jCipher.dataIO;
+package io.github.awidesky.jCipher.messageInterface;

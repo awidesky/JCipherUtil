@@ -18,27 +18,37 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 
 import io.github.awidesky.jCipher.AbstractCipher;
-import io.github.awidesky.jCipher.dataIO.MessageConsumer;
-import io.github.awidesky.jCipher.dataIO.MessageProvider;
+import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
+import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 
 public class AESGCMCipher extends AbstractCipher {
 
 	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12, 256);
-	public final static int GCM_TAG_LENGTH = 16;
-	public final static int SALT_LENGTH = 64;
+	public final static int GCM_TAG_BIT_LENGTH = 128;
+	public final static int SALT_BYTE_LENGTH = 64;
+	
+	private byte[] IV;
 	
 	public AESGCMCipher(int bufsize) {
 		super(METADATA, bufsize);
+		try {
+			cipher = Cipher.getInstance(METADATA.ALGORITMH_NAME + "/" + METADATA.ALGORITMH_MODE + "/" + METADATA.ALGORITMH_PADDING);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			e.printStackTrace();
+		}
 	}
 	
+	public byte[] getIV() { return IV; }
+	
 	@Override
-	protected void initWrite(MessageConsumer mc) throws IOException {
-		byte[] IV = new byte[METADATA.NONCESIZE];
-		byte[] salt = new byte[SALT_LENGTH]; 
+	protected void initEncrypt(MessageConsumer mc) throws IOException {
+		IV = new byte[METADATA.NONCESIZE];
+		byte[] salt = new byte[SALT_BYTE_LENGTH]; 
 		int iteration;
 		
 		SecureRandom sr = new SecureRandom();
@@ -46,22 +56,27 @@ public class AESGCMCipher extends AbstractCipher {
 		sr.nextBytes(salt);
 		iteration = sr.nextInt(800000, 1000000);
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(iteration, IV));
+			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException
 				| InvalidKeySpecException e) {
 			e.printStackTrace();
 			return;
 		}
-		
+		/*
+		System.out.println("Encrypt : ");
+		System.out.println("salt : " + HexFormat.of().formatHex(salt));
+		System.out.println("iter : " + iteration);
+		System.out.println("IV : " + HexFormat.of().formatHex(IV));
+		*/
 		mc.consumeResult(IV);
 		mc.consumeResult(salt);
 		mc.consumeResult(ByteBuffer.allocate(4).putInt(iteration).array());
 	}
 	
 	@Override
-	protected void initRead(MessageProvider mp) throws IOException {
-		byte[] IV = new byte[METADATA.NONCESIZE];
-		byte[] salt = new byte[SALT_LENGTH]; 
+	protected void initDecrypt(MessageProvider mp) throws IOException {
+		IV = new byte[METADATA.NONCESIZE];
+		byte[] salt = new byte[SALT_BYTE_LENGTH]; 
 		int iteration;
 		byte[] iterationByte = new byte[4];
 		
@@ -72,9 +87,14 @@ public class AESGCMCipher extends AbstractCipher {
 		read = 0;
 		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
 		iteration = ByteBuffer.wrap(iterationByte).getInt();
-		
+		/*
+		System.out.println("Decrypt : ");
+		System.out.println("salt : " + HexFormat.of().formatHex(salt));
+		System.out.println("iter : " + iteration);
+		System.out.println("IV : " + HexFormat.of().formatHex(IV));
+		*/
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(iteration, IV));
+			cipher.init(Cipher.DECRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException
 				| InvalidKeySpecException e) {
 			e.printStackTrace();

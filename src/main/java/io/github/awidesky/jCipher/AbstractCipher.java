@@ -18,9 +18,8 @@ import java.util.HexFormat;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-
-import io.github.awidesky.jCipher.dataIO.MessageConsumer;
-import io.github.awidesky.jCipher.dataIO.MessageProvider;
+import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
+import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
 
@@ -42,47 +41,60 @@ public abstract class AbstractCipher implements CipherUtil {
 	 * This method should do tasks like generating metadata, writing it.. etc.  
 	 * @throws IOException 
 	 * */
-	protected abstract void initWrite(MessageConsumer mc) throws IOException;
+	protected abstract void initEncrypt(MessageConsumer mc) throws IOException;
 	/**
 	 * Initialize <code>Cipher</code> in decrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
 	 * 
 	 * This method should do tasks like reading metadata.. etc.  
 	 * @throws IOException 
 	 * */
-	protected abstract void initRead(MessageProvider mp) throws IOException;
+	protected abstract void initDecrypt(MessageProvider mp) throws IOException;
 
 
+	public byte[] getSalt() { return key.getSalt(); }
 	
 	@Override
-	public void init(char[] password) {
+	public CipherUtil init(char[] password) {
 		this.key = new KeyProperty(password);
+		return this;
 	}
 	@Override
-	public void init(byte[] key) {
+	public CipherUtil init(byte[] key) {
 		this.key = new KeyProperty(key);
+		return this;
 	}
 
 
 	@Override
 	public void encrypt(MessageProvider mp, MessageConsumer mc)
 			throws IOException, IllegalBlockSizeException, BadPaddingException {
+		initEncrypt(mc);
 		processCipher(mp, mc);
 	}
 
 	@Override
 	public void decrypt(MessageProvider mp, MessageConsumer mc)
 			throws IOException, IllegalBlockSizeException, BadPaddingException {
+		initDecrypt(mp);
 		processCipher(mp, mc);
 		
 	}
 	
 	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws IOException, IllegalBlockSizeException, BadPaddingException {
 		byte[] buf = new byte[BUFFER_SIZE];
+		//boolean b = true; TODO
 		while(true) {
 			int read = mp.getSrc(buf);
 			if(read == -1) break;
 			byte[] result = cipher.update(buf, 0, read);
-			if(result != null) mc.consumeResult(buf);
+		/*	if(b) {
+				System.out.println();
+				System.out.println("src : " + HexFormat.of().formatHex(buf));
+				System.out.println("result : " + HexFormat.of().formatHex(result));
+				System.out.println();
+				b = false;
+			}*/
+			if(result != null) mc.consumeResult(result);
 		}
 		mc.consumeResult(cipher.doFinal());
 	}

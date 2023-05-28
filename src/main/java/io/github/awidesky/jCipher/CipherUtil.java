@@ -15,23 +15,27 @@ import java.nio.charset.Charset;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
-import io.github.awidesky.jCipher.dataIO.MessageConsumer;
-import io.github.awidesky.jCipher.dataIO.MessageProvider;
+import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
+import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
 
 	
 public interface CipherUtil {
 	/**
 	 * Initialize this <code>CipherUtil</code> with given <code>password</code>
+	 * 
+	 * @return this instance
 	 * */
-	public void init(char[] password);
+	public CipherUtil init(char[] password);
 	/**
 	 * Initialize this <code>CipherUtil</code> with given <code>password</code>
 	 * Given byte array does not used directly as a key. instead, it is converted to <code>String</code> via {@link KeyProperty#byteArrToCharArr},
 	 * and then used as a password.
 	 * This is for consistency of salting, PBE algorithm, cipher metadata save protocol.
+	 * 
+	 * @return this instance
 	 * */
-	public void init(byte[] password);
+	public CipherUtil init(byte[] password);
 
 	/**
 	 * Simple way to encrypt from a source to a destination.
@@ -58,7 +62,7 @@ public interface CipherUtil {
 	/**
 	 * Encrypt whole data into single <code>byte[]</code> and return it
 	 * 
-	 * @param mp Plain dataProvider of source for encryption
+	 * @param mp Plain data Provider of source for encryption
 	 * @return the <code>byte</code> array that has all encrypted data
 	 * @throws IOException 
 	 * @throws BadPaddingException 
@@ -68,7 +72,7 @@ public interface CipherUtil {
 	/**
 	 * Encrypt whole data and represent the binary data as <code>Base64</code> encoding
 	 * 
-	 * @param mp Plain dataProvider of source for encryption
+	 * @param mp Plain data Provider of source for encryption
 	 * @return <code>Base64</code> text that encoded from encrypted data
 	 * @throws IOException 
 	 * @throws BadPaddingException 
@@ -78,7 +82,7 @@ public interface CipherUtil {
 	/**
 	 * Encrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
 	 * 
-	 * @param mp Plain dataProvider of source for encryption
+	 * @param mp Plain data Provider of source for encryption
 	 * @return hex format text that encoded from encrypted data
 	 * @throws IOException 
 	 * @throws BadPaddingException 
@@ -86,6 +90,17 @@ public interface CipherUtil {
 	 * */
 	public String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
 	
+	/**
+	 * Encrypt a <code>String</code> as given encoding
+	 * 
+	 * @param str <code>String</code> to be encrypted
+	 * @param encoding character set that decode the <code>str</code>
+	 * @param mc Encrypted data Consumer
+	 * @throws IOException 
+	 * @throws BadPaddingException 
+	 * @throws IllegalBlockSizeException 
+	 * */
+	public void encryptFromString(String str, Charset encoding, MessageConsumer mc) throws IllegalBlockSizeException, BadPaddingException, IOException;
 	
 	/**
 	 * Decrypts whole data into single <code>byte[]</code> and return it
@@ -127,4 +142,5 @@ public interface CipherUtil {
 	 * @throws IllegalBlockSizeException 
 	 * */
 	public String decryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	
 }

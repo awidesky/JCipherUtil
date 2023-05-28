@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher.dataIO;
+package io.github.awidesky.jCipher.messageInterface;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -44,24 +44,18 @@ public interface MessageProvider {
 	public int getSrc(byte[] buffer, int off) throws IOException;
 	
 	
-
+	//TODO : add comment
 	public static MessageProvider from(byte[] src) {
 		return from(new ByteArrayInputStream(src));
 	}
 	public static MessageProvider from(File src) throws FileNotFoundException {
 		return from(new FileInputStream(src));
 	}
-	public static MessageProvider from(String src) {
-		return from(src, Charset.defaultCharset());
-	}
 	public static MessageProvider fromBase64(String base64) {
 		return from(Base64.getDecoder().decode(base64));
 	}
 	public static MessageProvider fromHexString(String hex) {
 		return from(HexFormat.of().parseHex(hex.toLowerCase()));
-	}
-	public static MessageProvider from(String src, Charset encoding) {
-		return from(new ByteArrayInputStream(src.getBytes(encoding)));
 	}
 	public static MessageProvider from(InputStream src) {
 		return new MessageProvider() {
@@ -88,13 +82,12 @@ public interface MessageProvider {
 			private long length = len;
 			@Override
 			public int getSrc(byte[] buffer, int off) throws IOException {
+				if(length == 0) return -1;
 				try {
 					int read = in.read(buffer, off, (int)Math.min(buffer.length - off, length));
 					if(read == -1) in.close();
-					else {
-						length -= read;
-						if(length == 0) return -1;
-					}
+					else  length -= read;
+					
 					return read;
 				} catch (Exception e) {
 					in.close();
@@ -129,14 +122,13 @@ public interface MessageProvider {
 			
 			@Override
 			public int getSrc(byte[] buffer, int off) throws IOException {
+				if(length == 0) return -1;
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(buffer).position(off).limit((int)Math.min(buffer.length, length + off));
 					int read = in.read(buf);
 					if(read == -1) in.close();
-					else {
-						length -= read;
-						if(length == 0) return -1;
-					}
+					else length -= read;
+
 					return read;
 				} catch (Exception e) {
 					in.close();
