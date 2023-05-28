@@ -200,8 +200,7 @@ class AESGCMTestAll {
 		@Test
 		void byteArr() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException, IOException,
 				DigestException, NoSuchAlgorithmException {
-			assertEquals(srcHash,
-					TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(encrypted))));
+			assertEquals(srcHash, TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(encrypted))));
 		}
 
 		@DisplayName("File -> File")
@@ -211,7 +210,7 @@ class AESGCMTestAll {
 				DigestException, NoSuchAlgorithmException {
 			File fsrc = mkTempEncryptedFile();
 			File fdest = mkEmptyTempFile();
-			c.encrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
+			c.decrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
 			assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 		}
 
@@ -262,81 +261,6 @@ class AESGCMTestAll {
 		}
 	}
 	
-	/*
-
-		@BeforeEach
-		void beforeEach() {
-			c.init(TestUtil.password);
-		}
-		
-		@DisplayName("To File")
-		@Order(1)
-		@Test
-		void file() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			File fsrc = mkTempEncryptedFile();
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.from(fsrc)))));
-		}
-		@DisplayName("To OutputStream")
-		@Order(2)
-		@Test
-		void inputstream() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			File fsrc = mkTempEncryptedFile();
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc)))))));
-		}
-		@DisplayName("To WritableByteChannel")
-		@Order(3)
-		@Test
-		void channel() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			File fsrc = mkTempEncryptedFile();
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ))))));
-		}
-		@DisplayName("To byte[]")
-		@Order(4)
-		@Test
-		void byteArr() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.from(src)))));
-		}
-		@DisplayName("To String")
-		@Order(5)
-		@Test
-		void string() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.from(randomStr, TESTCHARSET)))));
-		}
-		@DisplayName("To Base64 encoded String")
-		@Order(6)
-		@Test
-		void base64() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(src))))));
-		}
-		@DisplayName("To Hex encoded String")
-		@Order(7)
-		@Test
-		void hexStr() throws IllegalBlockSizeException, BadPaddingException, FileNotFoundException,
-		IOException, DigestException, NoSuchAlgorithmException {
-			assertEquals(srcHash
-					, TestUtil.testEncrypt(new ByteArrayInputStream(c.decryptToSingleBuffer(MessageProvider.fromHexString(HexFormat.of().formatHex(src))))));
-		}
-		
-		
-		static File mkTempEncryptedFile() throws IOException {
-			return mkTempFile(encrypted);
-		}
-	}
-*/
-
-	
 
 	public static File mkTempFile(byte[] data) throws IOException {
 		File f = Files.createTempFile("AESGCMTestSrc", "bin").toFile();
@@ -355,18 +279,5 @@ class AESGCMTestAll {
 		f.deleteOnExit();
 		return f;
 	}
-	
-	/*
-	static Stream<CipherUtil> AESProvider() {
-		return Stream.of(new AESGCMCipher(ran.nextInt(1024, 64 * 1024)));
-	}
-	//, MessageProvider.from(randomStr), MessageProvider.from(null, null)
-	static Stream<MessageProvider> generalFromProvider() throws FileNotFoundException {
-		return Stream.of(MessageProvider.from(src), MessageProvider.from(fsrc), MessageProvider.from(isrc), MessageProvider.from(chsrc));
-	}
-	static Stream<MessageConsumer> generaltoProvider() throws FileNotFoundException {
-		return Stream.of(MessageConsumer.to(fdest), MessageConsumer.to(idest), MessageConsumer.to(chdest));
-	}
-	*/
 	
 }
