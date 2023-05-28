@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
 
@@ -55,7 +54,7 @@ public interface MessageProvider {
 		return from(Base64.getDecoder().decode(base64));
 	}
 	public static MessageProvider fromHexString(String hex) {
-		return from(HexFormat.of().parseHex(hex.toLowerCase()));
+		return MessageProvider.from(HexFormat.of().parseHex(hex.toLowerCase()));
 	}
 	public static MessageProvider from(InputStream src) {
 		return new MessageProvider() {
