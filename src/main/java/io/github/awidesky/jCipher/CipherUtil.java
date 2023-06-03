@@ -9,8 +9,11 @@
 
 package io.github.awidesky.jCipher;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Base64;
+import java.util.HexFormat;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -68,7 +71,11 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public byte[] encryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	public default byte[] encryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		encrypt(mp, MessageConsumer.to(bos));
+		return bos.toByteArray();
+	}
 	/**
 	 * Encrypt whole data and represent the binary data as <code>Base64</code> encoding
 	 * 
@@ -78,7 +85,9 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public String encryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	public default String encryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(mp));
+	}
 	/**
 	 * Encrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
 	 * 
@@ -88,8 +97,9 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
-
+	public default String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		return HexFormat.of().formatHex(encryptToSingleBuffer(mp));
+	}
 	/**
 	 * Decrypt whole data into single <code>byte[]</code> and return it
 	 * 
@@ -99,8 +109,11 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public byte[] decryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
-	
+	public default byte[] decryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		decrypt(mp, MessageConsumer.to(bos));
+		return bos.toByteArray();
+	}
 	/**
 	 * Decrypt whole data and encode it to <code>String</code>
 	 * 
@@ -110,8 +123,9 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public String decryptToString(MessageProvider mp, Charset encoding) throws IllegalBlockSizeException, BadPaddingException, IOException;
-	
+	public default String decryptToString(MessageProvider mp, Charset encoding) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		return new String(decryptToSingleBuffer(mp), encoding);
+	}
 	/**
 	 * Decrypt whole data and represent the binary data as <code>Base64</code> encoding
 	 * 
@@ -121,7 +135,9 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public String decryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	public default String decryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(mp));
+	}
 
 	/**
 	 * Decrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
@@ -132,6 +148,8 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public String decryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	public default String decryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
+	}
 	
 }

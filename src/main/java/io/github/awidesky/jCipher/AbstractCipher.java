@@ -9,15 +9,12 @@
 
 package io.github.awidesky.jCipher;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Base64;
-import java.util.HexFormat;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
@@ -144,108 +141,6 @@ public abstract class AbstractCipher implements CipherUtil {
 			if(result != null) mc.consumeResult(result);
 		}
 		mc.consumeResult(cipher.doFinal());
-	}
-
-	/**
-	 * Encrypt whole data into single <code>byte[]</code> and return it
-	 * 
-	 * @param mp Plain data Provider of source for encryption
-	 * @return the <code>byte</code> array that has all encrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public byte[] encryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		encrypt(mp, MessageConsumer.to(bos));
-		return bos.toByteArray();
-	}
-
-	/**
-	 * Encrypt whole data and represent the binary data as <code>Base64</code> encoding
-	 * 
-	 * @param mp Plain data Provider of source for encryption
-	 * @return <code>Base64</code> text that encoded from encrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public String encryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(mp));
-	}
-
-	/**
-	 * Encrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
-	 * 
-	 * @param mp Plain data Provider of source for encryption
-	 * @return hex format text that encoded from encrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		return HexFormat.of().formatHex(encryptToSingleBuffer(mp));
-	}
-
-	/**
-	 * Decrypt whole data into single <code>byte[]</code> and return it
-	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @return the <code>byte</code> array that has all decrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public byte[] decryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		decrypt(mp, MessageConsumer.to(bos));
-		return bos.toByteArray();
-	}
-
-	/**
-	 * Decrypt whole data and encode it to <code>String</code>
-	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @return text that encoded from decrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public String decryptToString(MessageProvider mp, Charset encoding) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		return new String(decryptToSingleBuffer(mp), encoding);
-	}
-
-	/**
-	 * Decrypt whole data and represent the binary data as <code>Base64</code> encoding
-	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @return <code>Base64</code> text that encoded from decrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public String decryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(mp));
-	}
-
-	/**
-	 * Decrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
-	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @return hex format text that encoded from encrypted data
-	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException 
-	 * */
-	@Override
-	public String decryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
-		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
 	}
 
 }
