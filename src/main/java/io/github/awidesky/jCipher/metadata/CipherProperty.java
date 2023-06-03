@@ -39,7 +39,7 @@ public class CipherProperty {
 	 * */
 	public final int NONCESIZE;
 	/**
-	 * Size of key in bytes
+	 * Size of key in bits
 	 * */
 	public final int KEYSIZE;
 	/**
@@ -50,7 +50,7 @@ public class CipherProperty {
 	 * @param algorithmPadding Padding of the cipher algorithm, like <code>NoPadding</code> or <code>PKCS5Padding</code>
 	 * @param keyAlgorithmName Name of the key algorithm, like <code>AES</code> or <code>ChaCha20</code>
 	 * @param nonceSize Size of nonce(Initial Vector) in bytes
-	 * @param keySize Size of key in bytes
+	 * @param keySize Size of key in bits
 	 */
 	public CipherProperty(String algorithmName, String algorithmMode, String algorithmPadding, String keyAlgorithmName, int nonceSize, int keySize) {
 		this.ALGORITMH_NAME = algorithmName;

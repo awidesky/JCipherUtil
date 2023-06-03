@@ -157,6 +157,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public String toString() {
 		return "CipherUtil [" + cipher.getAlgorithm() + " from " + cipher.getProvider() + ", Nonce Size : " + getCipherMetadata().NONCESIZE
-				+ "byte, key size : " + (getCipherMetadata().KEYSIZE * 8) + "bit]";
+				+ "byte, key size : " + getCipherMetadata().KEYSIZE + "bit]";
 	}
 }
