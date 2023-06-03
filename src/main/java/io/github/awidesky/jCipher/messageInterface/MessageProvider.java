@@ -21,6 +21,10 @@ import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
 
+/**
+ * An Interface that abstracts providing cipher source data from various sources(e.g. byte array, a file, base64 encoded text, an <code>InputStream</code> etc.).
+ * <p>This interface does not care if the data is encryped, decrypted, or not.
+ * */
 public interface MessageProvider {
 	/**
 	 * Reads from Source data(may be a plainText or cipherText) and fills the buffer
@@ -43,34 +47,79 @@ public interface MessageProvider {
 	 * */
 	public int getSrc(byte[] buffer, int off) throws IOException;
 	/**
-	 * Close attached resource if there is.
+	 * Close attached resource if needed.
 	 * */
 	public void closeResource() throws IOException;
 	
 	
-	
-	//TODO : add comment
+	/**
+	 * Provide data from a <code>byte[]</code>
+	 * 
+	 * @param src source of the data
+	 * */
 	public static MessageProvider from(byte[] src) {
 		return from(new ByteArrayInputStream(src));
 	}
+	/**
+	 * Provide data from a <code>File</code>
+	 * 
+	 * @param src source of the data
+	 * */
 	public static MessageProvider from(File src) throws FileNotFoundException {
 		return from(new FileInputStream(src));
 	}
+	/**
+	 * Provide data from a <code>String</code>.
+	 * <p>Encode <code>String</code> with <code>Charset.defaultCharset()</code>.
+	 * 
+	 * @see MessageProvider#from(String, Charset)
+	 * @param src source of the data
+	 * */
 	public static MessageProvider from(String str) {
 		return from(str, Charset.defaultCharset());
 	}
+	/**
+	 * Provide data from a <code>String</code>.
+	 * <p>Encode <code>String</code> with <code>encoding</code>.
+	 * 
+	 * @param src source of the data
+	 * @param encoding character set to encode the <code>String</code>
+	 * */
 	public static MessageProvider from(String str, Charset encoding) {
 		return MessageProvider.from(new ByteArrayInputStream(str.getBytes(encoding)));
 	}
+	/**
+	 * Provide data from a Base64 encoded <code>String</code>
+	 * 
+	 * @param src Base64 encoded <code>String</code>
+	 * */
 	public static MessageProvider fromBase64(String base64) {
 		return from(Base64.getDecoder().decode(base64));
 	}
+	/**
+	 * Provide data from a Hex encoded <code>String</code>
+	 * 
+	 * @param src Hex encoded <code>String</code>
+	 * */
 	public static MessageProvider fromHexString(String hex) {
 		return MessageProvider.from(HexFormat.of().parseHex(hex.toLowerCase()));
 	}
+	/**
+	 * Provide data from a <code>InputStream</code>
+	 * This method closes <code>InputStream</code> after the Cipher process is successfully finished
+	 * 
+	 * @see MessageProvider#from(InputStream, boolean)
+	 * @param src <code>InputStream</code> to source of the data
+	 * */
 	public static MessageProvider from(InputStream src) {
 		return from(src, true);
 	}
+	/**
+	 * Provide data from <code>InputStream</code>
+	 * 
+	 * @param src <code>InputStream</code> to source of the data
+	 * @param close whether or not close <code>InputStream</code> after the Cipher process is successfully finished
+	 * */
 	public static MessageProvider from(InputStream src, boolean close) {
 		return new MessageProvider() {
 			private InputStream in = src;
@@ -89,14 +138,26 @@ public interface MessageProvider {
 			}
 		};
 	}
-	
 	/**
-	 * Read specific length of a <code>Stream</code> and provide.
-	 * Returned <code>MessageProvider</code> does not close <code>InputStream</code> if <code>len</code> bytes are successfully read
+	 * Provide data from a <code>InputStream</code>, 
+	 * but only up to <code>len</code> bytes from the <code>InputStream</code> are provided.
+	 * This method closes <code>InputStream</code> after the Cipher process is successfully finished
+	 * 
+	 * @see MessageProvider#from(InputStream, long, boolean)
+	 * @param src <code>InputStream</code> to source of the data
+	 * @param len  the maximum number of bytes to provide
 	 * */
 	public static MessageProvider from(InputStream src, long len) {
 		return from(src, len, true);
 	}
+	/**
+	 * Provide data from <code>InputStream</code>, 
+	 * but only up to <code>len</code> bytes from the <code>InputStream</code> are provided.
+	 * 
+	 * @param src <code>InputStream</code> to source of the data
+	 * @param len  the maximum number of bytes to provide
+	 * @param close whether or not close <code>InputStream</code> after the Cipher process is successfully finished
+	 * */
 	public static MessageProvider from(InputStream src, long len, boolean close) {
 		return new MessageProvider() {
 			private InputStream in = src;
@@ -121,9 +182,22 @@ public interface MessageProvider {
 			}
 		};
 	}
+	/**
+	 * Provide data from a <code>ReadableByteChannel</code>
+	 * This method closes <code>ReadableByteChannel</code> after the Cipher process is successfully finished
+	 * 
+	 * @see MessageProvider#from(ReadableByteChannel, boolean)
+	 * @param src <code>ReadableByteChannel</code> to source of the data
+	 * */
 	public static MessageProvider from(ReadableByteChannel src) {
 		return from(src, true);
 	}
+	/**
+	 * Provide data from <code>ReadableByteChannel</code>
+	 * 
+	 * @param src <code>ReadableByteChannel</code> to source of the data
+	 * @param close whether or not close <code>ReadableByteChannel</code> after the Cipher process is successfully finished
+	 * */
 	public static MessageProvider from(ReadableByteChannel src, boolean close) {
 		return new MessageProvider() {
 			private ReadableByteChannel in = src;
@@ -144,12 +218,25 @@ public interface MessageProvider {
 		};
 	}
 	/**
-	 * Read specific length of a <code>ReadableByteChannel</code> and provide.
-	 * Returned <code>MessageProvider</code> does not close <code>ReadableByteChannel</code> if <code>len</code> bytes are successfully read
+	 * Provide data from a <code>ReadableByteChannel</code>, 
+	 * but only up to <code>len</code> bytes from the <code>ReadableByteChannel</code> are provided.
+	 * This method closes <code>ReadableByteChannel</code> after the Cipher process is successfully finished
+	 * 
+	 * @see MessageProvider#from(ReadableByteChannel, long, boolean)
+	 * @param src <code>ReadableByteChannel</code> to source of the data
+	 * @param len  the maximum number of bytes to provide
 	 * */
 	public static MessageProvider from(ReadableByteChannel src, long len) {
 		return from(src, len, true);
 	}
+	/**
+	 * Provide data from <code>ReadableByteChannel</code>, 
+	 * but only up to <code>len</code> bytes from the <code>ReadableByteChannel</code> are provided.
+	 * 
+	 * @param src <code>ReadableByteChannel</code> to source of the data
+	 * @param len  the maximum number of bytes to provide
+	 * @param close whether or not close <code>ReadableByteChannel</code> after the Cipher process is successfully finished
+	 * */
 	public static MessageProvider from(ReadableByteChannel src, long len, boolean close) {
 		return new MessageProvider() {
 			private ReadableByteChannel in = src;

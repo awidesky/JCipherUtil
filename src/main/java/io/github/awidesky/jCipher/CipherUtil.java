@@ -91,7 +91,7 @@ public interface CipherUtil {
 	public String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
 
 	/**
-	 * Decrypts whole data into single <code>byte[]</code> and return it
+	 * Decrypt whole data into single <code>byte[]</code> and return it
 	 * 
 	 * @param mp CipherUtil data Provider of source for decryption
 	 * @return the <code>byte</code> array that has all decrypted data
@@ -100,8 +100,9 @@ public interface CipherUtil {
 	 * @throws IllegalBlockSizeException 
 	 * */
 	public byte[] decryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	
 	/**
-	 * Decrypts whole data and encode it to <code>String</code>
+	 * Decrypt whole data and encode it to <code>String</code>
 	 * 
 	 * @param mp CipherUtil data Provider of source for decryption
 	 * @return text that encoded from decrypted data
@@ -110,8 +111,9 @@ public interface CipherUtil {
 	 * @throws IllegalBlockSizeException 
 	 * */
 	public String decryptToString(MessageProvider mp, Charset encoding) throws IllegalBlockSizeException, BadPaddingException, IOException;
+	
 	/**
-	 * Decrypts whole data and represent the binary data as <code>Base64</code> encoding
+	 * Decrypt whole data and represent the binary data as <code>Base64</code> encoding
 	 * 
 	 * @param mp CipherUtil data Provider of source for decryption
 	 * @return <code>Base64</code> text that encoded from decrypted data
@@ -120,8 +122,9 @@ public interface CipherUtil {
 	 * @throws IllegalBlockSizeException 
 	 * */
 	public String decryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException;
+
 	/**
-	 * Decrypts whole data and represent the binary data as hex format(e.g. 5f3759df)
+	 * Decrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
 	 * 
 	 * @param mp CipherUtil data Provider of source for decryption
 	 * @return hex format text that encoded from encrypted data

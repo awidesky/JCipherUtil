@@ -27,10 +27,38 @@ public class KeyProperty {
 	private byte[] salt;
 	int iterationCount;
 	
+	/**
+	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
+	 * is not generated because other necessary metadata(salt, iteration count) is unknown.
+	 * <p>The <code>key</code> is encoded to hex representation(like {@link HexFormat#formatHex(byte[])}), 
+	 * and use the result text to password.
+	 * <p>This process is needed for consistency of key generating algorithm & metadata layout. 
+	 * Since password salt and iteration count is included in cipherText header metadata,
+	 * they should be used in every cases, otherwise, metadata scheme should be more complicated to let 
+	 * cipher processor know if the cipherText uses salt&iteration count or not.
+	 * And since <code>key</code> as byte array won't be salted, user might use same byte array multiple times,
+	 * which causes vulnerability.
+	 * 
+	 * @param key byte data which will be encoded to hexadecimal format, and used for password
+	 * */
 	public KeyProperty(byte[] key) { this.password = byteArrToCharArr(key); }
-	public KeyProperty(char[] key) { this.password = key; }
+	/**
+	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
+	 * is not generated because other necessary metadata(salt, iteration count) is unknown.
+	 * 
+	 * @param key the password
+	 * */
+	public KeyProperty(char[] password) { this.password = password; }
 	
-	
+	/**
+	 * Generate {@link javax.crypto.SecretKey} with given metadata.
+	 * @param cm metadata of the Cipher. used to find key algorithm & key size.
+	 * @param salt the salt.
+	 * @param iterationCount the iteration count.
+	 * 
+	 * @throws NoSuchAlgorithmException //TODO : deal with unnecessary Exception? what if if there's no provider?
+	 * @throws InvalidKeySpecException
+	 */
 	public SecretKeySpec genKey(CipherProperty cm, byte[] salt, int iterationCount) throws NoSuchAlgorithmException, InvalidKeySpecException {
 		this.salt = salt;
 		this.iterationCount = iterationCount;
@@ -38,10 +66,22 @@ public class KeyProperty {
 	    return (key = new SecretKeySpec(pbeKey.getEncoded(), cm.KEY_ALGORITMH_NAME));
 	}
 	
+	/**
+	 * @return This <code>SecretKeySpec</code> key
+	 * */
 	public SecretKeySpec getKey() { return key; }
+	/**
+	 * @return Salt value for the password-based key generation algorithm
+	 * */
 	public byte[] getSalt() { return salt; }
+	/**
+	 * @return Iteration count for the password-based key generation algorithm
+	 * */
 	public int getIterationCount() { return iterationCount; }
 	
+	/**
+	 * Destroy the <code>SecretKeySpec</code>, password and metadata
+	 * */
 	public void destroy() throws DestroyFailedException {
 		SecureRandom sr = new SecureRandom();
 		key.destroy();

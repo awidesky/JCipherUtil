@@ -16,6 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -43,7 +44,12 @@ public class AESGCMCipher extends AbstractCipher {
 		}
 	}
 	
-	public byte[] getIV() { return IV; }
+	/**
+	 * Return copy of Initial Vector
+	 * @Deprecated probably no use, an cause confusion to figure out since returning IV is used in previous cipher task
+	 * */
+	@Deprecated
+	public byte[] getIV() { return Arrays.copyOf(IV, IV.length); }
 	
 	@Override
 	protected void initEncrypt(MessageConsumer mc) throws IOException {

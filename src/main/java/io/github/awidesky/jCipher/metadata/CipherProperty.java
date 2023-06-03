@@ -42,7 +42,16 @@ public class CipherProperty {
 	 * Size of key in bytes
 	 * */
 	public final int KEYSIZE;
-	
+	/**
+	 * Initialize <code>CipherProperty</code> with given parameters.
+	 *
+	 * @param algorithmName Name of the cipher algorithm, like <code>AES</code> or <code>ChaCha20-Poly1305</code>
+	 * @param algorithmMode Mode of the cipher algorithm, like <code>CBC</code> or <code>GCM</code>
+	 * @param algorithmPadding Padding of the cipher algorithm, like <code>NoPadding</code> or <code>PKCS5Padding</code>
+	 * @param keyAlgorithmName Name of the key algorithm, like <code>AES</code> or <code>ChaCha20</code>
+	 * @param nonceSize Size of nonce(Initial Vector) in bytes
+	 * @param keySize Size of key in bytes
+	 */
 	public CipherProperty(String algorithmName, String algorithmMode, String algorithmPadding, String keyAlgorithmName, int nonceSize, int keySize) {
 		this.ALGORITMH_NAME = algorithmName;
 		this.ALGORITMH_MODE = algorithmMode;
