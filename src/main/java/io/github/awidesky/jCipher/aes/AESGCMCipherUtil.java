@@ -19,7 +19,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 
 import io.github.awidesky.jCipher.AbstractCipherUtil;
@@ -29,19 +28,16 @@ import io.github.awidesky.jCipher.metadata.CipherProperty;
 
 public class AESGCMCipherUtil extends AbstractCipherUtil {
 
+
 	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12, 256);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
 	public final static int SALT_BYTE_LENGTH = 64;
 	
 	private byte[] IV;
 	
-	public AESGCMCipherUtil(int bufsize) {
-		super(METADATA, bufsize);
-		try {
-			cipher = Cipher.getInstance(METADATA.ALGORITMH_NAME + "/" + METADATA.ALGORITMH_MODE + "/" + METADATA.ALGORITMH_PADDING);
-		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			e.printStackTrace();
-		}
+
+	protected AESGCMCipherUtil(CipherProperty metadata, int bufferSize) {
+		super(metadata, bufferSize);
 	}
 	
 	/**
@@ -95,5 +91,11 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 			return;
 		}
 	}
+
+	/**
+	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
+	 * */
+	@Override
+	protected CipherProperty getCipherMetadata() { return METADATA; }
 
 }

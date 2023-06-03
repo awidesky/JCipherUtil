@@ -10,10 +10,12 @@
 package io.github.awidesky.jCipher;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
@@ -30,8 +32,17 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	protected AbstractCipherUtil(CipherProperty metadata, int bufferSize) {
 		this.cipherMetadata = metadata;
 		this.BUFFER_SIZE = bufferSize;
+		try {
+			cipher = Cipher.getInstance(getCipherMetadata().ALGORITMH_NAME + "/" + getCipherMetadata().ALGORITMH_MODE + "/" + getCipherMetadata().ALGORITMH_PADDING);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			e.printStackTrace(); //TODO : any better option?
+		}
 	}
 	
+	/**
+	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
+	 * */
+	protected abstract CipherProperty getCipherMetadata();
 	/**
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
 	 * 
@@ -145,6 +156,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 
 	@Override
 	public String toString() {
-		return "CipherUtil with - " + cipherMetadata.toString();
+		return "CipherUtil [" + cipher.getAlgorithm() + " from " + cipher.getProvider() + ", Nonce Size : " + getCipherMetadata().NONCESIZE
+				+ "byte, key size : " + (getCipherMetadata().KEYSIZE * 8) + "bit]";
 	}
 }
