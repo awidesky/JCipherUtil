@@ -36,8 +36,8 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 	private byte[] IV;
 	
 
-	protected AESGCMCipherUtil(CipherProperty metadata, int bufferSize) {
-		super(metadata, bufferSize);
+	public AESGCMCipherUtil(int bufferSize) {
+		super(METADATA, bufferSize);
 	}
 	
 	/**
