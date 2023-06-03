@@ -22,12 +22,12 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 
-import io.github.awidesky.jCipher.AbstractCipher;
+import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 
-public class AESGCMCipher extends AbstractCipher {
+public class AESGCMCipherUtil extends AbstractCipherUtil {
 
 	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12, 256);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
@@ -35,7 +35,7 @@ public class AESGCMCipher extends AbstractCipher {
 	
 	private byte[] IV;
 	
-	public AESGCMCipher(int bufsize) {
+	public AESGCMCipherUtil(int bufsize) {
 		super(METADATA, bufsize);
 		try {
 			cipher = Cipher.getInstance(METADATA.ALGORITMH_NAME + "/" + METADATA.ALGORITMH_MODE + "/" + METADATA.ALGORITMH_PADDING);

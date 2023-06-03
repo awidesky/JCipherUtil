@@ -20,14 +20,14 @@ import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
 
-public abstract class AbstractCipher implements CipherUtil {
+public abstract class AbstractCipherUtil implements CipherUtil {
 
 	protected KeyProperty key;
 	protected Cipher cipher;
 	protected final int BUFFER_SIZE;
 	protected CipherProperty cipherMetadata;
 	
-	protected AbstractCipher(CipherProperty metadata, int bufferSize) {
+	protected AbstractCipherUtil(CipherProperty metadata, int bufferSize) {
 		this.cipherMetadata = metadata;
 		this.BUFFER_SIZE = bufferSize;
 	}
@@ -81,11 +81,11 @@ public abstract class AbstractCipher implements CipherUtil {
 	/**
 	 * Encrypt from source(designated as <code>MessageProvider</code>)
 	 * and writes to given destination(designated as <code>MessageConsumer</code>).
-	 * <p>Default implementation calls two method {@link AbstractCipher#initEncrypt(MessageConsumer)},
-	 * {@link AbstractCipher#processCipher(MessageProvider, MessageConsumer)}, and close both parameters.
+	 * <p>Default implementation calls two method {@link AbstractCipherUtil#initEncrypt(MessageConsumer)},
+	 * {@link AbstractCipherUtil#processCipher(MessageProvider, MessageConsumer)}, and close both parameters.
 	 *
-	 * @see AbstractCipher#initEncrypt(MessageConsumer)
-	 * @see AbstractCipher#processCipher(MessageProvider, MessageConsumer)
+	 * @see AbstractCipherUtil#initEncrypt(MessageConsumer)
+	 * @see AbstractCipherUtil#processCipher(MessageProvider, MessageConsumer)
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
@@ -105,11 +105,11 @@ public abstract class AbstractCipher implements CipherUtil {
 	/**
 	 * Decrypt from source(designated as <code>MessageProvider</code>)
 	 * and writes to given destination(designated as <code>MessageConsumer</code>).
-	 * <p>Default implementation calls two method {@link AbstractCipher#initDecrypt(MessageProvider)},
-	 * {@link AbstractCipher#processCipher(MessageProvider, MessageConsumer)}, and close both parameters.
+	 * <p>Default implementation calls two method {@link AbstractCipherUtil#initDecrypt(MessageProvider)},
+	 * {@link AbstractCipherUtil#processCipher(MessageProvider, MessageConsumer)}, and close both parameters.
 	 *
-	 * @see AbstractCipher#initEncrypt(MessageConsumer)
-	 * @see AbstractCipher#processCipher(MessageProvider, MessageConsumer)
+	 * @see AbstractCipherUtil#initEncrypt(MessageConsumer)
+	 * @see AbstractCipherUtil#processCipher(MessageProvider, MessageConsumer)
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
@@ -143,4 +143,8 @@ public abstract class AbstractCipher implements CipherUtil {
 		mc.consumeResult(cipher.doFinal());
 	}
 
+	@Override
+	public String toString() {
+		return "CipherUtil with - " + cipherMetadata.toString();
+	}
 }

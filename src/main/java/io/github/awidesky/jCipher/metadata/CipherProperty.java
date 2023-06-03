@@ -60,4 +60,11 @@ public class CipherProperty {
 		this.NONCESIZE = nonceSize;
 		this.KEYSIZE = keySize;
 	}
+	
+	@Override
+	public String toString() {
+		return "CipherProperty [ALGORITMH_NAME=" + ALGORITMH_NAME + ", ALGORITMH_MODE=" + ALGORITMH_MODE
+				+ ", ALGORITMH_PADDING=" + ALGORITMH_PADDING + ", KEY_ALGORITMH_NAME=" + KEY_ALGORITMH_NAME
+				+ ", NONCESIZE=" + NONCESIZE + "byte, KEYSIZE=" + (KEYSIZE * 8) + "bit]";
+	}
 }

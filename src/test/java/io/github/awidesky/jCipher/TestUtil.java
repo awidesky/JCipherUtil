@@ -19,7 +19,7 @@ import java.util.HexFormat;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 
-import io.github.awidesky.jCipher.aes.AESGCMCipher;
+import io.github.awidesky.jCipher.aes.AESGCMCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 
 public class TestUtil {
@@ -52,10 +52,10 @@ public class TestUtil {
 	}
 	public static String testDecrypt(InputStream is) throws DigestException, IOException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-512");
-		return HexFormat.of().formatHex(digest.digest(new AESGCMCipher(8 * 1024).init(password).decryptToSingleBuffer(MessageProvider.from(is))));
+		return HexFormat.of().formatHex(digest.digest(new AESGCMCipherUtil(8 * 1024).init(password).decryptToSingleBuffer(MessageProvider.from(is))));
 	}
 	public static String testEncrypt(InputStream is) throws DigestException, IOException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-512");
-		return HexFormat.of().formatHex(digest.digest(new AESGCMCipher(8 * 1024).init(password).encryptToSingleBuffer(MessageProvider.from(is))));
+		return HexFormat.of().formatHex(digest.digest(new AESGCMCipherUtil(8 * 1024).init(password).encryptToSingleBuffer(MessageProvider.from(is))));
 	}
 }

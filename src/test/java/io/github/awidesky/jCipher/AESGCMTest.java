@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.Nested;
 
-import io.github.awidesky.jCipher.aes.AESGCMCipher;
+import io.github.awidesky.jCipher.aes.AESGCMCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 
@@ -51,7 +51,7 @@ class AESGCMTest {
 
 	public static final Charset TESTCHARSET = Charset.forName("UTF-16"); // TODO : param test? 
 	static SecureRandom ran = new SecureRandom();
-	static AESGCMCipher c = new AESGCMCipher(8 * 1024);
+	static AESGCMCipherUtil c = new AESGCMCipherUtil(8 * 1024);
 	
 	static byte[] src;
 	static String randomStr;
