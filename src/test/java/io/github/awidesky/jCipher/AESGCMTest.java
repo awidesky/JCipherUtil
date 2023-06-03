@@ -61,6 +61,7 @@ class AESGCMTest {
 		src = new byte[64 * 1024];
 		randomStr = "random String 1234!@#$";
 		ran.nextBytes(src);
+		System.out.println("Testing " + c);
 	}
 	
 
