@@ -25,6 +25,7 @@ import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.util.NestedCipherException;
 
 public class AESGCMCipherUtil extends AbstractCipherUtil {
 
@@ -59,10 +60,8 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 		iteration = sr.nextInt(800000, 1000000);
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException
-				| InvalidKeySpecException e) {
-			e.printStackTrace();
-			return;
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new NestedCipherException(e);
 		}
 		mc.consumeResult(IV);
 		mc.consumeResult(salt);
@@ -85,10 +84,8 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 		iteration = ByteBuffer.wrap(iterationByte).getInt();
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException
-				| InvalidKeySpecException e) {
-			e.printStackTrace();
-			return;
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+			throw new NestedCipherException(e);
 		}
 	}
 

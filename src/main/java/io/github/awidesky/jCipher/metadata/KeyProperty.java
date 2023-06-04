@@ -56,7 +56,7 @@ public class KeyProperty {
 	 * @param salt the salt.
 	 * @param iterationCount the iteration count.
 	 * 
-	 * @throws NoSuchAlgorithmException //TODO : deal with unnecessary Exception? what if if there's no provider?
+	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException
 	 */
 	public SecretKeySpec genKey(CipherProperty cm, byte[] salt, int iterationCount) throws NoSuchAlgorithmException, InvalidKeySpecException {

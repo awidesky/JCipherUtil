@@ -49,7 +49,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public void encrypt(MessageProvider mp, MessageConsumer mc) throws IOException, IllegalBlockSizeException, BadPaddingException;
+	public void encrypt(MessageProvider mp, MessageConsumer mc) throws IOException ;
 	/**
 	 * Simple way to decrypt from a source to a destination.
 	 * 
@@ -59,7 +59,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public void decrypt(MessageProvider mp, MessageConsumer mc) throws IOException, IllegalBlockSizeException, BadPaddingException;
+	public void decrypt(MessageProvider mp, MessageConsumer mc) throws IOException ;
 	
 	
 	/**
@@ -71,7 +71,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default byte[] encryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default byte[] encryptToSingleBuffer(MessageProvider mp) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		encrypt(mp, MessageConsumer.to(bos));
 		return bos.toByteArray();
@@ -85,7 +85,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default String encryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default String encryptToBase64(MessageProvider mp) throws IOException {
 		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(mp));
 	}
 	/**
@@ -97,7 +97,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default String encryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default String encryptToHexString(MessageProvider mp) throws IOException {
 		return HexFormat.of().formatHex(encryptToSingleBuffer(mp));
 	}
 	/**
@@ -109,7 +109,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default byte[] decryptToSingleBuffer(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default byte[] decryptToSingleBuffer(MessageProvider mp) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		decrypt(mp, MessageConsumer.to(bos));
 		return bos.toByteArray();
@@ -123,7 +123,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default String decryptToString(MessageProvider mp, Charset encoding) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default String decryptToString(MessageProvider mp, Charset encoding) throws IOException {
 		return new String(decryptToSingleBuffer(mp), encoding);
 	}
 	/**
@@ -135,7 +135,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default String decryptToBase64(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default String decryptToBase64(MessageProvider mp) throws IOException {
 		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(mp));
 	}
 
@@ -148,7 +148,7 @@ public interface CipherUtil {
 	 * @throws BadPaddingException 
 	 * @throws IllegalBlockSizeException 
 	 * */
-	public default String decryptToHexString(MessageProvider mp) throws IllegalBlockSizeException, BadPaddingException, IOException {
+	public default String decryptToHexString(MessageProvider mp) throws IOException {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
 	}
 	

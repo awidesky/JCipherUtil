@@ -21,6 +21,7 @@ import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
+import io.github.awidesky.jCipher.util.NestedCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
@@ -35,7 +36,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			cipher = Cipher.getInstance(getCipherMetadata().ALGORITMH_NAME + "/" + getCipherMetadata().ALGORITMH_MODE + "/" + getCipherMetadata().ALGORITMH_PADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			e.printStackTrace(); //TODO : any better option?
+			throw new NestedCipherException(e);
 		}
 	}
 	
@@ -101,12 +102,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
 	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException
 	 * */
 	@Override
-	public void encrypt(MessageProvider mp, MessageConsumer mc)
-			throws IOException, IllegalBlockSizeException, BadPaddingException {
+	public void encrypt(MessageProvider mp, MessageConsumer mc) throws IOException {
 		initEncrypt(mc);
 		processCipher(mp, mc);
 		mc.closeResource();
@@ -125,12 +123,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
 	 * @throws IOException 
-	 * @throws BadPaddingException 
-	 * @throws IllegalBlockSizeException
 	 * */
 	@Override
-	public void decrypt(MessageProvider mp, MessageConsumer mc)
-			throws IOException, IllegalBlockSizeException, BadPaddingException {
+	public void decrypt(MessageProvider mp, MessageConsumer mc) throws IOException {
 		initDecrypt(mp);
 		processCipher(mp, mc);
 		mc.closeResource();
@@ -143,7 +138,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param mp Plain data Provider of source for encryption/decryption
 	 * @param mc Data Consumer that writes encrypted/decryption data to designated destination 
 	 * */
-	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws IOException, IllegalBlockSizeException, BadPaddingException {
+	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws IOException {
 		byte[] buf = new byte[BUFFER_SIZE];
 		while(true) {
 			int read = mp.getSrc(buf);
@@ -151,7 +146,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			byte[] result = cipher.update(buf, 0, read);
 			if(result != null) mc.consumeResult(result);
 		}
-		mc.consumeResult(cipher.doFinal());
+		try {
+			mc.consumeResult(cipher.doFinal());
+		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
+			throw new NestedCipherException(e);
+		}
 	}
 
 	@Override
