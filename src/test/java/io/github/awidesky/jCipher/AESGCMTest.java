@@ -49,7 +49,7 @@ import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AESGCMTest {
 
-	public static final Charset TESTCHARSET = Charset.forName("UTF-16"); // TODO : param test? 
+	public static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
 	static SecureRandom ran = new SecureRandom();
 	static AESGCMCipherUtil c = new AESGCMCipherUtil(8 * 1024);
 	

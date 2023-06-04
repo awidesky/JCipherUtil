@@ -12,6 +12,7 @@ package io.github.awidesky.jCipher.metadata;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.HexFormat;
 
 import javax.crypto.SecretKey;
@@ -22,7 +23,6 @@ import javax.security.auth.DestroyFailedException;
 
 public class KeyProperty {
 
-	private SecretKeySpec key;
 	private char[] password;
 	private byte[] salt;
 	int iterationCount;
@@ -39,41 +39,39 @@ public class KeyProperty {
 	 * And since <code>key</code> as byte array won't be salted, user might use same byte array multiple times,
 	 * which causes vulnerability.
 	 * 
-	 * @param key byte data which will be encoded to hexadecimal format, and used for password
+	 * @param key byte data which will be encoded to hexadecimal format, and used for password.
+	 * The contents of the buffer are copied to protect against subsequent modification.
 	 * */
-	public KeyProperty(byte[] key) { this.password = byteArrToCharArr(key); }
+	public KeyProperty(byte[] key) { this.password = byteArrToCharArr(Arrays.copyOf(key, key.length)); }
 	/**
 	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
 	 * is not generated because other necessary metadata(salt, iteration count) is unknown.
 	 * 
-	 * @param key the password
+	 * @param key the password. The contents of the buffer are copied to protect against subsequent modification.
 	 * */
-	public KeyProperty(char[] password) { this.password = password; }
+	public KeyProperty(char[] password) { this.password = Arrays.copyOf(password, password.length); }
 	
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
 	 * @param cm metadata of the Cipher. used to find key algorithm & key size.
-	 * @param salt the salt.
+	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
 	 * 
 	 * @throws NoSuchAlgorithmException
 	 * @throws InvalidKeySpecException
 	 */
 	public SecretKeySpec genKey(CipherProperty cm, byte[] salt, int iterationCount) throws NoSuchAlgorithmException, InvalidKeySpecException {
-		this.salt = salt;
+		this.salt =  Arrays.copyOf(salt, salt.length);
 		this.iterationCount = iterationCount;
-	    SecretKey pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, salt, iterationCount, cm.KEYSIZE));
-	    return (key = new SecretKeySpec(pbeKey.getEncoded(), cm.KEY_ALGORITMH_NAME));
+	    SecretKey pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, this.salt, iterationCount, cm.KEYSIZE));
+	    return new SecretKeySpec(pbeKey.getEncoded(), cm.KEY_ALGORITMH_NAME);
 	}
 	
 	/**
-	 * @return This <code>SecretKeySpec</code> key
+	 * @return Salt value for the password-based key generation algorithm.
+	 * The contents of the result were copied to protect against subsequent modification.
 	 * */
-	public SecretKeySpec getKey() { return key; }
-	/**
-	 * @return Salt value for the password-based key generation algorithm
-	 * */
-	public byte[] getSalt() { return salt; }
+	public byte[] getSalt() { return Arrays.copyOf(salt, salt.length); }
 	/**
 	 * @return Iteration count for the password-based key generation algorithm
 	 * */
@@ -84,7 +82,8 @@ public class KeyProperty {
 	 * */
 	public void destroy() throws DestroyFailedException {
 		SecureRandom sr = new SecureRandom();
-		key.destroy();
+		//key.destroy(); only KerberosKey implement destroy method.
+		//https://stackoverflow.com/questions/38276866/destroying-secretkey-throws-destroyfailedexception
 		for(int i = 0; i < password.length; i++) password[i] = (char)sr.nextInt();
 		for(int i = 0; i < salt.length; i++) salt[i] = (byte)sr.nextInt();
 		iterationCount = sr.nextInt();

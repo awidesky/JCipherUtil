@@ -16,6 +16,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
@@ -71,6 +72,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	@Override
 	public CipherUtil init(char[] password) { //TODO : destroy previous key
+		try {
+			if(this.key != null) this.key.destroy();
+		} catch (DestroyFailedException e) { throw new NestedCipherException(e); }
 		this.key = new KeyProperty(password);
 		return this;
 	}
@@ -85,6 +89,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	@Override
 	public CipherUtil init(byte[] key) {
+		try {
+			if(this.key != null) this.key.destroy();
+		} catch (DestroyFailedException e) { throw new NestedCipherException(e); }
 		this.key = new KeyProperty(key);
 		return this;
 	}

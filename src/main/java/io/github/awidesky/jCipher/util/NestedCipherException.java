@@ -48,7 +48,7 @@ public class NestedCipherException extends RuntimeException {
 
 	@Override
 	public String toString() {
-		return "NestedCipherException with nested Exception : " + nested.toString();
+		return "NestedCipherException with nested " + nested.toString();
 	}
 
 }
