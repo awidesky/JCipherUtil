@@ -25,7 +25,7 @@ import java.util.HexFormat;
  * An Interface that abstracts providing cipher source data from various sources(e.g. byte array, a file, base64 encoded text, an <code>InputStream</code> etc.).
  * <p>This interface does not care if the data is encryped, decrypted, or not.
  * */
-public interface MessageProvider {
+public interface MessageProvider extends AutoCloseable {
 	/**
 	 * Reads from Source data(may be a plainText or cipherText) and fills the buffer
 	 * 
@@ -50,7 +50,11 @@ public interface MessageProvider {
 	 * Close attached resource if needed.
 	 * */
 	public void closeResource() throws IOException;
-	
+	/**
+	 * Close attached resource if needed.
+	 * */
+	@Override
+	public default void close() throws IOException { closeResource(); }
 	
 	/**
 	 * Provide data from a <code>byte[]</code>

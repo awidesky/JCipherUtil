@@ -22,7 +22,7 @@ import java.nio.channels.WritableByteChannel;
  * An Interface that abstracts consuming cipher result and send to various destinations(e.g. byte array, a file, base64 encoded text, an <code>OutputStrea</code> etc.).
  * <p>This interface does not care if the data is encryped, decrypted, or not.
  * */
-public interface MessageConsumer {
+public interface MessageConsumer extends AutoCloseable {
 
 	/**
 	 * Consume data(may be a plainText or cipherText) and writes to the destination(may be a <code>String</code>, <code>File</code>, <code>OutPutStream</code> etc.)
@@ -35,7 +35,12 @@ public interface MessageConsumer {
 	 * Close attached resource if needed.
 	 * */
 	public void closeResource() throws IOException;
-
+	/**
+	 * Close attached resource if needed.
+	 * */
+	@Override
+	public default void close() throws IOException { closeResource(); }
+	
 	
 	/**
 	 * Consume data and writes to a <code>File</code>

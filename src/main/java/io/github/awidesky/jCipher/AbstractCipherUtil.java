@@ -105,10 +105,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	@Override
 	public void encrypt(MessageProvider mp, MessageConsumer mc) throws IOException {
-		initEncrypt(mc);
-		processCipher(mp, mc);
-		mc.closeResource();
-		mp.closeResource();
+		try (mp; mc) {
+			initEncrypt(mc);
+			processCipher(mp, mc);
+		}
 	}
 
 	/**
@@ -126,10 +126,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	@Override
 	public void decrypt(MessageProvider mp, MessageConsumer mc) throws IOException {
-		initDecrypt(mp);
-		processCipher(mp, mc);
-		mc.closeResource();
-		mp.closeResource();
+		try (mp; mc) {
+			initDecrypt(mp);
+			processCipher(mp, mc);
+		}
 	}
 	
 	/**
