@@ -22,8 +22,23 @@ import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
 
-	
+
+/**
+ * An utility that provides easy encrypt/decrypt process from/to various input/output.
+ * <p>The {@code CipherUtil} interface provides two generic encrypt/decrypt method named
+ * {@link CipherUtil#encrypt(MessageProvider, MessageConsumer)} and {@link CipherUtil#decrypt(MessageProvider, MessageConsumer)},
+ * that can be used to encrypt and decrypt from/to many types.
+ * <p>Also, The {@code CipherUtil} interface provides several utility encrypt/decrypt method like 
+ * {@link CipherUtil#encryptToBase64(MessageProvider)}, {@link CipherUtil#decryptToBase64(MessageProvider)}, {@link CipherUtil#decryptToString(MessageProvider, Charset)}  
+ * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
+ * single {@code byte[]} buffer, etc)
+ * 
+ * @see MessageProvider
+ * @see MessageConsumer
+ * @see AbstractCipherUtil
+ * */
 public interface CipherUtil {
+	
 	/**
 	 * Initialize this <code>CipherUtil</code> with given <code>password</code>
 	 * 
