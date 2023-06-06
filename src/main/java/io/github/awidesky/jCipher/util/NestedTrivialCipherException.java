@@ -10,19 +10,19 @@
 package io.github.awidesky.jCipher.util;
 
 /**
- * {@code NestedCipherException} is an {@code RuntimeException} that encapsulates
+ * {@code NestedTrivialCipherException} is an {@code RuntimeException} that encapsulates
  * cipher-related exception that is usually developer of this library's fault.
  * Those like {@code NoSuchAlgorithmException}, {@code NoSuchPaddingException} or {@code IllegalStateException}
  * is usually not thrown, and if they were, it's probably fault of the developer who wrote the subclass of {@code CipherUtil},
  * or some rare mistake cases (e.g. try to decrypt totally wrong data. etc.) 
  * 
  * */
-public class NestedCipherException extends RuntimeException {
+public class NestedTrivialCipherException extends RuntimeException {
 
 	private static final long serialVersionUID = -6976828145263718764L;
 	private final Exception nested;
 	
-	public NestedCipherException(Exception nested) {
+	public NestedTrivialCipherException(Exception nested) {
 		super(nested);
 		this.nested = nested;
 	}
@@ -48,7 +48,7 @@ public class NestedCipherException extends RuntimeException {
 
 	@Override
 	public String toString() {
-		return "NestedCipherException with nested " + nested.toString();
+		return "NestedTrivialCipherException with nested " + nested.toString();
 	}
 
 }

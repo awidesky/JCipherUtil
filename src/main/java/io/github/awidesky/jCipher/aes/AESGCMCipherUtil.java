@@ -25,7 +25,7 @@ import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.util.NestedCipherException;
+import io.github.awidesky.jCipher.util.NestedTrivialCipherException;
 
 public class AESGCMCipherUtil extends AbstractCipherUtil {
 
@@ -61,7 +61,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-			throw new NestedCipherException(e);
+			throw new NestedTrivialCipherException(e);
 		}
 		mc.consumeResult(IV);
 		mc.consumeResult(salt);
@@ -85,7 +85,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-			throw new NestedCipherException(e);
+			throw new NestedTrivialCipherException(e);
 		}
 	}
 

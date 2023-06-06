@@ -22,7 +22,7 @@ import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
-import io.github.awidesky.jCipher.util.NestedCipherException;
+import io.github.awidesky.jCipher.util.NestedTrivialCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
@@ -37,7 +37,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			cipher = Cipher.getInstance(getCipherMetadata().ALGORITMH_NAME + "/" + getCipherMetadata().ALGORITMH_MODE + "/" + getCipherMetadata().ALGORITMH_PADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new NestedCipherException(e);
+			throw new NestedTrivialCipherException(e);
 		}
 	}
 	
@@ -74,7 +74,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public CipherUtil init(char[] password) { //TODO : destroy previous key
 		try {
 			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new NestedCipherException(e); }
+		} catch (DestroyFailedException e) { throw new NestedTrivialCipherException(e); }
 		this.key = new KeyProperty(password);
 		return this;
 	}
@@ -91,7 +91,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public CipherUtil init(byte[] key) {
 		try {
 			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new NestedCipherException(e); }
+		} catch (DestroyFailedException e) { throw new NestedTrivialCipherException(e); }
 		this.key = new KeyProperty(key);
 		return this;
 	}
@@ -156,7 +156,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			mc.consumeResult(cipher.doFinal());
 		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new NestedCipherException(e);
+			throw new NestedTrivialCipherException(e);
 		}
 	}
 
