@@ -17,6 +17,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
+import io.github.awidesky.jCipher.util.NestedIOException;
+
 
 /**
  * An Interface that abstracts consuming cipher result and send to various destinations(e.g. byte array, a file, base64 encoded text, an <code>OutputStrea</code> etc.).
@@ -28,18 +30,18 @@ public interface MessageConsumer extends AutoCloseable {
 	 * Consume data(may be a plainText or cipherText) and writes to the destination(may be a <code>String</code>, <code>File</code>, <code>OutPutStream</code> etc.)
 	 * 
 	 * @param buffer the data
-	 * @throws IOException 
+	 * @throws NestedIOException 
 	 * */
-	public void consumeResult(byte[] buffer) throws IOException;
+	public void consumeResult(byte[] buffer) throws NestedIOException;
 	/**
 	 * Close attached resource if needed.
 	 * */
-	public void closeResource() throws IOException;
+	public void closeResource() throws NestedIOException;
 	/**
 	 * Close attached resource if needed.
 	 * */
 	@Override
-	public default void close() throws IOException { closeResource(); }
+	public default void close() throws NestedIOException { closeResource(); }
 	
 	
 	/**
@@ -70,17 +72,18 @@ public interface MessageConsumer extends AutoCloseable {
 		return new MessageConsumer() {
 			private OutputStream out = os;
 			@Override
-			public void consumeResult(byte[] buffer) throws IOException {
+			public void consumeResult(byte[] buffer) throws NestedIOException {
 				try {
 					out.write(buffer);
-				} catch (Exception e) {
-					out.close();
-					throw e;
+				} catch (IOException e) {
+					closeResource();
+					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws IOException {
-				if(close) out.close();
+			public void closeResource() throws NestedIOException {
+				try { if(close) out.close(); }
+				catch (IOException e) { throw new NestedIOException(e);	}
 			}
 		};
 	}
@@ -104,18 +107,19 @@ public interface MessageConsumer extends AutoCloseable {
 		return new MessageConsumer() {
 			private WritableByteChannel out = ch;
 			@Override
-			public void consumeResult(byte[] buffer) throws IOException {
+			public void consumeResult(byte[] buffer) throws NestedIOException {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(buffer);
 					while(buf.hasRemaining()) out.write(buf);
-				} catch (Exception e) {
-					out.close();
-					throw e;
+				} catch (IOException e) {
+					closeResource();
+					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws IOException {
-				if(close) out.close();
+			public void closeResource() throws NestedIOException {
+				try { if(close) out.close(); }
+				catch (IOException e) { throw new NestedIOException(e);	}
 			}
 		};
 	}

@@ -21,6 +21,8 @@ import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
 
+import io.github.awidesky.jCipher.util.NestedIOException;
+
 /**
  * An Interface that abstracts providing cipher source data from various sources(e.g. byte array, a file, base64 encoded text, an <code>InputStream</code> etc.).
  * <p>This interface does not care if the data is encryped, decrypted, or not.
@@ -31,9 +33,8 @@ public interface MessageProvider extends AutoCloseable {
 	 * 
 	 * @param buffer buffer to store read data
 	 * @return the total number of bytes read into the buffer, or -1 if there is no more data
-	 * 
 	 * */
-	public default int getSrc(byte[] buffer) throws IOException { return getSrc(buffer, 0); }
+	public default int getSrc(byte[] buffer) throws NestedIOException { return getSrc(buffer, 0); }
 	/**
 	 * Reads from Source data(may be a plainText or cipherText) and fills the buffer
 	 * 
@@ -41,20 +42,18 @@ public interface MessageProvider extends AutoCloseable {
 	 * @param off   the start offset in array {@code buffer}
      *              at which the data is written.
 	 * 
-	 * 
 	 * @return the total number of bytes read into the buffer, or -1 if there is no more data
-	 * 
 	 * */
-	public int getSrc(byte[] buffer, int off) throws IOException;
+	public int getSrc(byte[] buffer, int off) throws NestedIOException;
 	/**
 	 * Close attached resource if needed.
 	 * */
-	public void closeResource() throws IOException;
+	public void closeResource() throws NestedIOException;
 	/**
 	 * Close attached resource if needed.
 	 * */
 	@Override
-	public default void close() throws IOException { closeResource(); }
+	public default void close() throws NestedIOException { closeResource(); }
 	
 	/**
 	 * Provide data from a <code>byte[]</code>
@@ -128,17 +127,18 @@ public interface MessageProvider extends AutoCloseable {
 		return new MessageProvider() {
 			private InputStream in = src;
 			@Override
-			public int getSrc(byte[] buffer, int off) throws IOException {
+			public int getSrc(byte[] buffer, int off) throws NestedIOException {
 				try {
 					return in.read(buffer, off, buffer.length - off);
-				} catch (Exception e) {
-					in.close();
-					throw e;
+				} catch (IOException e) {
+					closeResource();
+					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws IOException {
-				if(close) in.close();
+			public void closeResource() throws NestedIOException {
+				try { if(close) in.close(); }
+				catch (IOException e) { throw new NestedIOException(e);	}
 			}
 		};
 	}
@@ -167,7 +167,7 @@ public interface MessageProvider extends AutoCloseable {
 			private InputStream in = src;
 			private long length = len;
 			@Override
-			public int getSrc(byte[] buffer, int off) throws IOException {
+			public int getSrc(byte[] buffer, int off) throws NestedIOException {
 				if(length == 0) return -1;
 				try {
 					int read = in.read(buffer, off, (int)Math.min(buffer.length - off, length));
@@ -175,14 +175,15 @@ public interface MessageProvider extends AutoCloseable {
 					else  length -= read;
 					
 					return read;
-				} catch (Exception e) {
-					in.close();
-					throw e;
+				} catch (IOException e) {
+					closeResource();
+					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws IOException {
-				if(close) in.close();
+			public void closeResource() throws NestedIOException {
+				try { if(close) in.close(); }
+				catch (IOException e) { throw new NestedIOException(e);	}
 			}
 		};
 	}
@@ -206,18 +207,19 @@ public interface MessageProvider extends AutoCloseable {
 		return new MessageProvider() {
 			private ReadableByteChannel in = src;
 			@Override
-			public int getSrc(byte[] buffer, int off) throws IOException {
+			public int getSrc(byte[] buffer, int off) throws NestedIOException {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(buffer).position(off);
 					return in.read(buf);
-				} catch (Exception e) {
-					in.close();
-					throw e;
+				} catch (IOException e) {
+					closeResource();
+					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws IOException {
-				if(close) in.close();
+			public void closeResource() throws NestedIOException {
+				try { if(close) in.close(); }
+				catch (IOException e) { throw new NestedIOException(e);	}
 			}
 		};
 	}
@@ -247,7 +249,7 @@ public interface MessageProvider extends AutoCloseable {
 			private long length = len;
 			
 			@Override
-			public int getSrc(byte[] buffer, int off) throws IOException {
+			public int getSrc(byte[] buffer, int off) throws NestedIOException {
 				if(length == 0) return -1;
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(buffer).position(off).limit((int)Math.min(buffer.length, length + off));
@@ -256,14 +258,15 @@ public interface MessageProvider extends AutoCloseable {
 					else length -= read;
 
 					return read;
-				} catch (Exception e) {
-					in.close();
-					throw e;
+				} catch (IOException e) {
+					closeResource();
+					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws IOException {
-				if(close) in.close();
+			public void closeResource() throws NestedIOException {
+				try { if(close) in.close(); }
+				catch (IOException e) { throw new NestedIOException(e);	}
 			}
 		};
 	}

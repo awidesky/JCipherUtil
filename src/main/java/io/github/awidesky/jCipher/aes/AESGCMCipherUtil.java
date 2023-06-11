@@ -9,7 +9,6 @@
 
 package io.github.awidesky.jCipher.aes;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -25,7 +24,8 @@ import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.util.NestedTrivialCipherException;
+import io.github.awidesky.jCipher.util.NestedIOException;
+import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
 public class AESGCMCipherUtil extends AbstractCipherUtil {
 
@@ -49,7 +49,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 	public byte[] getIV() { return Arrays.copyOf(IV, IV.length); }
 	
 	@Override
-	protected void initEncrypt(MessageConsumer mc) throws IOException {
+	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
 		IV = new byte[METADATA.NONCESIZE];
 		byte[] salt = new byte[SALT_BYTE_LENGTH]; 
 		int iteration;
@@ -61,7 +61,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-			throw new NestedTrivialCipherException(e);
+			throw new NestedOmittedCipherException(e);
 		}
 		mc.consumeResult(IV);
 		mc.consumeResult(salt);
@@ -69,7 +69,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 	}
 	
 	@Override
-	protected void initDecrypt(MessageProvider mp) throws IOException {
+	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
 		IV = new byte[METADATA.NONCESIZE];
 		byte[] salt = new byte[SALT_BYTE_LENGTH]; 
 		int iteration;
@@ -85,7 +85,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtil {
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, key.genKey(METADATA, salt, iteration), new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-			throw new NestedTrivialCipherException(e);
+			throw new NestedOmittedCipherException(e);
 		}
 	}
 

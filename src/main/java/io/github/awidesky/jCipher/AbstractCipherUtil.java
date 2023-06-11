@@ -9,7 +9,6 @@
 
 package io.github.awidesky.jCipher;
 
-import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
@@ -22,7 +21,8 @@ import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
-import io.github.awidesky.jCipher.util.NestedTrivialCipherException;
+import io.github.awidesky.jCipher.util.NestedIOException;
+import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
@@ -37,7 +37,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			cipher = Cipher.getInstance(getCipherMetadata().ALGORITMH_NAME + "/" + getCipherMetadata().ALGORITMH_MODE + "/" + getCipherMetadata().ALGORITMH_PADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new NestedTrivialCipherException(e);
+			throw new NestedOmittedCipherException(e);
 		}
 	}
 	
@@ -49,16 +49,16 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
 	 * 
 	 * This method should do tasks like generating metadata, writing it.. etc.  
-	 * @throws IOException 
+	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract void initEncrypt(MessageConsumer mc) throws IOException;
+	protected abstract void initEncrypt(MessageConsumer mc) throws NestedIOException;
 	/**
 	 * Initialize <code>Cipher</code> in decrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
 	 * 
 	 * This method should do tasks like reading metadata.. etc.  
-	 * @throws IOException 
+	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract void initDecrypt(MessageProvider mp) throws IOException;
+	protected abstract void initDecrypt(MessageProvider mp) throws NestedIOException;
 
 	/**
 	 * @return The salt for the key
@@ -74,7 +74,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public CipherUtil init(char[] password) { //TODO : destroy previous key
 		try {
 			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new NestedTrivialCipherException(e); }
+		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
 		this.key = new KeyProperty(password);
 		return this;
 	}
@@ -91,7 +91,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public CipherUtil init(byte[] key) {
 		try {
 			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new NestedTrivialCipherException(e); }
+		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
 		this.key = new KeyProperty(key);
 		return this;
 	}
@@ -108,10 +108,13 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
-	 * @throws IOException 
+	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
+	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.
+	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	@Override
-	public void encrypt(MessageProvider mp, MessageConsumer mc) throws IOException {
+	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException {
 		try (mp; mc) {
 			initEncrypt(mc);
 			processCipher(mp, mc);
@@ -129,10 +132,13 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
-	 * @throws IOException 
+	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
+	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
+	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	@Override
-	public void decrypt(MessageProvider mp, MessageConsumer mc) throws IOException {
+	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException {
 		try (mp; mc) {
 			initDecrypt(mp);
 			processCipher(mp, mc);
@@ -144,8 +150,12 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * 
 	 * @param mp Plain data Provider of source for encryption/decryption
 	 * @param mc Data Consumer that writes encrypted/decryption data to designated destination 
+	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
+	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
+	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws IOException {
+	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException {
 		byte[] buf = new byte[BUFFER_SIZE];
 		while(true) {
 			int read = mp.getSrc(buf);
@@ -156,7 +166,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			mc.consumeResult(cipher.doFinal());
 		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new NestedTrivialCipherException(e);
+			throw new NestedOmittedCipherException(e);
 		}
 	}
 
