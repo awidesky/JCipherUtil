@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import io.github.awidesky.jCipher.aes.AESGCMCipherUtil;
+import io.github.awidesky.jCipher.aes.AESCBCCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 
@@ -47,13 +47,13 @@ import io.github.awidesky.jCipher.messageInterface.MessageProvider;
  * Please refer to LICENSE
  * */
 
-@DisplayName("AES GCM")
+@DisplayName("AES CBC")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class AESGCMTest {
+class AESCBCTest {
 
 	public static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
 	static SecureRandom ran = new SecureRandom();
-	static AESGCMCipherUtil c = new AESGCMCipherUtil(8 * 1024);
+	static AESCBCCipherUtil c = new AESCBCCipherUtil(8 * 1024);
 	
 	static byte[] src;
 	static String randomStr;
@@ -283,14 +283,13 @@ class AESGCMTest {
 		return f;
 	}
 	
-	
 	public static String testDecrypt(InputStream is) throws DigestException, IOException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-512");
-		return HexFormat.of().formatHex(digest.digest(new AESGCMCipherUtil(8 * 1024).init(TestUtil.password).decryptToSingleBuffer(MessageProvider.from(is))));
+		return HexFormat.of().formatHex(digest.digest(new AESCBCCipherUtil(8 * 1024).init(TestUtil.password).decryptToSingleBuffer(MessageProvider.from(is))));
 	}
 	public static String testEncrypt(InputStream is) throws DigestException, IOException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-512");
-		return HexFormat.of().formatHex(digest.digest(new AESGCMCipherUtil(8 * 1024).init(TestUtil.password).encryptToSingleBuffer(MessageProvider.from(is))));
+		return HexFormat.of().formatHex(digest.digest(new AESCBCCipherUtil(8 * 1024).init(TestUtil.password).encryptToSingleBuffer(MessageProvider.from(is))));
 	}
 	
 }

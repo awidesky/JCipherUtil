@@ -11,16 +11,15 @@ package io.github.awidesky.jCipher.aes;
 
 import java.security.spec.AlgorithmParameterSpec;
 
-import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 
-public class AESGCMCipherUtil extends AbstractAESCipherUtil {
+public class AESCBCCipherUtil extends AbstractAESCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12, 256);
-	public final static int GCM_TAG_BIT_LENGTH = 128;
+	public final static CipherProperty METADATA = new CipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16, 256);
 	
-	public AESGCMCipherUtil(int bufferSize) {
+	public AESCBCCipherUtil(int bufferSize) {
 		super(METADATA, bufferSize);
 	}
 	
@@ -34,7 +33,8 @@ public class AESGCMCipherUtil extends AbstractAESCipherUtil {
 
 	@Override
 	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV);
+		return new IvParameterSpec(IV);
 	}
+
 
 }
