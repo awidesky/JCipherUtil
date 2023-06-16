@@ -12,10 +12,8 @@ package io.github.awidesky.jCipher.aes;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import javax.crypto.Cipher;
@@ -62,7 +60,7 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 		iteration = sr.nextInt(800000, 1000000);
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata(), salt, iteration), getAlgorithmParameterSpec());
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException  e) {
 			throw new NestedOmittedCipherException(e);
 		}
 		mc.consumeResult(IV);
@@ -86,7 +84,7 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 		iteration = ByteBuffer.wrap(iterationByte).getInt();
 		try {
 			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherMetadata(), salt, iteration), getAlgorithmParameterSpec());
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new NestedOmittedCipherException(e);
 		}
 	}

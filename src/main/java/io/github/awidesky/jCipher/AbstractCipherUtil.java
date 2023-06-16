@@ -19,8 +19,10 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
+import io.github.awidesky.jCipher.metadata.ByteKeyProperty;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
+import io.github.awidesky.jCipher.metadata.PasswordKeyProperty;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
@@ -71,28 +73,27 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param password the password
 	 * */
 	@Override
-	public CipherUtil init(char[] password) { //TODO : destroy previous key
+	public CipherUtil init(char[] password) {
 		try {
 			if(this.key != null) this.key.destroy();
 		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
-		this.key = new KeyProperty(password);
+		this.key = new PasswordKeyProperty(password);
 		return this;
 	}
 	/**
 	 * Initialize <code>Cipher</code> with given key.
-	 * parameter <code>key</code> is encoded as hex format characters and used as password.
-	 * <p><i><b>The argument byte array is not directly used as <code>SecretKey</code>!</b></i>
+	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
 	 * 
 	 * @see KeyProperty#KeyProperty(byte[])
 	 * 
-	 * @param key the byte array that will be encoded to characters and used as password
+	 * @param key the key
 	 * */
 	@Override
 	public CipherUtil init(byte[] key) {
 		try {
 			if(this.key != null) this.key.destroy();
 		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
-		this.key = new KeyProperty(key);
+		this.key = new ByteKeyProperty(key);
 		return this;
 	}
 
