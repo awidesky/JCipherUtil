@@ -34,12 +34,12 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
 import io.github.awidesky.jCipher.aes.AESCBCCipherUtil;
@@ -66,9 +66,9 @@ class Test {
 	
 	@TestFactory
 	@DisplayName("AES")
-	Collection<DynamicContainer> testAES() throws NoSuchAlgorithmException, DigestException, IOException {
+	Collection<DynamicNode> testAES() throws NoSuchAlgorithmException, DigestException, IOException {
 		
-		List<DynamicContainer> allTests = new ArrayList<>();
+		List<DynamicNode> allTests = new ArrayList<>();
 
 		for (CipherUtil c : ciphers) {
 			Function<InputStream, String> testDecrypt = (is) -> {
@@ -78,115 +78,126 @@ class Test {
 				} catch (NoSuchAlgorithmException e) { e.printStackTrace(); return null; }
 			};
 			
-			List<DynamicContainer> singleCipherAlgorithmTests = new ArrayList<>(2);
-			Stream<DynamicTest> encryptTests = Stream.of(
-					dynamicTest("byte[] -> byte[]", () -> {
-						c.init(TestUtil.password);
-						assertEquals(TestUtil.hashPlain(src),
-								testDecrypt.apply(new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(src)))));
-					}),	
-					dynamicTest("File -> File", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempPlainFile();
-						File fdest = mkEmptyTempFile();
-						c.encrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
-						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt.apply(new FileInputStream(fdest)));
-					}),
-					dynamicTest("Base64 encoded String -> Base64 encoded String", () -> {
-						c.init(TestUtil.password);
-						String result = c.encryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(src)));
-						assertEquals(TestUtil.hashPlain(src), testDecrypt.apply(new ByteArrayInputStream(Base64.getDecoder().decode(result))));
-					}),
-					dynamicTest("Hex encoded String -> Hex encoded String", () -> {
-						c.init(TestUtil.password);
-						String result = c.encryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(src)));
-						assertEquals(TestUtil.hashPlain(src), testDecrypt.apply(new ByteArrayInputStream(HexFormat.of().parseHex(result))));
-					}),
-					dynamicTest("String -> byte[]", () -> {
-						c.init(TestUtil.password);
-						assertEquals(TestUtil.hashPlain(randomStr.getBytes(TESTCHARSET)), testDecrypt.apply(
-								new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(randomStr, TESTCHARSET)))));
-					}),
-					dynamicTest("Inputstream -> Outputstream", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempPlainFile();
-						File fdest = mkEmptyTempFile();
-						c.encrypt(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc))),
-								MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
-						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt.apply(new FileInputStream(fdest)));
-					}),
-					dynamicTest("part of InputStream -> byte[]", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempPlainFile();
-						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
-								testDecrypt.apply(new ByteArrayInputStream(c.encryptToSingleBuffer(
-										MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc)), 16 * 1024)))));
-					}),
-					dynamicTest("ReadableByteChannel -> WritableByteChannel", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempPlainFile();
-						File fdest = mkEmptyTempFile();
-						c.encrypt(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ)),
-								MessageConsumer.to(FileChannel.open(fdest.toPath(), StandardOpenOption.WRITE)));
-						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)),
-								testDecrypt.apply(new FileInputStream(fdest)));
-					}),
-					dynamicTest("From part of ReadableByteChannel", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempPlainFile();
-						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
-								testDecrypt.apply(new ByteArrayInputStream(
-										c.encryptToSingleBuffer(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ), 16 * 1024)))));
-					})
-				);
+			List<DynamicNode> singleCipherAlgorithmTests = new ArrayList<>(2);
 
+			singleCipherAlgorithmTests.add(dynamicTest("byte[] key test", () -> {
+				byte[] key = new byte[1024];
+				new Random().nextBytes(key);
+				c.init(key);
+				assertEquals(TestUtil.hashPlain(src),
+						TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
+			}));	
+			singleCipherAlgorithmTests.add(dynamicTest("password test", () -> {
+				c.init(TestUtil.password);
+				assertEquals(TestUtil.hashPlain(src),
+						TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
+			}));	
+			
+			singleCipherAlgorithmTests.add(dynamicContainer("Encryption methods", Stream.of(
+				dynamicTest("byte[] -> byte[]", () -> {
+					c.init(TestUtil.password);
+					assertEquals(TestUtil.hashPlain(src),
+							testDecrypt.apply(new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(src)))));
+				}),	
+				dynamicTest("File -> File", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempPlainFile();
+					File fdest = mkEmptyTempFile();
+					c.encrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt.apply(new FileInputStream(fdest)));
+				}),
+				dynamicTest("Base64 encoded String -> Base64 encoded String", () -> {
+					c.init(TestUtil.password);
+					String result = c.encryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(src)));
+					assertEquals(TestUtil.hashPlain(src), testDecrypt.apply(new ByteArrayInputStream(Base64.getDecoder().decode(result))));
+				}),
+				dynamicTest("Hex encoded String -> Hex encoded String", () -> {
+					c.init(TestUtil.password);
+					String result = c.encryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(src)));
+					assertEquals(TestUtil.hashPlain(src), testDecrypt.apply(new ByteArrayInputStream(HexFormat.of().parseHex(result))));
+				}),
+				dynamicTest("String -> byte[]", () -> {
+					c.init(TestUtil.password);
+					assertEquals(TestUtil.hashPlain(randomStr.getBytes(TESTCHARSET)), testDecrypt.apply(
+							new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(randomStr, TESTCHARSET)))));
+				}),
+				dynamicTest("Inputstream -> Outputstream", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempPlainFile();
+					File fdest = mkEmptyTempFile();
+					c.encrypt(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc))),
+							MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt.apply(new FileInputStream(fdest)));
+				}),
+				dynamicTest("part of InputStream -> byte[]", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempPlainFile();
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
+							testDecrypt.apply(new ByteArrayInputStream(c.encryptToSingleBuffer(
+									MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc)), 16 * 1024)))));
+				}),
+				dynamicTest("ReadableByteChannel -> WritableByteChannel", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempPlainFile();
+					File fdest = mkEmptyTempFile();
+					c.encrypt(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ)),
+							MessageConsumer.to(FileChannel.open(fdest.toPath(), StandardOpenOption.WRITE)));
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)),
+							testDecrypt.apply(new FileInputStream(fdest)));
+				}),
+				dynamicTest("From part of ReadableByteChannel", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempPlainFile();
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
+							testDecrypt.apply(new ByteArrayInputStream(
+									c.encryptToSingleBuffer(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ), 16 * 1024)))));
+				})
+			)));
+			
 			c.init(TestUtil.password);
 			final byte[] encrypted = c.encryptToSingleBuffer(MessageProvider.from(src));
 			srcHash = TestUtil.hashPlain(src);
-			Stream<DynamicTest> decryptTests = Stream.of(
-					dynamicTest("byte[] -> byte[]", () -> {
-						c.init(TestUtil.password);
-						assertEquals(srcHash, TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(encrypted))));
-					}),
-					dynamicTest("File -> File", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempEncryptedFile(encrypted);
-						File fdest = mkEmptyTempFile();
-						c.decrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
-						assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
-					}),
-					dynamicTest("Base64 encoded String -> Base64 encoded String", () -> {
-						c.init(TestUtil.password);
-						String result = c.decryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(encrypted)));
-						assertEquals(srcHash, TestUtil.hashPlain(Base64.getDecoder().decode(result)));
-					}),
-					dynamicTest("Hex encoded String -> Hex encoded String", () -> {
-						c.init(TestUtil.password);
-						String result = c.decryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(encrypted)));
-						assertEquals(srcHash, TestUtil.hashPlain(HexFormat.of().parseHex(result)));
-					}),
-					dynamicTest("Inputstream -> Outputstream", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempEncryptedFile(encrypted);
-						File fdest = mkEmptyTempFile();
-						c.decrypt(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc))),
-								MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
-						assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
-					}),
-					dynamicTest("ReadableByteChannel -> WritableByteChannel", () -> {
-						c.init(TestUtil.password);
-						File fsrc = mkTempEncryptedFile(encrypted);
-						File fdest = mkEmptyTempFile();
-						c.decrypt(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ)),
-								MessageConsumer.to(FileChannel.open(fdest.toPath(), StandardOpenOption.WRITE)));
-						assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
-					})
-				);
+			singleCipherAlgorithmTests.add(dynamicContainer("Decryption methods", Stream.of(
+				dynamicTest("byte[] -> byte[]", () -> {
+					c.init(TestUtil.password);
+					assertEquals(srcHash, TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(encrypted))));
+				}),
+				dynamicTest("File -> File", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempEncryptedFile(encrypted);
+					File fdest = mkEmptyTempFile();
+					c.decrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
+					assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
+				}),
+				dynamicTest("Base64 encoded String -> Base64 encoded String", () -> {
+					c.init(TestUtil.password);
+					String result = c.decryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(encrypted)));
+					assertEquals(srcHash, TestUtil.hashPlain(Base64.getDecoder().decode(result)));
+				}),
+				dynamicTest("Hex encoded String -> Hex encoded String", () -> {
+					c.init(TestUtil.password);
+					String result = c.decryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(encrypted)));
+					assertEquals(srcHash, TestUtil.hashPlain(HexFormat.of().parseHex(result)));
+				}),
+				dynamicTest("Inputstream -> Outputstream", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempEncryptedFile(encrypted);
+					File fdest = mkEmptyTempFile();
+					c.decrypt(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc))),
+							MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
+					assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
+				}),
+				dynamicTest("ReadableByteChannel -> WritableByteChannel", () -> {
+					c.init(TestUtil.password);
+					File fsrc = mkTempEncryptedFile(encrypted);
+					File fdest = mkEmptyTempFile();
+					c.decrypt(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ)),
+							MessageConsumer.to(FileChannel.open(fdest.toPath(), StandardOpenOption.WRITE)));
+					assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
+				})
+			)));
 			
 			
-			
-			singleCipherAlgorithmTests.add(dynamicContainer("Encryption", encryptTests));
-			singleCipherAlgorithmTests.add(dynamicContainer("Decryption", decryptTests));
 			allTests.add(dynamicContainer(c.toString(), singleCipherAlgorithmTests));
 		}
 		return allTests;
