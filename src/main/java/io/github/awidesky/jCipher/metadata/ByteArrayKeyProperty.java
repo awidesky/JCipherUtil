@@ -18,7 +18,7 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
-public class ByteKeyProperty extends KeyProperty {
+public class ByteArrayKeyProperty extends KeyProperty {
 
 	private byte[] key;
 	
@@ -36,7 +36,7 @@ public class ByteKeyProperty extends KeyProperty {
 	 * @param key the key
 	 * The contents of the buffer are copied to protect against subsequent modification.
 	 * */
-	public ByteKeyProperty(byte[] key) { this.key = Arrays.copyOf(key, key.length); }
+	public ByteArrayKeyProperty(byte[] key) { this.key = Arrays.copyOf(key, key.length); }
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
@@ -65,7 +65,7 @@ public class ByteKeyProperty extends KeyProperty {
 			result = digest.digest();
 		}
 
-		return new SecretKeySpec(result, cm.KEY_ALGORITMH_NAME);
+		return new SecretKeySpec(result, 0, cm.KEYSIZE / 8, cm.KEY_ALGORITMH_NAME);
 	}
 	
 	@Override

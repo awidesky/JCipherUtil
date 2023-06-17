@@ -19,7 +19,7 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.ByteKeyProperty;
+import io.github.awidesky.jCipher.metadata.ByteArrayKeyProperty;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyProperty;
 import io.github.awidesky.jCipher.metadata.PasswordKeyProperty;
@@ -93,7 +93,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			if(this.key != null) this.key.destroy();
 		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
-		this.key = new ByteKeyProperty(key);
+		this.key = new ByteArrayKeyProperty(key);
 		return this;
 	}
 
