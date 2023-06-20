@@ -108,7 +108,7 @@ public interface MessageProvider extends AutoCloseable {
 		return MessageProvider.from(HexFormat.of().parseHex(hex.toLowerCase()));
 	}
 	/**
-	 * Provide data from a <code>InputStream</code>
+	 * Provide data from a <code>InputStream</code>.<p>
 	 * This method closes <code>InputStream</code> after the Cipher process is successfully finished
 	 * 
 	 * @see MessageProvider#from(InputStream, boolean)

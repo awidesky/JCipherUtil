@@ -10,6 +10,8 @@
 package io.github.awidesky.jCipher;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
@@ -76,6 +78,36 @@ public interface CipherUtil {
 	 * */
 	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException;
 	
+	
+	/**
+	 * Simple way to encrypt from a {@code InputStreamr} to a {@code OutputStream}.<p>
+	 * Both <code>Stream</code>s are closed after cipher process is finished.
+	 * 
+	 * @param in Source for encryption
+	 * @param out The destination 
+	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
+	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
+	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * there's a internal flaw in the cipher library occurs.
+	 * */
+	public default void encrypt(InputStream in, OutputStream out) throws NestedIOException, NestedOmittedCipherException {
+		encrypt(MessageProvider.from(in), MessageConsumer.to(out));
+	}
+
+	/**
+	 * Simple way to decrypt from a {@code InputStreamr} to a {@code OutputStream}.<p>
+	 * Both <code>Stream</code>s are closed after cipher process is finished.
+	 * 
+	 * @param in Source for encryption
+	 * @param out The destination 
+	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
+	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
+	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * there's a internal flaw in the cipher library occurs.
+	 * */
+	public default void decrypt(InputStream in, OutputStream out) throws NestedIOException, NestedOmittedCipherException {
+		decrypt(MessageProvider.from(in), MessageConsumer.to(out));
+	}
 	
 	/**
 	 * Encrypt whole data into single <code>byte[]</code> and return it

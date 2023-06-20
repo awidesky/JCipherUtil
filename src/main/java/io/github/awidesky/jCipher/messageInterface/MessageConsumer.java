@@ -53,7 +53,7 @@ public interface MessageConsumer extends AutoCloseable {
 		return to(new FileOutputStream(f));
 	}
 	/**
-	 * Consume data and writes to a <code>OutputStream</code>
+	 * Consume data and writes to a <code>OutputStream</code>.<p>
 	 * This method closes <code>OutputStream</code> after the Cipher process is finished
 	 * 
 	 * @see MessageConsumer#to(OutputStream, boolean)
