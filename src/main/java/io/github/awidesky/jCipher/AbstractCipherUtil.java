@@ -21,14 +21,14 @@ import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.ByteArrayKeyProperty;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.metadata.KeyProperty;
+import io.github.awidesky.jCipher.metadata.KeyMaterial;
 import io.github.awidesky.jCipher.metadata.PasswordKeyProperty;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
-	protected KeyProperty key;
+	protected KeyMaterial key;
 	protected Cipher cipher;
 	protected final int BUFFER_SIZE;
 	protected CipherProperty cipherMetadata;
@@ -84,7 +84,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * Initialize <code>Cipher</code> with given key.
 	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
 	 * 
-	 * @see KeyProperty#KeyProperty(byte[])
+	 * @see KeyMaterial#KeyProperty(byte[])
 	 * 
 	 * @param key the key
 	 * */

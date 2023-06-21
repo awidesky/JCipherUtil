@@ -21,7 +21,7 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
-public class PasswordKeyProperty extends KeyProperty {
+public class PasswordKeyProperty extends KeyMaterial {
 
 
 	private char[] password;

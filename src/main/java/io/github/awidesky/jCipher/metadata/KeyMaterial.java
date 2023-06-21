@@ -18,7 +18,7 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
-public abstract class KeyProperty {
+public abstract class KeyMaterial {
 
 	protected byte[] salt;
 	protected int iterationCount;

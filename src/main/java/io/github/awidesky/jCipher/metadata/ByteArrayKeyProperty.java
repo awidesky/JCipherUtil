@@ -18,7 +18,7 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
 
-public class ByteArrayKeyProperty extends KeyProperty {
+public class ByteArrayKeyProperty extends KeyMaterial {
 
 	private byte[] key;
 	
