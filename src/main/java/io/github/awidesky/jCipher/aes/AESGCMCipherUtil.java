@@ -14,14 +14,15 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.spec.GCMParameterSpec;
 
 import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.metadata.KeyMetadata;
 
 public class AESGCMCipherUtil extends AbstractAESCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12, 256);
+	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
 	
-	public AESGCMCipherUtil(int bufferSize) {
-		super(METADATA, bufferSize);
+	public AESGCMCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+		super(METADATA, keyMetadata, bufferSize);
 	}
 	
 

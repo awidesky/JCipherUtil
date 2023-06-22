@@ -39,10 +39,6 @@ public class CipherProperty {
 	 * */
 	public final int NONCESIZE;
 	/**
-	 * Size of key in bits
-	 * */
-	public final int KEYSIZE;
-	/**
 	 * Initialize <code>CipherProperty</code> with given parameters.
 	 *
 	 * @param algorithmName Name of the cipher algorithm, like <code>AES</code> or <code>ChaCha20-Poly1305</code>
@@ -52,19 +48,18 @@ public class CipherProperty {
 	 * @param nonceSize Size of nonce(Initial Vector) in bytes
 	 * @param keySize Size of key in bits
 	 */
-	public CipherProperty(String algorithmName, String algorithmMode, String algorithmPadding, String keyAlgorithmName, int nonceSize, int keySize) {
+	public CipherProperty(String algorithmName, String algorithmMode, String algorithmPadding, String keyAlgorithmName, int nonceSize) {
 		this.ALGORITMH_NAME = algorithmName;
 		this.ALGORITMH_MODE = algorithmMode;
 		this.ALGORITMH_PADDING = algorithmPadding;
 		this.KEY_ALGORITMH_NAME = keyAlgorithmName;
 		this.NONCESIZE = nonceSize;
-		this.KEYSIZE = keySize;
 	}
 	
 	@Override
 	public String toString() {
 		return "CipherProperty [ALGORITMH_NAME=" + ALGORITMH_NAME + ", ALGORITMH_MODE=" + ALGORITMH_MODE
 				+ ", ALGORITMH_PADDING=" + ALGORITMH_PADDING + ", KEY_ALGORITMH_NAME=" + KEY_ALGORITMH_NAME
-				+ ", NONCESIZE=" + NONCESIZE + "byte, KEYSIZE=" + (KEYSIZE * 8) + "bit]";
+				+ ", NONCESIZE=" + NONCESIZE + "byte]";
 	}
 }

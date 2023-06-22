@@ -17,12 +17,12 @@ package io.github.awidesky.jCipher.util;
  * or some rare mistake cases (e.g. try to decrypt totally wrong data. etc.) 
  * 
  * */
-public class NestedOmittedCipherException extends RuntimeException {
+public class OmittedCipherException extends RuntimeException {
 
 	private static final long serialVersionUID = -6976828145263718764L;
 	private final Exception nested;
 	
-	public NestedOmittedCipherException(Exception nested) {
+	public OmittedCipherException(Exception nested) {
 		super(nested);
 		this.nested = nested;
 	}

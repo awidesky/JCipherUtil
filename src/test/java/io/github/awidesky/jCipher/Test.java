@@ -44,14 +44,19 @@ import org.junit.jupiter.api.TestFactory;
 
 import io.github.awidesky.jCipher.aes.AESCBCCipherUtil;
 import io.github.awidesky.jCipher.aes.AESGCMCipherUtil;
+import io.github.awidesky.jCipher.aes.AESKeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
+import io.github.awidesky.jCipher.metadata.KeyMetadata;
 
 @DisplayName("Cipher Tests")
 class Test {
 
 	static final int CIPHERUTILBUFFERSIZE = 4 * 1024;
-	static final CipherUtil[] ciphers = new CipherUtil[] { new AESGCMCipherUtil(CIPHERUTILBUFFERSIZE), new AESCBCCipherUtil(CIPHERUTILBUFFERSIZE) };
+	static final CipherUtil[] ciphers = new CipherUtil[] {
+			new AESGCMCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+			new AESCBCCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
+			};
 
 	static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
 	static final SecureRandom ran = new SecureRandom();

@@ -20,7 +20,7 @@ import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.KeyMaterial;
 import io.github.awidesky.jCipher.util.NestedIOException;
-import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
+import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 
 /**
@@ -62,10 +62,10 @@ public interface CipherUtil {
 	 * @param mc CipherUtil data Consumer that writes encrypted data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException;
+	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException;
 	/**
 	 * Simple way to decrypt from a source to a destination.
 	 * 
@@ -73,10 +73,10 @@ public interface CipherUtil {
 	 * @param mc Plain data Consumer that writes decrypted data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException;
+	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException;
 	
 	
 	/**
@@ -87,10 +87,10 @@ public interface CipherUtil {
 	 * @param out The destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default void encrypt(InputStream in, OutputStream out) throws NestedIOException, NestedOmittedCipherException {
+	public default void encrypt(InputStream in, OutputStream out) throws NestedIOException, OmittedCipherException {
 		encrypt(MessageProvider.from(in), MessageConsumer.to(out));
 	}
 
@@ -102,10 +102,10 @@ public interface CipherUtil {
 	 * @param out The destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default void decrypt(InputStream in, OutputStream out) throws NestedIOException, NestedOmittedCipherException {
+	public default void decrypt(InputStream in, OutputStream out) throws NestedIOException, OmittedCipherException {
 		decrypt(MessageProvider.from(in), MessageConsumer.to(out));
 	}
 	
@@ -115,9 +115,9 @@ public interface CipherUtil {
 	 * @param mp Plain data Provider of source for encryption
 	 * @return the <code>byte</code> array that has all encrypted data
 	 * @throws NestedIOException 
-	 * @throws NestedOmittedCipherException 
+	 * @throws OmittedCipherException 
 	 * */
-	public default byte[] encryptToSingleBuffer(MessageProvider mp) throws NestedIOException, NestedOmittedCipherException {
+	public default byte[] encryptToSingleBuffer(MessageProvider mp) throws NestedIOException, OmittedCipherException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		encrypt(mp, MessageConsumer.to(bos));
 		return bos.toByteArray();
@@ -129,10 +129,10 @@ public interface CipherUtil {
 	 * @return <code>Base64</code> text that encoded from encrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String encryptToBase64(MessageProvider mp) throws NestedIOException, NestedOmittedCipherException {
+	public default String encryptToBase64(MessageProvider mp) throws NestedIOException, OmittedCipherException {
 		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(mp));
 	}
 	/**
@@ -142,10 +142,10 @@ public interface CipherUtil {
 	 * @return hex format text that encoded from encrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String encryptToHexString(MessageProvider mp) throws NestedIOException, NestedOmittedCipherException {
+	public default String encryptToHexString(MessageProvider mp) throws NestedIOException, OmittedCipherException {
 		return HexFormat.of().formatHex(encryptToSingleBuffer(mp));
 	}
 	/**
@@ -155,10 +155,10 @@ public interface CipherUtil {
 	 * @return the <code>byte</code> array that has all decrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default byte[] decryptToSingleBuffer(MessageProvider mp) throws NestedIOException, NestedOmittedCipherException {
+	public default byte[] decryptToSingleBuffer(MessageProvider mp) throws NestedIOException, OmittedCipherException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		decrypt(mp, MessageConsumer.to(bos));
 		return bos.toByteArray();
@@ -170,10 +170,10 @@ public interface CipherUtil {
 	 * @return text that encoded from decrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToString(MessageProvider mp, Charset encoding) throws NestedIOException, NestedOmittedCipherException {
+	public default String decryptToString(MessageProvider mp, Charset encoding) throws NestedIOException, OmittedCipherException {
 		return new String(decryptToSingleBuffer(mp), encoding);
 	}
 	/**
@@ -183,10 +183,10 @@ public interface CipherUtil {
 	 * @return <code>Base64</code> text that encoded from decrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToBase64(MessageProvider mp) throws NestedIOException, NestedOmittedCipherException {
+	public default String decryptToBase64(MessageProvider mp) throws NestedIOException, OmittedCipherException {
 		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(mp));
 	}
 
@@ -197,10 +197,10 @@ public interface CipherUtil {
 	 * @return hex format text that encoded from encrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToHexString(MessageProvider mp) throws NestedIOException, NestedOmittedCipherException {
+	public default String decryptToHexString(MessageProvider mp) throws NestedIOException, OmittedCipherException {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
 	}
 	

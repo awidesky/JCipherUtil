@@ -16,9 +16,9 @@ import java.util.Arrays;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
-import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
+import io.github.awidesky.jCipher.util.OmittedCipherException;
 
-public class ByteArrayKeyProperty extends KeyMaterial {
+public class ByteArrayKeyMaterial extends KeyMaterial {
 
 	private byte[] key;
 	
@@ -36,25 +36,24 @@ public class ByteArrayKeyProperty extends KeyMaterial {
 	 * @param key the key
 	 * The contents of the buffer are copied to protect against subsequent modification.
 	 * */
-	public ByteArrayKeyProperty(byte[] key) { this.key = Arrays.copyOf(key, key.length); }
+	public ByteArrayKeyMaterial(byte[] key) { this.key = Arrays.copyOf(key, key.length); }
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
-	 * @param cm metadata of the Cipher. used to find key algorithm & key size.
+	 * @param algorithm metadata of the Cipher. used to find key algorithm & key size.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
-	 * 
-	 * @throws NestedOmittedCipherException if {@link NoSuchAlgorithmException} is thrown
+	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} is thrown
 	 */
 	@Override
-	public SecretKeySpec genKey(CipherProperty cm, byte[] salt, int iterationCount) throws NestedOmittedCipherException {
+	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
 		this.salt =  Arrays.copyOf(salt, salt.length);
 		this.iterationCount = iterationCount;
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-512");
 		} catch (NoSuchAlgorithmException e) {
-			throw new NestedOmittedCipherException(e);
+			throw new OmittedCipherException(e);
 		}
 		byte[] result = key;
 		
@@ -65,7 +64,7 @@ public class ByteArrayKeyProperty extends KeyMaterial {
 			result = digest.digest();
 		}
 
-		return new SecretKeySpec(result, 0, cm.KEYSIZE / 8, cm.KEY_ALGORITMH_NAME);
+		return new SecretKeySpec(result, 0, keySize / 8, algorithm);
 	}
 	
 	@Override

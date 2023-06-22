@@ -22,19 +22,17 @@ import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
-import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
+import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 
-	public final static int SALT_BYTE_LENGTH = 64;
-	
 	protected byte[] IV;
 	
+	protected AbstractAESCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
-	protected AbstractAESCipherUtil(CipherProperty metadata, int bufferSize) { super(metadata, bufferSize); }
-	
-	
 	protected abstract AlgorithmParameterSpec getAlgorithmParameterSpec();
 	
 	/**
@@ -47,21 +45,18 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 	@Override
 	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
 		IV = new byte[getCipherMetadata().NONCESIZE];
-		byte[] salt = new byte[SALT_BYTE_LENGTH]; 
+		byte[] salt = new byte[keyMetadata.saltLen]; 
 		int iteration;
 		
 		SecureRandom sr = new SecureRandom();
 		sr.nextBytes(IV);
 		sr.nextBytes(salt);
-		/**
-		 * https://en.wikipedia.org/wiki/PBKDF2
-		 * TODO : In 2023, OWASP recommended to use 600,000 iterations for PBKDF2-HMAC-SHA256 and 210,000 for PBKDF2-HMAC-SHA512.
-		 */
-		iteration = sr.nextInt(800000, 1000000);
+
+		iteration = sr.nextInt(keyMetadata.iterationRange[0], keyMetadata.iterationRange[1]);
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata(), salt, iteration), getAlgorithmParameterSpec());
+			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iteration), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException  e) {
-			throw new NestedOmittedCipherException(e);
+			throw new OmittedCipherException(e);
 		}
 		mc.consumeResult(IV);
 		mc.consumeResult(salt);
@@ -71,7 +66,7 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 	@Override
 	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
 		IV = new byte[getCipherMetadata().NONCESIZE];
-		byte[] salt = new byte[SALT_BYTE_LENGTH]; 
+		byte[] salt = new byte[keyMetadata.saltLen]; 
 		int iteration;
 		byte[] iterationByte = new byte[4];
 		
@@ -82,10 +77,13 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 		read = 0;
 		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
 		iteration = ByteBuffer.wrap(iterationByte).getInt();
+		if (!(keyMetadata.iterationRange[0] <= iteration && iteration < keyMetadata.iterationRange[1])) {
+			throw new IllegalMetadataException("Unacceptable iteration count : " + iteration + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
+		}
 		try {
-			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherMetadata(), salt, iteration), getAlgorithmParameterSpec());
+			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iteration), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-			throw new NestedOmittedCipherException(e);
+			throw new OmittedCipherException(e);
 		}
 	}
 

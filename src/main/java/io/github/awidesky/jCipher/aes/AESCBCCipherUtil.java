@@ -14,13 +14,14 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.metadata.KeyMetadata;
 
 public class AESCBCCipherUtil extends AbstractAESCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16, 256);
+	public final static CipherProperty METADATA = new CipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
-	public AESCBCCipherUtil(int bufferSize) {
-		super(METADATA, bufferSize);
+	public AESCBCCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+		super(METADATA, keyMetadata, bufferSize);
 	}
 	
 

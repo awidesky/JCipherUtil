@@ -16,7 +16,7 @@ import java.util.Arrays;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
-import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
+import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class KeyMaterial {
 
@@ -25,13 +25,13 @@ public abstract class KeyMaterial {
 	
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
-	 * @param cm metadata of the Cipher. used to find key algorithm & key size.
+	 * @param algorithm key algorithm.
+	 * @param keySize size of key in bits.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
-	 * 
-	 * @throws NestedOmittedCipherException if an {@link RuntimeException}(like {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException}) is thrown
+	 * @throws OmittedCipherException if an {@link RuntimeException}(like {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException}) is thrown
 	 */
-	public abstract SecretKeySpec genKey(CipherProperty cm, byte[] salt, int iterationCount) throws NestedOmittedCipherException;
+	public abstract SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException;
 	
 	/**
 	 * @return Salt value for the password-based key generation algorithm.

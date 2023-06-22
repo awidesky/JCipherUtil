@@ -19,10 +19,9 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
-import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
+import io.github.awidesky.jCipher.util.OmittedCipherException;
 
-public class PasswordKeyProperty extends KeyMaterial {
-
+public class PasswordKeyMaterial extends KeyMaterial {
 
 	private char[] password;
 	
@@ -32,27 +31,26 @@ public class PasswordKeyProperty extends KeyMaterial {
 	 * 
 	 * @param key the password. The contents of the buffer are copied to protect against subsequent modification.
 	 * */
-	public PasswordKeyProperty(char[] password) { this.password = Arrays.copyOf(password, password.length); }
+	public PasswordKeyMaterial(char[] password) { this.password = Arrays.copyOf(password, password.length); }
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata and password.
-	 * @param cm metadata of the Cipher. used to find key algorithm & key size.
+	 * @param algorithm metadata of the Cipher. used to find key algorithm & key size.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
-	 * 
-	 * @throws NestedOmittedCipherException if {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException} is thrown
+	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException} is thrown
 	 */
 	@Override
-	public SecretKeySpec genKey(CipherProperty cm, byte[] salt, int iterationCount) throws NestedOmittedCipherException {
+	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
 		this.salt =  Arrays.copyOf(salt, salt.length);
 		this.iterationCount = iterationCount;
 	    SecretKey pbeKey;
 		try {
-			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, this.salt, iterationCount, cm.KEYSIZE));
+			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, this.salt, iterationCount, keySize));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			throw new NestedOmittedCipherException(e);
+			throw new OmittedCipherException(e);
 		}
-	    return new SecretKeySpec(pbeKey.getEncoded(), cm.KEY_ALGORITMH_NAME);
+	    return new SecretKeySpec(pbeKey.getEncoded(), algorithm);
 	}
 	
 	

@@ -19,27 +19,33 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.ByteArrayKeyProperty;
+import io.github.awidesky.jCipher.metadata.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.KeyMaterial;
-import io.github.awidesky.jCipher.metadata.PasswordKeyProperty;
+import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.metadata.PasswordKeyMaterial;
 import io.github.awidesky.jCipher.util.NestedIOException;
-import io.github.awidesky.jCipher.util.NestedOmittedCipherException;
+import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
 	protected KeyMaterial key;
+	protected KeyMetadata keyMetadata;
 	protected Cipher cipher;
 	protected final int BUFFER_SIZE;
 	protected CipherProperty cipherMetadata;
 	
-	protected AbstractCipherUtil(CipherProperty metadata, int bufferSize) {
-		this.cipherMetadata = metadata;
+	protected AbstractCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata) {
+		this(cipherMetadata, keyMetadata, 8 * 1024);
+	}
+	protected AbstractCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
+		this.cipherMetadata = cipherMetadata;
+		this.keyMetadata = keyMetadata;
 		this.BUFFER_SIZE = bufferSize;
 		try {
 			cipher = Cipher.getInstance(getCipherMetadata().ALGORITMH_NAME + "/" + getCipherMetadata().ALGORITMH_MODE + "/" + getCipherMetadata().ALGORITMH_PADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new NestedOmittedCipherException(e);
+			throw new OmittedCipherException(e);
 		}
 	}
 	
@@ -65,7 +71,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	/**
 	 * @return The salt for the key
 	 * */
-	public byte[] getSalt() { return key.getSalt(); }
+	public byte[] getSalt() {
+		byte[] salt = key.getSalt();
+		if(salt.length != keyMetadata.saltLen) throw new OmittedCipherException(null);
+		return key.getSalt();
+	}
 	
 	/**
 	 * Initialize <code>Cipher</code> with given password
@@ -76,8 +86,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public CipherUtil init(char[] password) {
 		try {
 			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
-		this.key = new PasswordKeyProperty(password);
+		} catch (DestroyFailedException e) { throw new OmittedCipherException(e); }
+		this.key = new PasswordKeyMaterial(password);
 		return this;
 	}
 	/**
@@ -92,8 +102,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public CipherUtil init(byte[] key) {
 		try {
 			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new NestedOmittedCipherException(e); }
-		this.key = new ByteArrayKeyProperty(key);
+		} catch (DestroyFailedException e) { throw new OmittedCipherException(e); }
+		this.key = new ByteArrayKeyMaterial(key);
 		return this;
 	}
 
@@ -111,11 +121,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	@Override
-	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException {
+	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		try (mp; mc) {
 			initEncrypt(mc);
 			processCipher(mp, mc);
@@ -135,11 +145,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	@Override
-	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException {
+	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		try (mp; mc) {
 			initDecrypt(mp);
 			processCipher(mp, mc);
@@ -153,10 +163,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @param mc Data Consumer that writes encrypted/decryption data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws NestedOmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws NestedIOException, NestedOmittedCipherException {
+	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		byte[] buf = new byte[BUFFER_SIZE];
 		while(true) {
 			int read = mp.getSrc(buf);
@@ -167,13 +177,13 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		try {
 			mc.consumeResult(cipher.doFinal());
 		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new NestedOmittedCipherException(e);
+			throw new OmittedCipherException(e);
 		}
 	}
 
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [" + cipher.getAlgorithm() + " from " + cipher.getProvider() + ", Nonce Size : " + getCipherMetadata().NONCESIZE
-				+ "byte, key size : " + getCipherMetadata().KEYSIZE + "bit]";
+				+ "byte, key size : " + keyMetadata.keyLen + "bit]";
 	}
 }
