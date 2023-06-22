@@ -14,7 +14,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
 public class AESCBCCipherUtil extends AbstractAESCipherUtil {
 

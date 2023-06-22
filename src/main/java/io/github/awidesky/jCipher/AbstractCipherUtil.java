@@ -19,11 +19,11 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.metadata.KeyMaterial;
-import io.github.awidesky.jCipher.metadata.KeyMetadata;
-import io.github.awidesky.jCipher.metadata.PasswordKeyMaterial;
+import io.github.awidesky.jCipher.metadata.key.ByteArrayKeyMaterial;
+import io.github.awidesky.jCipher.metadata.key.KeyMaterial;
+import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
+import io.github.awidesky.jCipher.metadata.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 

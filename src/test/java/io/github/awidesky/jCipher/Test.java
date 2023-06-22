@@ -47,7 +47,7 @@ import io.github.awidesky.jCipher.aes.AESGCMCipherUtil;
 import io.github.awidesky.jCipher.aes.AESKeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
 @DisplayName("Cipher Tests")
 class Test {

@@ -1,6 +1,6 @@
 package io.github.awidesky.jCipher.aes;
 
-import io.github.awidesky.jCipher.metadata.KeySize;
+import io.github.awidesky.jCipher.metadata.key.KeySize;
 
 public class AESKeySize extends KeySize {
 

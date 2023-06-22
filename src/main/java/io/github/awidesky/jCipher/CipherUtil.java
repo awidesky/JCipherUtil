@@ -18,7 +18,7 @@ import java.util.HexFormat;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.KeyMaterial;
+import io.github.awidesky.jCipher.metadata.key.KeyMaterial;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 

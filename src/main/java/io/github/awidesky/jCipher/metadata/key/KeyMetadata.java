@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.metadata;
+package io.github.awidesky.jCipher.metadata.key;
 
 public class KeyMetadata {
 	

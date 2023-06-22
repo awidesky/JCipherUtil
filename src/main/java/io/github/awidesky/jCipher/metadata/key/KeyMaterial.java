@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher.metadata;
+package io.github.awidesky.jCipher.metadata.key;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
