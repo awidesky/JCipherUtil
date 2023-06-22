@@ -58,9 +58,9 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException  e) {
 			throw new OmittedCipherException(e);
 		}
-		mc.consumeResult(IV);
-		mc.consumeResult(salt);
 		mc.consumeResult(ByteBuffer.allocate(4).putInt(iteration).array());
+		mc.consumeResult(salt);
+		mc.consumeResult(IV);
 	}
 	
 	@Override
@@ -71,12 +71,12 @@ public abstract class AbstractAESCipherUtil extends AbstractCipherUtil {
 		byte[] iterationByte = new byte[4];
 		
 		int read = 0;
-		while ((read += mp.getSrc(IV, read)) != IV.length);
+		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
+		iteration = ByteBuffer.wrap(iterationByte).getInt();
 		read = 0;
 		while ((read += mp.getSrc(salt, read)) != salt.length);
 		read = 0;
-		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
-		iteration = ByteBuffer.wrap(iterationByte).getInt();
+		while ((read += mp.getSrc(IV, read)) != IV.length);
 		if (!(keyMetadata.iterationRange[0] <= iteration && iteration < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iteration + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
