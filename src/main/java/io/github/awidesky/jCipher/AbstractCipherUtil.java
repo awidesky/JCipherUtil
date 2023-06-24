@@ -77,19 +77,42 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	protected abstract void initDecrypt(MessageProvider mp) throws NestedIOException;
 
-	
-	protected void generateSalt(SecureRandom sr) { //TODO : generate comment
+	/**
+	 * Generate random salt with given {@code SecureRandom} instance.
+	 * Size of the salt is determined by {@code KeyMetadata}.
+	 * 
+	 * @see KeyMetadata#saltLen
+	 * */
+	protected void generateSalt(SecureRandom sr) {
 		salt = new byte[keyMetadata.saltLen]; 
 		sr.nextBytes(salt);
 	}
+	/**
+	 * Generate random iteration count with given {@code SecureRandom} instance.
+	 * Size of the iteration count is determined by {@code KeyMetadata}.
+	 * 
+	 * @see KeyMetadata#iterationRange
+	 * */
 	protected void generateIterationCount(SecureRandom sr) {
 		iterationCount = sr.nextInt(keyMetadata.iterationRange[0], keyMetadata.iterationRange[1]);
 	}
+	/**
+	 * Read salt from given {@code MessageProvider} instance.
+	 * Size of the salt is determined by {@code KeyMetadata}.
+	 * 
+	 * @see KeyMetadata#saltLen
+	 * */
 	protected void readSalt(MessageProvider mp) {
 		salt = new byte[keyMetadata.saltLen]; 
 		int read = 0;
 		while ((read += mp.getSrc(salt, read)) != salt.length);
 	}
+	/**
+	 * Read iteration count from given {@code MessageProvider} instance.
+	 * Size of the iteration count is determined by {@code KeyMetadata}.
+	 * 
+	 * @see KeyMetadata#iterationRange
+	 * */
 	protected void readIterationCount(MessageProvider mp) {
 		byte[] iterationByte = new byte[4];
 		int read = 0;
