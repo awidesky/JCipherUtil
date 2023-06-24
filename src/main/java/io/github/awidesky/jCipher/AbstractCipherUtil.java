@@ -10,6 +10,7 @@
 package io.github.awidesky.jCipher;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -26,6 +27,7 @@ import io.github.awidesky.jCipher.metadata.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipher.metadata.key.KeyMaterial;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 import io.github.awidesky.jCipher.metadata.key.PasswordKeyMaterial;
+import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
@@ -64,18 +66,43 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 
 	/**
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
-	 * 
-	 * This method should do tasks like reading metadata.. etc.  
+	 * In default, this method generates random salt and iteration count, initiate the <code>Cipher</code> instance, and write iteration count and salt
+	 * to {@code MessageConsumer}.
+	 * This method can be override to generate and write additional metadata(like Initial Vector)
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract void initEncrypt(MessageConsumer mc) throws NestedIOException;
+	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
+		SecureRandom sr = new SecureRandom();
+		generateSalt(sr);
+		generateIterationCount(sr);
+		try {
+			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount));
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}
+		mc.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
+		mc.consumeResult(salt);
+	}
 	/**
 	 * Initialize <code>Cipher</code> in decrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
-	 * 
-	 * This method should do tasks like reading metadata.. etc.  
+	 * In default, this method reads iteration count and salt from {@code MessageProvider}, and initiate the <code>Cipher</code> instance
+	 * .
+	 * This method can be override to read additional metadata(like Initial Vector) from {@code MessageConsumer} 
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract void initDecrypt(MessageProvider mp) throws NestedIOException;
+	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
+		readIterationCount(mp);
+		readSalt(mp);
+		
+		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
+			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
+		}
+		try {
+			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount));
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}		
+	}
 
 	/**
 	 * Generate random salt with given {@code SecureRandom} instance.
