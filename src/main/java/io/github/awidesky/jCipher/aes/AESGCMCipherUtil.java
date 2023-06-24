@@ -13,10 +13,11 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.spec.GCMParameterSpec;
 
+import io.github.awidesky.jCipher.AbstractCipherUtilWithNonce;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESGCMCipherUtil extends AbstractAESCipherUtil {
+public class AESGCMCipherUtil extends AbstractCipherUtilWithNonce {
 
 	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12);
 	public final static int GCM_TAG_BIT_LENGTH = 128;

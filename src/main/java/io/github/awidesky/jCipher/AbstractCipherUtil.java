@@ -9,7 +9,9 @@
 
 package io.github.awidesky.jCipher;
 
+import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -27,10 +29,16 @@ import io.github.awidesky.jCipher.metadata.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
+/**
+ * Abstract <code>CipherUtil</code> class that uses salt and iteration count for key derivation.
+ * @see KeyMaterial
+ * */
 public abstract class AbstractCipherUtil implements CipherUtil {
 
 	protected KeyMaterial key;
 	protected KeyMetadata keyMetadata;
+	protected byte[] salt;
+	protected int iterationCount;
 	protected Cipher cipher;
 	protected final int BUFFER_SIZE;
 	protected CipherProperty cipherMetadata;
@@ -53,10 +61,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	protected abstract CipherProperty getCipherMetadata();
+
 	/**
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
 	 * 
-	 * This method should do tasks like generating metadata, writing it.. etc.  
+	 * This method should do tasks like reading metadata.. etc.  
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
 	protected abstract void initEncrypt(MessageConsumer mc) throws NestedIOException;
@@ -68,14 +77,30 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	protected abstract void initDecrypt(MessageProvider mp) throws NestedIOException;
 
+	
+	protected void generateSalt(SecureRandom sr) { //TODO : generate comment
+		salt = new byte[keyMetadata.saltLen]; 
+		sr.nextBytes(salt);
+	}
+	protected void generateIterationCount(SecureRandom sr) {
+		iterationCount = sr.nextInt(keyMetadata.iterationRange[0], keyMetadata.iterationRange[1]);
+	}
+	protected void readSalt(MessageProvider mp) {
+		salt = new byte[keyMetadata.saltLen]; 
+		int read = 0;
+		while ((read += mp.getSrc(salt, read)) != salt.length);
+	}
+	protected void readIterationCount(MessageProvider mp) {
+		byte[] iterationByte = new byte[4];
+		int read = 0;
+		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
+		iterationCount = ByteBuffer.wrap(iterationByte).getInt();
+	}
+
 	/**
 	 * @return The salt for the key
 	 * */
-	public byte[] getSalt() {
-		byte[] salt = key.getSalt();
-		if(salt.length != keyMetadata.saltLen) throw new OmittedCipherException(null);
-		return key.getSalt();
-	}
+	public byte[] getSalt() { return key.getSalt(); }
 	
 	/**
 	 * Initialize <code>Cipher</code> with given password
@@ -108,6 +133,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 
+	
 	/**
 	 * Encrypt from source(designated as <code>MessageProvider</code>)
 	 * and writes to given destination(designated as <code>MessageConsumer</code>).
