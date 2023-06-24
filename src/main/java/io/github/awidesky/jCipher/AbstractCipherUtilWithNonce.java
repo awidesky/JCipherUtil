@@ -33,13 +33,34 @@ public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
 
 	protected abstract AlgorithmParameterSpec getAlgorithmParameterSpec();
 	
+	/**
+	 * Generate random IV with given {@code SecureRandom} instance.
+	 * Size of the IV is determined by {@code CipherProperty}.
+	 * 
+	 * @see CipherProperty#NONCESIZE
+	 * */
+	protected void generateIV(SecureRandom sr) {
+		IV = new byte[getCipherMetadata().NONCESIZE];
+		sr.nextBytes(IV);
+	}
+	/**
+	 * Read IV from given {@code MessageProvider} instance.
+	 * Size of the IV is determined by {@code CipherProperty}.
+	 * 
+	 * @see CipherProperty#NONCESIZE
+	 * */
+	protected void readIV(MessageProvider mp) {
+		IV = new byte[getCipherMetadata().NONCESIZE];
+		int read = 0;
+		while ((read += mp.getSrc(IV, read)) != IV.length);
+	}
+	
 	@Override
 	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
-		IV = new byte[getCipherMetadata().NONCESIZE];
 		generateSalt(sr);
 		generateIterationCount(sr);
-		sr.nextBytes(IV);
+		generateIV(sr);
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
@@ -52,12 +73,10 @@ public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
 	
 	@Override
 	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
-		IV = new byte[getCipherMetadata().NONCESIZE];
 		readIterationCount(mp);
 		readSalt(mp);
+		readIV(mp);
 		
-		int read = 0;
-		while ((read += mp.getSrc(IV, read)) != IV.length);
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
