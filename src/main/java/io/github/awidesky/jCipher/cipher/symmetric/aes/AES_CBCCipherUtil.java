@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher.aes;
+package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -17,11 +17,11 @@ import io.github.awidesky.jCipher.AbstractIVCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESCBCCipherUtil extends AbstractIVCipherUtil {
+public class AES_CBCCipherUtil extends AbstractIVCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
-	public AESCBCCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+	public AES_CBCCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}
 	

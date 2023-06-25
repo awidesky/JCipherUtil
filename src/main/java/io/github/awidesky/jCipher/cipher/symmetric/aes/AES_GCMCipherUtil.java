@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher.aes;
+package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import java.security.spec.AlgorithmParameterSpec;
 
@@ -17,12 +17,12 @@ import io.github.awidesky.jCipher.AbstractIVCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESGCMCipherUtil extends AbstractIVCipherUtil {
+public class AES_GCMCipherUtil extends AbstractIVCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "GCM", "NoPadding", "AES", 12);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
 	
-	public AESGCMCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+	public AES_GCMCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}
 	

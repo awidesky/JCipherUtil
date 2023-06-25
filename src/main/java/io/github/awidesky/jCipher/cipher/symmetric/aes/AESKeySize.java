@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.aes;
+package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import io.github.awidesky.jCipher.metadata.key.KeySize;
 

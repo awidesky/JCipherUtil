@@ -1,14 +1,14 @@
-package io.github.awidesky.jCipher.aes;
+package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESECBCipherUtil extends AbstractCipherUtil {
+public class AES_ECBCipherUtil extends AbstractCipherUtil {
 
 	public final static CipherProperty METADATA = new CipherProperty("AES", "ECB", "PKCS5PADDING", "AES");
 	
-	public AESECBCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+	public AES_ECBCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}
 

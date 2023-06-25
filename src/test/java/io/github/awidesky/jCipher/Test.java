@@ -42,11 +42,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicNode;
 import org.junit.jupiter.api.TestFactory;
 
-import io.github.awidesky.jCipher.aes.AESCBCCipherUtil;
-import io.github.awidesky.jCipher.aes.AESCTRCipherUtil;
-import io.github.awidesky.jCipher.aes.AESECBCipherUtil;
-import io.github.awidesky.jCipher.aes.AESGCMCipherUtil;
-import io.github.awidesky.jCipher.aes.AESKeySize;
+import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CBCCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CTRCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_ECBCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_GCMCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.aes.AESKeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
@@ -56,10 +56,10 @@ class Test {
 
 	static final int CIPHERUTILBUFFERSIZE = 4 * 1024;
 	static final CipherUtil[] ciphers = new CipherUtil[] {
-			new AESGCMCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-			new AESECBCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-			new AESCTRCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-			new AESCBCCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
+			new AES_GCMCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+			new AES_ECBCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+			new AES_CTRCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+			new AES_CBCCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
 			};
 
 	static final Charset TESTCHARSET = Charset.forName("UTF-16"); 

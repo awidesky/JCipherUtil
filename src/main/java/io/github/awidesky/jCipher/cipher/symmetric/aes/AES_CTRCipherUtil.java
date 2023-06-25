@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.aes;
+package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
@@ -10,7 +10,7 @@ import io.github.awidesky.jCipher.AbstractIVCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESCTRCipherUtil extends AbstractIVCipherUtil {
+public class AES_CTRCipherUtil extends AbstractIVCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CTR", "NoPadding", "AES", 16);
 	
@@ -22,11 +22,11 @@ public class AESCTRCipherUtil extends AbstractIVCipherUtil {
 	 * */
 	public final int counterLen; //TODO : add specific tests(like invalid counter length..) 
 	
-	public AESCTRCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+	public AES_CTRCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 		counterLen = 4;
 	}
-	public AESCTRCipherUtil(KeyMetadata keyMetadata, int bufferSize, int counterLength) {
+	public AES_CTRCipherUtil(KeyMetadata keyMetadata, int bufferSize, int counterLength) {
 		super(METADATA, keyMetadata, bufferSize);
 		this.counterLen = counterLength;
 	}
