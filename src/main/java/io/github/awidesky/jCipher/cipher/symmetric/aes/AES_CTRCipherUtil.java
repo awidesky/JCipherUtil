@@ -3,11 +3,11 @@ package io.github.awidesky.jCipher.cipher.symmetric.aes;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import io.github.awidesky.jCipher.AbstractIVCipherUtil;
+import io.github.awidesky.jCipher.AbstracNonceCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AES_CTRCipherUtil extends AbstractIVCipherUtil {
+public class AES_CTRCipherUtil extends AbstracNonceCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CTR", "NoPadding", "AES", 16);
 	

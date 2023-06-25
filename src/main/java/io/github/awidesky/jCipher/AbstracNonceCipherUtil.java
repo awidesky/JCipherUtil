@@ -27,11 +27,11 @@ import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
-public abstract class AbstractIVCipherUtil extends AbstractCipherUtil {
+public abstract class AbstracNonceCipherUtil extends AbstractCipherUtil {
 
 	protected byte[] IV;
 	
-	protected AbstractIVCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
+	protected AbstracNonceCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
 	/**
 	 * Get {@code AlgorithmParameterSpec} of this cipher.
@@ -39,7 +39,7 @@ public abstract class AbstractIVCipherUtil extends AbstractCipherUtil {
 	 * 
 	 * */
 	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new IvParameterSpec(IV);
+		return new IvParameterSpec(IV);//TODO : rename to nonce
 	}
 	
 	/**

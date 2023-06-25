@@ -40,8 +40,14 @@ public class TestUtil {
 		is.close();
 		return HexFormat.of().formatHex(digest.digest());
 	}
-	public static String hashPlain(byte[] is) throws NoSuchAlgorithmException, IOException, DigestException {
-		MessageDigest digest = MessageDigest.getInstance("SHA-512");
-		return HexFormat.of().formatHex(digest.digest(is));
+	public static String hashPlain(byte[] is) {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-512");
+			return HexFormat.of().formatHex(digest.digest(is));
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

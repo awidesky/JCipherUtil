@@ -9,11 +9,11 @@
 
 package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
-import io.github.awidesky.jCipher.AbstractIVCipherUtil;
+import io.github.awidesky.jCipher.AbstracNonceCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AES_CBCCipherUtil extends AbstractIVCipherUtil {
+public class AES_CBCCipherUtil extends AbstracNonceCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
