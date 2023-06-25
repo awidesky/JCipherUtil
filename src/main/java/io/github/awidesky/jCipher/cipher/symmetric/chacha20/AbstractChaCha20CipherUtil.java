@@ -8,7 +8,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 
-import io.github.awidesky.jCipher.AbstracNonceCipherUtil;
+import io.github.awidesky.jCipher.AbstractNonceCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
@@ -24,7 +24,7 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
  * <p>So, in here, I use a punt to avoid this <code>InvalidKeyException</code>, by initiating cipher with different nonce and key.
  * This will (hopefully) do the job...
  * */
-public abstract class AbstractChaCha20CipherUtil extends AbstracNonceCipherUtil {
+public abstract class AbstractChaCha20CipherUtil extends AbstractNonceCipherUtil {
 
 	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
 		super(cipherMetadata, keyMetadata, bufferSize);
@@ -35,14 +35,14 @@ public abstract class AbstractChaCha20CipherUtil extends AbstracNonceCipherUtil 
 	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
 		readIterationCount(mp);
 		readSalt(mp);
-		readIV(mp);
+		readNonce(mp);
 		
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
 		try {
 			/**Tweak IV and key*/
-			byte[] iv = IV.clone();
+			byte[] iv = nonce.clone();
 			//Tweak IV a little bit, making sure same IV not used again.
 			iv[0] = (byte) ~iv[0];
 			//generate random key too. Key iteration process would consume much time.

@@ -3,11 +3,11 @@ package io.github.awidesky.jCipher.cipher.symmetric.aes;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-import io.github.awidesky.jCipher.AbstracNonceCipherUtil;
+import io.github.awidesky.jCipher.AbstractNonceCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AES_CTRCipherUtil extends AbstracNonceCipherUtil {
+public class AES_CTRCipherUtil extends AbstractNonceCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CTR", "NoPadding", "AES", 16);
 	
@@ -29,10 +29,10 @@ public class AES_CTRCipherUtil extends AbstracNonceCipherUtil {
 	}
 
 	@Override
-	protected void generateIV(SecureRandom sr) {
+	protected void generateNonce(SecureRandom sr) {
 		byte[] nonce = new byte[16 - counterLen];
 		sr.nextBytes(nonce);
-		IV = Arrays.copyOfRange(nonce, 0, 16);
+		nonce = Arrays.copyOfRange(nonce, 0, 16);
 	}
 	
 	@Override

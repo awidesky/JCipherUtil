@@ -27,41 +27,41 @@ import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
-public abstract class AbstracNonceCipherUtil extends AbstractCipherUtil {
+public abstract class AbstractNonceCipherUtil extends AbstractCipherUtil {
 
-	protected byte[] IV;
+	protected byte[] nonce;
 	
-	protected AbstracNonceCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
+	protected AbstractNonceCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
 	/**
 	 * Get {@code AlgorithmParameterSpec} of this cipher.
-	 * default implementation returns an {@code IvParameterSpec} associated with this {@code AbstractIVCipherUtil#IV}.
+	 * default implementation returns an {@code IvParameterSpec} associated with the <code>nonce</code>.
 	 * 
 	 * */
 	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new IvParameterSpec(IV);//TODO : rename to nonce
+		return new IvParameterSpec(nonce);
 	}
 	
 	/**
-	 * Generate random IV with given {@code SecureRandom} instance.
-	 * Size of the IV is determined by {@code CipherProperty}.
+	 * Generate random nonce with given {@code SecureRandom} instance.
+	 * Size of the nonce is determined by {@code CipherProperty}.
 	 * 
 	 * @see CipherProperty#NONCESIZE
 	 * */
-	protected void generateIV(SecureRandom sr) {
-		IV = new byte[getCipherProperty().NONCESIZE];
-		sr.nextBytes(IV);
+	protected void generateNonce(SecureRandom sr) {
+		nonce = new byte[getCipherProperty().NONCESIZE];
+		sr.nextBytes(nonce);
 	}
 	/**
-	 * Read IV from given {@code MessageProvider} instance.
-	 * Size of the IV is determined by {@code CipherProperty}.
+	 * Read nonce from given {@code MessageProvider} instance.
+	 * Size of the Nonce is determined by {@code CipherProperty}.
 	 * 
 	 * @see CipherProperty#NONCESIZE
 	 * */
-	protected void readIV(MessageProvider mp) {
-		IV = new byte[getCipherProperty().NONCESIZE];
+	protected void readNonce(MessageProvider mp) {
+		nonce = new byte[getCipherProperty().NONCESIZE];
 		int read = 0;
-		while ((read += mp.getSrc(IV, read)) != IV.length);
+		while ((read += mp.getSrc(nonce, read)) != nonce.length);
 	}
 	
 	@Override
@@ -72,7 +72,7 @@ public abstract class AbstracNonceCipherUtil extends AbstractCipherUtil {
 		SecureRandom sr = new SecureRandom();
 		generateSalt(sr);
 		generateIterationCount(sr);
-		generateIV(sr);
+		generateNonce(sr);
 		try {
 			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
@@ -80,14 +80,14 @@ public abstract class AbstracNonceCipherUtil extends AbstractCipherUtil {
 		}
 		mc.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
 		mc.consumeResult(salt);
-		mc.consumeResult(IV);
+		mc.consumeResult(nonce);
 	}
 	
 	@Override
 	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
 		readIterationCount(mp);
 		readSalt(mp);
-		readIV(mp);
+		readNonce(mp);
 		
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);

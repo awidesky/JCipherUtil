@@ -13,11 +13,11 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.spec.GCMParameterSpec;
 
-import io.github.awidesky.jCipher.AbstracNonceCipherUtil;
+import io.github.awidesky.jCipher.AbstractNonceCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AES_GCMCipherUtil extends AbstracNonceCipherUtil {
+public class AES_GCMCipherUtil extends AbstractNonceCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "GCM", "NoPadding", "AES", 12);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
@@ -36,7 +36,7 @@ public class AES_GCMCipherUtil extends AbstracNonceCipherUtil {
 
 	@Override
 	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new GCMParameterSpec(GCM_TAG_BIT_LENGTH, IV);
+		return new GCMParameterSpec(GCM_TAG_BIT_LENGTH, nonce);
 	}
 
 }

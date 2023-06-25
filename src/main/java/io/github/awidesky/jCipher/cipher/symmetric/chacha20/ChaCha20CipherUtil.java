@@ -21,7 +21,7 @@ public class ChaCha20CipherUtil extends AbstractChaCha20CipherUtil {
 	 * */
 	@Override
 	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new ChaCha20ParameterSpec(IV, 0);
+		return new ChaCha20ParameterSpec(nonce, 0);
 	}
 
 
