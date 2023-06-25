@@ -30,7 +30,7 @@ public class AES_CTRCipherUtil extends AbstractNonceCipherUtil {
 
 	@Override
 	protected void generateNonce(SecureRandom sr) {
-		byte[] nonce = new byte[16 - counterLen];
+		nonce = new byte[METADATA.NONCESIZE - counterLen];
 		sr.nextBytes(nonce);
 		nonce = Arrays.copyOfRange(nonce, 0, 16);
 	}

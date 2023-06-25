@@ -58,7 +58,7 @@ import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 @DisplayName("ALL Cipher Tests")
 class Test {
 
-	static final int CIPHERUTILBUFFERSIZE = 4 * 1024;
+	static final int CIPHERUTILBUFFERSIZE = 501; //odd number for test
 	static final Map<String, CipherUtil[]> ciphers = Map.ofEntries(
 			Map.entry("AES", new CipherUtil[] {
 					new AES_GCMCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
@@ -76,7 +76,7 @@ class Test {
 	static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
 	static final SecureRandom ran = new SecureRandom();
 	
-	static final byte[] src = new byte[7 * 1024];
+	static final byte[] src = new byte[7 * 1001]; //odd number for test
 	static final String randomStr = "random String 1234!@#$";;
 	static String srcHash;
 	
