@@ -45,10 +45,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	protected final int BUFFER_SIZE;
 	protected CipherProperty cipherMetadata;
 	
-	protected AbstractCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata) {
+	public AbstractCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata) {
 		this(cipherMetadata, keyMetadata, 8 * 1024);
 	}
-	protected AbstractCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
+	public AbstractCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
 		this.cipherMetadata = cipherMetadata;
 		this.keyMetadata = keyMetadata;
 		this.BUFFER_SIZE = bufferSize;
