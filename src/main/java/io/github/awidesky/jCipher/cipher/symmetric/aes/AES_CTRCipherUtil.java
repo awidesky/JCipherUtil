@@ -17,14 +17,20 @@ public class AES_CTRCipherUtil extends AbstractNonceCipherUtil {
 	 * <code>counterLen</code> bytes of IV will be set to 0(zero).
 	 * 4 byte of counter will handle at least 68GB of data without reusing the counter.
 	 * */
-	public final int counterLen; //TODO : add specific tests(like invalid counter length..) 
+	public final int counterLen;
 	
 	public AES_CTRCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 		counterLen = 4;
 	}
+	/**
+	 * Initiate this object with given <code>counterLength</code>.
+	 * 
+	 * @throws IllegalArgumentException if <code>counterLength</code> is smaller than 1 or greater than 16.
+	 * */
 	public AES_CTRCipherUtil(KeyMetadata keyMetadata, int bufferSize, int counterLength) {
 		super(METADATA, keyMetadata, bufferSize);
+		if(counterLength < 1 || 16 < counterLength) throw new IllegalArgumentException("Invalid counter length : " + counterLength + ", must be 0 < c < 17");
 		this.counterLen = counterLength;
 	}
 
