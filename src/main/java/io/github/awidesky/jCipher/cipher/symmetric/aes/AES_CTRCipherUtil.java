@@ -1,10 +1,7 @@
 package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import java.security.SecureRandom;
-import java.security.spec.AlgorithmParameterSpec;
 import java.util.Arrays;
-
-import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.AbstractIVCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
@@ -38,11 +35,6 @@ public class AES_CTRCipherUtil extends AbstractIVCipherUtil {
 		IV = Arrays.copyOfRange(nonce, 0, 16);
 	}
 	
-	@Override
-	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new IvParameterSpec(IV);
-	}
-
 	@Override
 	protected IVCipherProperty getCipherProperty() { return METADATA; }
 

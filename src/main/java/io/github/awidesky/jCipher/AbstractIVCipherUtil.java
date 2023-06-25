@@ -16,6 +16,7 @@ import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
@@ -32,7 +33,14 @@ public abstract class AbstractIVCipherUtil extends AbstractCipherUtil {
 	
 	protected AbstractIVCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
-	protected abstract AlgorithmParameterSpec getAlgorithmParameterSpec();
+	/**
+	 * Get {@code AlgorithmParameterSpec} of this cipher.
+	 * default implementation returns an {@code IvParameterSpec} associated with this {@code AbstractIVCipherUtil#IV}.
+	 * 
+	 * */
+	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
+		return new IvParameterSpec(IV);
+	}
 	
 	/**
 	 * Generate random IV with given {@code SecureRandom} instance.

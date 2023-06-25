@@ -9,10 +9,6 @@
 
 package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
-import java.security.spec.AlgorithmParameterSpec;
-
-import javax.crypto.spec.IvParameterSpec;
-
 import io.github.awidesky.jCipher.AbstractIVCipherUtil;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
@@ -31,12 +27,5 @@ public class AES_CBCCipherUtil extends AbstractIVCipherUtil {
 	 * */
 	@Override
 	protected IVCipherProperty getCipherProperty() { return METADATA; }
-
-
-	@Override
-	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
-		return new IvParameterSpec(IV);
-	}
-
 
 }
