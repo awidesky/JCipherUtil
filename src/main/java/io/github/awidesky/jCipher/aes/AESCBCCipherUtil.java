@@ -13,13 +13,13 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.spec.IvParameterSpec;
 
-import io.github.awidesky.jCipher.AbstractCipherUtilWithNonce;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.AbstractIVCipherUtil;
+import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESCBCCipherUtil extends AbstractCipherUtilWithNonce {
+public class AESCBCCipherUtil extends AbstractIVCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
+	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
 	public AESCBCCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
@@ -30,7 +30,7 @@ public class AESCBCCipherUtil extends AbstractCipherUtilWithNonce {
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	@Override
-	protected CipherProperty getCipherMetadata() { return METADATA; }
+	protected IVCipherProperty getCipherProperty() { return METADATA; }
 
 
 	@Override

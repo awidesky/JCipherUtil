@@ -20,16 +20,17 @@ import javax.crypto.Cipher;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
-public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
+public abstract class AbstractIVCipherUtil extends AbstractCipherUtil {
 
 	protected byte[] IV;
 	
-	protected AbstractCipherUtilWithNonce(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
+	protected AbstractIVCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
 	protected abstract AlgorithmParameterSpec getAlgorithmParameterSpec();
 	
@@ -40,7 +41,7 @@ public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
 	 * @see CipherProperty#NONCESIZE
 	 * */
 	protected void generateIV(SecureRandom sr) {
-		IV = new byte[getCipherMetadata().NONCESIZE];
+		IV = new byte[getCipherProperty().NONCESIZE];
 		sr.nextBytes(IV);
 	}
 	/**
@@ -50,11 +51,14 @@ public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
 	 * @see CipherProperty#NONCESIZE
 	 * */
 	protected void readIV(MessageProvider mp) {
-		IV = new byte[getCipherMetadata().NONCESIZE];
+		IV = new byte[getCipherProperty().NONCESIZE];
 		int read = 0;
 		while ((read += mp.getSrc(IV, read)) != IV.length);
 	}
 	
+	@Override
+	protected abstract IVCipherProperty getCipherProperty();
+
 	@Override
 	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
@@ -62,7 +66,7 @@ public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
 		generateIterationCount(sr);
 		generateIV(sr);
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -81,10 +85,15 @@ public abstract class AbstractCipherUtilWithNonce extends AbstractCipherUtil {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
 		try {
-			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
+	}
+
+	@Override
+	protected String fields() {
+		return super.fields() + ", Nonce Size : " + getCipherProperty().NONCESIZE + "byte";
 	}
 
 }

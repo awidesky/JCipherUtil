@@ -33,11 +33,7 @@ public class CipherProperty {
 	 * {@link https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms}
 	 * */
 	public final String KEY_ALGORITMH_NAME;
-	
-	/**
-	 * Size of nonce(Initial Vector) in bytes
-	 * */
-	public final int NONCESIZE;
+
 	/**
 	 * Initialize <code>CipherProperty</code> with given parameters.
 	 *
@@ -45,21 +41,21 @@ public class CipherProperty {
 	 * @param algorithmMode Mode of the cipher algorithm, like <code>CBC</code> or <code>GCM</code>
 	 * @param algorithmPadding Padding of the cipher algorithm, like <code>NoPadding</code> or <code>PKCS5Padding</code>
 	 * @param keyAlgorithmName Name of the key algorithm, like <code>AES</code> or <code>ChaCha20</code>
-	 * @param nonceSize Size of nonce(Initial Vector) in bytes
-	 * @param keySize Size of key in bits
 	 */
-	public CipherProperty(String algorithmName, String algorithmMode, String algorithmPadding, String keyAlgorithmName, int nonceSize) {
+	public CipherProperty(String algorithmName, String algorithmMode, String algorithmPadding, String keyAlgorithmName) {
 		this.ALGORITMH_NAME = algorithmName;
 		this.ALGORITMH_MODE = algorithmMode;
 		this.ALGORITMH_PADDING = algorithmPadding;
 		this.KEY_ALGORITMH_NAME = keyAlgorithmName;
-		this.NONCESIZE = nonceSize;
+	}
+	
+	protected String fields() {
+		return "ALGORITMH_NAME=" + ALGORITMH_NAME + ", ALGORITMH_MODE=" + ALGORITMH_MODE
+				+ ", ALGORITMH_PADDING=" + ALGORITMH_PADDING + ", KEY_ALGORITMH_NAME=" + KEY_ALGORITMH_NAME;
 	}
 	
 	@Override
 	public String toString() {
-		return "CipherProperty [ALGORITMH_NAME=" + ALGORITMH_NAME + ", ALGORITMH_MODE=" + ALGORITMH_MODE
-				+ ", ALGORITMH_PADDING=" + ALGORITMH_PADDING + ", KEY_ALGORITMH_NAME=" + KEY_ALGORITMH_NAME
-				+ ", NONCESIZE=" + NONCESIZE + "byte]";
+		return "CipherProperty [" + fields() + "]";
 	}
 }

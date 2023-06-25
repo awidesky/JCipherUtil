@@ -6,13 +6,13 @@ import java.util.Arrays;
 
 import javax.crypto.spec.IvParameterSpec;
 
-import io.github.awidesky.jCipher.AbstractCipherUtilWithNonce;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.AbstractIVCipherUtil;
+import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESCTRCipherUtil extends AbstractCipherUtilWithNonce {
+public class AESCTRCipherUtil extends AbstractIVCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "CTR", "NoPadding", "AES", 16);
+	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CTR", "NoPadding", "AES", 16);
 	
 	/**
 	 * Length of the counter in bytes.
@@ -44,6 +44,6 @@ public class AESCTRCipherUtil extends AbstractCipherUtilWithNonce {
 	}
 
 	@Override
-	protected CipherProperty getCipherMetadata() { return METADATA; }
+	protected IVCipherProperty getCipherProperty() { return METADATA; }
 
 }

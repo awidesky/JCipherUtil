@@ -53,7 +53,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		this.keyMetadata = keyMetadata;
 		this.BUFFER_SIZE = bufferSize;
 		try {
-			cipher = Cipher.getInstance(getCipherMetadata().ALGORITMH_NAME + "/" + getCipherMetadata().ALGORITMH_MODE + "/" + getCipherMetadata().ALGORITMH_PADDING);
+			cipher = Cipher.getInstance(getCipherProperty().ALGORITMH_NAME + "/" + getCipherProperty().ALGORITMH_MODE + "/" + getCipherProperty().ALGORITMH_PADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -62,7 +62,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	/**
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
-	protected abstract CipherProperty getCipherMetadata();
+	protected abstract CipherProperty getCipherProperty();
 
 	/**
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
@@ -76,7 +76,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		generateSalt(sr);
 		generateIterationCount(sr);
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount));
+			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount));
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -98,7 +98,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
 		try {
-			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherMetadata().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount));
+			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount));
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}		
@@ -257,10 +257,13 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		}
 	}
 
+	protected String fields() {
+		return cipher.getAlgorithm() + " from " + cipher.getProvider() + ", key size : " + keyMetadata.keyLen + "bit, salt size : "
+				+ keyMetadata.saltLen + "byte, iteration count between : " + keyMetadata.iterationRange[0] + " / " + keyMetadata.iterationRange[1];
+	}
+	
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [" + cipher.getAlgorithm() + " from " + cipher.getProvider() + ", Nonce Size : " + getCipherMetadata().NONCESIZE
-				+ "byte, key size : " + keyMetadata.keyLen + "bit, salt size : " + keyMetadata.saltLen + "byte, iteration count between : "
-				+ keyMetadata.iterationRange[0] + " / " + keyMetadata.iterationRange[1] + "]";
+		return getClass().getSimpleName() + " [" + fields() + "]";
 	}
 }

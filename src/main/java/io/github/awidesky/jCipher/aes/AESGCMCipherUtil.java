@@ -13,13 +13,13 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.spec.GCMParameterSpec;
 
-import io.github.awidesky.jCipher.AbstractCipherUtilWithNonce;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.AbstractIVCipherUtil;
+import io.github.awidesky.jCipher.metadata.IVCipherProperty;
 import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AESGCMCipherUtil extends AbstractCipherUtilWithNonce {
+public class AESGCMCipherUtil extends AbstractIVCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "GCM", "NoPadding", "AES", 12);
+	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "GCM", "NoPadding", "AES", 12);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
 	
 	public AESGCMCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
@@ -31,7 +31,7 @@ public class AESGCMCipherUtil extends AbstractCipherUtilWithNonce {
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	@Override
-	protected CipherProperty getCipherMetadata() { return METADATA; }
+	protected IVCipherProperty getCipherProperty() { return METADATA; }
 
 
 	@Override

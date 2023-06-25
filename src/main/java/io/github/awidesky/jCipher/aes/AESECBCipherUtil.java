@@ -6,13 +6,13 @@ import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
 public class AESECBCipherUtil extends AbstractCipherUtil {
 
-	public final static CipherProperty METADATA = new CipherProperty("AES", "ECB", "PKCS5PADDING", "AES", 0);
+	public final static CipherProperty METADATA = new CipherProperty("AES", "ECB", "PKCS5PADDING", "AES");
 	
 	public AESECBCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}
 
 	@Override
-	protected CipherProperty getCipherMetadata() { return METADATA; }
+	protected CipherProperty getCipherProperty() { return METADATA; }
 
 }
