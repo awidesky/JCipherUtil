@@ -30,7 +30,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.HexFormat;
@@ -38,11 +37,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipher.symmetric.aes.AESKeySize;
 import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CBCCipherUtil;
@@ -59,17 +62,17 @@ import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 class Test {
 
 	static final int CIPHERUTILBUFFERSIZE = 501; //odd number for test
-	static final Map<String, CipherUtil[]> ciphers = Map.ofEntries(
-			Map.entry("AES", new CipherUtil[] {
-					new AES_GCMCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					new AES_ECBCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					new AES_CTRCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					new AES_CBCCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
-				}),
-			Map.entry("ChaCha20", new CipherUtil[] {
-					new ChaCha20_Poly1305CipherUtil(KeyMetadata.DEFAULT.with(ChaCha20KeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					new ChaCha20_Poly1305CipherUtil(KeyMetadata.DEFAULT.with(ChaCha20KeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-				})
+	static final Map<String, Stream<Supplier<CipherUtil>>> ciphers = Map.ofEntries(
+			Map.entry("AES", Stream.of(
+					() -> new AES_GCMCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+					() -> new AES_ECBCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+					() -> new AES_CTRCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+					() -> new AES_CBCCipherUtil(KeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
+				)),
+			Map.entry("ChaCha20", Stream.of(
+					() -> new ChaCha20_Poly1305CipherUtil(KeyMetadata.DEFAULT.with(ChaCha20KeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
+					() -> new ChaCha20_Poly1305CipherUtil(KeyMetadata.DEFAULT.with(ChaCha20KeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
+				))
 			);
 			
 
@@ -78,71 +81,75 @@ class Test {
 	
 	static final byte[] src = new byte[7 * 1001]; //odd number for test
 	static final String randomStr = "random String 1234!@#$";;
-	static String srcHash;
 	
 	static {
 		ran.nextBytes(src);
 	}
 	
 	@TestFactory
+	@Execution(ExecutionMode.CONCURRENT)
 	@DisplayName("test All")
 	Collection<DynamicNode> testAll() throws NoSuchAlgorithmException, DigestException, IOException {
 		
 		List<DynamicNode> allTests = new ArrayList<>();
 
 		ciphers.entrySet().stream().forEach(entry -> { //per AES, ChaCha20...
-			allTests.add(dynamicContainer(entry.getKey(), Arrays.stream(entry.getValue()).map(c -> { //per AES_GCMCipherUtil, AES_ECBCipherUtil
+			allTests.add(dynamicContainer(entry.getKey(), entry.getValue().map(cipherSuppl -> { // per  AES_GCMCipherUtil, AES_ECBCipherUtil, ...
 				Function<InputStream, String> testDecrypt = (is) -> {
 					try {
 						MessageDigest digest = MessageDigest.getInstance("SHA-512");
-						return HexFormat.of().formatHex(digest.digest(c.init(TestUtil.password).decryptToSingleBuffer(MessageProvider.from(is))));
-					} catch (NoSuchAlgorithmException e) { e.printStackTrace(); return null; }
+						return HexFormat.of().formatHex(digest
+								.digest(cipherSuppl.get().init(TestUtil.password).decryptToSingleBuffer(MessageProvider.from(is))));
+					} catch (NoSuchAlgorithmException e) {
+						e.printStackTrace();
+						return null;
+					}
 				};
-				
+
 				List<DynamicNode> singleCipherAlgorithmTests = new ArrayList<>(2);
 
-				singleCipherAlgorithmTests.add(dynamicTest("byte[] key test", () -> {
+				singleCipherAlgorithmTests.add(getTest(cipherSuppl, "byte[] key test", (c) -> {
 					byte[] key = new byte[1024];
 					new Random().nextBytes(key);
 					c.init(key);
 					assertEquals(TestUtil.hashPlain(src),
 							TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
 				}));	
-				singleCipherAlgorithmTests.add(dynamicTest("password test", () -> {
+				singleCipherAlgorithmTests.add(getTest(cipherSuppl, "password test", (c) -> {
 					c.init(TestUtil.password);
 					assertEquals(TestUtil.hashPlain(src),
 							TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
 				}));	
 				
 				singleCipherAlgorithmTests.add(dynamicContainer("Encryption methods", Stream.of(
-					dynamicTest("byte[] -> byte[]", () -> {
+					getTest(cipherSuppl, "byte[] -> byte[]", (c) -> {
 						c.init(TestUtil.password);
 						assertEquals(TestUtil.hashPlain(src),
 								testDecrypt.apply(new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(src)))));
 					}),	
-					dynamicTest("File -> File", () -> {
+					getTest(cipherSuppl, "File -> File", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempPlainFile();
 						File fdest = mkEmptyTempFile();
 						c.encrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
 						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt.apply(new FileInputStream(fdest)));
 					}),
-					dynamicTest("Base64 encoded String -> Base64 encoded String", () -> {
+					getTest(cipherSuppl, "Base64 encoded String -> Base64 encoded String", (c) -> {
 						c.init(TestUtil.password);
 						String result = c.encryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(src)));
 						assertEquals(TestUtil.hashPlain(src), testDecrypt.apply(new ByteArrayInputStream(Base64.getDecoder().decode(result))));
 					}),
-					dynamicTest("Hex encoded String -> Hex encoded String", () -> {
+					getTest(cipherSuppl, "Hex encoded String -> Hex encoded String", (c) -> {
 						c.init(TestUtil.password);
 						String result = c.encryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(src)));
 						assertEquals(TestUtil.hashPlain(src), testDecrypt.apply(new ByteArrayInputStream(HexFormat.of().parseHex(result))));
 					}),
-					dynamicTest("String -> byte[]", () -> {
+					getTest(cipherSuppl, "String -> byte[]", (c) -> {
 						c.init(TestUtil.password);
 						assertEquals(TestUtil.hashPlain(randomStr.getBytes(TESTCHARSET)), testDecrypt.apply(
 								new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(randomStr, TESTCHARSET)))));
 					}),
-					dynamicTest("Inputstream -> Outputstream", () -> {
+					getTest(cipherSuppl, "Inputstream -> Outputstream", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempPlainFile();
 						File fdest = mkEmptyTempFile();
@@ -150,14 +157,14 @@ class Test {
 								MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
 						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt.apply(new FileInputStream(fdest)));
 					}),
-					dynamicTest("part of InputStream -> byte[]", () -> {
+					getTest(cipherSuppl, "part of InputStream -> byte[]", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempPlainFile();
 						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
 								testDecrypt.apply(new ByteArrayInputStream(c.encryptToSingleBuffer(
 										MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc)), 16 * 1024)))));
 					}),
-					dynamicTest("ReadableByteChannel -> WritableByteChannel", () -> {
+					getTest(cipherSuppl, "ReadableByteChannel -> WritableByteChannel", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempPlainFile();
 						File fdest = mkEmptyTempFile();
@@ -166,7 +173,7 @@ class Test {
 						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)),
 								testDecrypt.apply(new FileInputStream(fdest)));
 					}),
-					dynamicTest("From part of ReadableByteChannel", () -> {
+					getTest(cipherSuppl, "From part of ReadableByteChannel", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempPlainFile();
 						assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
@@ -174,33 +181,33 @@ class Test {
 										c.encryptToSingleBuffer(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ), 16 * 1024)))));
 					})
 				)));
-				
-				c.init(TestUtil.password);
-				final byte[] encrypted = c.encryptToSingleBuffer(MessageProvider.from(src));
-				srcHash = TestUtil.hashPlain(src);
+				CipherUtil cc = cipherSuppl.get();
+				cc.init(TestUtil.password);
+				final byte[] encrypted = cc.encryptToSingleBuffer(MessageProvider.from(src));
+				final String srcHash = TestUtil.hashPlain(src);
 				singleCipherAlgorithmTests.add(dynamicContainer("Decryption methods", Stream.of(
-					dynamicTest("byte[] -> byte[]", () -> {
+					getTest(cipherSuppl, "byte[] -> byte[]", (c) -> {
 						c.init(TestUtil.password);
 						assertEquals(srcHash, TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(encrypted))));
 					}),
-					dynamicTest("File -> File", () -> {
+					getTest(cipherSuppl, "File -> File", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempEncryptedFile(encrypted);
 						File fdest = mkEmptyTempFile();
 						c.decrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
 						assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 					}),
-					dynamicTest("Base64 encoded String -> Base64 encoded String", () -> {
+					getTest(cipherSuppl, "Base64 encoded String -> Base64 encoded String", (c) -> {
 						c.init(TestUtil.password);
 						String result = c.decryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(encrypted)));
 						assertEquals(srcHash, TestUtil.hashPlain(Base64.getDecoder().decode(result)));
 					}),
-					dynamicTest("Hex encoded String -> Hex encoded String", () -> {
+					getTest(cipherSuppl, "Hex encoded String -> Hex encoded String", (c) -> {
 						c.init(TestUtil.password);
 						String result = c.decryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(encrypted)));
 						assertEquals(srcHash, TestUtil.hashPlain(HexFormat.of().parseHex(result)));
 					}),
-					dynamicTest("Inputstream -> Outputstream", () -> {
+					getTest(cipherSuppl, "Inputstream -> Outputstream", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempEncryptedFile(encrypted);
 						File fdest = mkEmptyTempFile();
@@ -208,7 +215,7 @@ class Test {
 								MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
 						assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 					}),
-					dynamicTest("ReadableByteChannel -> WritableByteChannel", () -> {
+					getTest(cipherSuppl, "ReadableByteChannel -> WritableByteChannel", (c) -> {
 						c.init(TestUtil.password);
 						File fsrc = mkTempEncryptedFile(encrypted);
 						File fdest = mkEmptyTempFile();
@@ -217,7 +224,7 @@ class Test {
 						assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 					})
 				)));
-				return dynamicContainer(c.toString(), singleCipherAlgorithmTests);
+				return dynamicContainer(cipherSuppl.get().toString(), singleCipherAlgorithmTests);
 			})));
 		});
 		
@@ -225,6 +232,9 @@ class Test {
 		return allTests;
 	}
 	
+	private static DynamicTest getTest(Supplier<CipherUtil> cipherSuppl, String name, ThrowableConsumer<CipherUtil> testCode) {
+		return dynamicTest(name, () -> testCode.accept(cipherSuppl.get()));
+	}
 	
 	private static File mkTempPlainFile() throws IOException {
 		return mkTempFile(src);
@@ -254,21 +264,29 @@ class Test {
 }
 
 
-
+interface ThrowableConsumer<T> {
+    /**
+     * Performs this operation on the given argument. May throw an {@code Exception} during the opertion.
+     *
+     * @param t the input argument
+     * @throws Exception
+     */
+    void accept(T t) throws Exception;
+}
 
 /*
 	
 	@TestFactory
-	Stream<DynamicTest> testAESGCM() {
+	Stream<getTest> testAESGCM() {
 		return Arrays.stream(ciphers).map(null);
 	}
 	@TestFactory
-	Stream<DynamicTest> testAESCBC() {
+	Stream<getTest> testAESCBC() {
 		return Arrays.stream(ciphers).map(null);
 	}
 
 	
-	Stream<DynamicTest> generateTests(CipherUtil c) {
+	Stream<getTest> generateTests(CipherUtil c) {
 		//Tests 클래스를 만들고, c를 받아서 테스트하기
 		return null;
 	}
