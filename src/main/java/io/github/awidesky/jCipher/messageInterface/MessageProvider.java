@@ -76,7 +76,7 @@ public interface MessageProvider extends AutoCloseable {
 	 * <p>Encode <code>String</code> with <code>Charset.defaultCharset()</code>.
 	 * 
 	 * @see MessageProvider#from(String, Charset)
-	 * @param src source of the data
+	 * @param str source of the data
 	 * */
 	public static MessageProvider from(String str) {
 		return from(str, Charset.defaultCharset());
@@ -85,7 +85,7 @@ public interface MessageProvider extends AutoCloseable {
 	 * Provide data from a <code>String</code>.
 	 * <p>Encode <code>String</code> with <code>encoding</code>.
 	 * 
-	 * @param src source of the data
+	 * @param str source of the data
 	 * @param encoding character set to encode the <code>String</code>
 	 * */
 	public static MessageProvider from(String str, Charset encoding) {
@@ -94,7 +94,7 @@ public interface MessageProvider extends AutoCloseable {
 	/**
 	 * Provide data from a Base64 encoded <code>String</code>
 	 * 
-	 * @param src Base64 encoded <code>String</code>
+	 * @param base64 Base64 encoded <code>String</code>
 	 * */
 	public static MessageProvider fromBase64(String base64) {
 		return from(Base64.getDecoder().decode(base64));
@@ -102,7 +102,7 @@ public interface MessageProvider extends AutoCloseable {
 	/**
 	 * Provide data from a Hex encoded <code>String</code>
 	 * 
-	 * @param src Hex encoded <code>String</code>
+	 * @param hex Hex encoded <code>String</code>
 	 * */
 	public static MessageProvider fromHexString(String hex) {
 		return MessageProvider.from(HexFormat.of().parseHex(hex.toLowerCase()));

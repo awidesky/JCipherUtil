@@ -29,13 +29,13 @@ public class PasswordKeyMaterial extends KeyMaterial {
 	 * Initiate <code>PasswordKeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
 	 * is not generated because other necessary metadata(salt, iteration count) is unknown.
 	 * 
-	 * @param key the password. The contents of the buffer are copied to protect against subsequent modification.
+	 * @param password the password. The contents of the buffer are copied to protect against subsequent modification.
 	 * */
 	public PasswordKeyMaterial(char[] password) { this.password = Arrays.copyOf(password, password.length); }
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata and password.
-	 * @param algorithm metadata of the Cipher. used to find key algorithm & key size.
+	 * @param algorithm metadata of the Cipher. used to find key algorithm and key size.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
 	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException} is thrown

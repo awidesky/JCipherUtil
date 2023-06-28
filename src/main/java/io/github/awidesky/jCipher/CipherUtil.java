@@ -18,7 +18,7 @@ import java.util.HexFormat;
 
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.key.KeyMaterial;
+import io.github.awidesky.jCipher.metadata.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
@@ -46,14 +46,14 @@ public interface CipherUtil {
 	 * */
 	public CipherUtil init(char[] password);
 	/**
-	 * Initialize this <code>CipherUtil</code> with given <code>password</code>
-	 * Given byte array does not used directly as a key. instead, it is converted to <code>String</code> via {@link KeyMaterial#byteArrToCharArr},
-	 * and then used as a password.
-	 * This is for consistency of salting, PBE algorithm, cipher metadata save protocol.
+	 * Initialize <code>Cipher</code> with given <code>byte[]</code> key.
+	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
+	 * 
+	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
 	 * 
 	 * @return this instance
 	 * */
-	public CipherUtil init(byte[] password);
+	public CipherUtil init(byte[] key);
 
 	/**
 	 * Simple way to encrypt from a source to a destination.

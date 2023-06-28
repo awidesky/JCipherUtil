@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.github.awidesky</groupId>
 	<artifactId>JCipherUtil</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 
 	<name>JCipherUtil</name>
 	<description>Simple Java library that provides Cipher encryption/decryption utilites.</description>
@@ -44,6 +44,7 @@
 				<configuration>
 					<source>17</source>
 					<target>17</target>
+					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -51,6 +52,7 @@
 				<version>3.5.0</version>
 				<configuration>
 					<additionalJOption>-Xdoclint:none</additionalJOption>
+					<encoding>UTF-8</encoding>
 				</configuration>
 				<executions>
 					<execution>
@@ -72,6 +74,11 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.1.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -102,6 +109,7 @@
 	</build>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 	</properties>

@@ -46,7 +46,7 @@ public abstract class AbstractNonceCipherUtil extends AbstractCipherUtil {
 	 * Generate random nonce with given {@code SecureRandom} instance.
 	 * Size of the nonce is determined by {@code CipherProperty}.
 	 * 
-	 * @see CipherProperty#NONCESIZE
+	 * @see IVCipherProperty#NONCESIZE
 	 * */
 	protected void generateNonce(SecureRandom sr) {
 		nonce = new byte[getCipherProperty().NONCESIZE];
@@ -56,7 +56,7 @@ public abstract class AbstractNonceCipherUtil extends AbstractCipherUtil {
 	 * Read nonce from given {@code MessageProvider} instance.
 	 * Size of the Nonce is determined by {@code CipherProperty}.
 	 * 
-	 * @see CipherProperty#NONCESIZE
+	 * @see IVCipherProperty#NONCESIZE
 	 * */
 	protected void readNonce(MessageProvider mp) {
 		nonce = new byte[getCipherProperty().NONCESIZE];

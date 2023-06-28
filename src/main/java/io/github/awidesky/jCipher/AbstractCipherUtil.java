@@ -166,10 +166,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		return this;
 	}
 	/**
-	 * Initialize <code>Cipher</code> with given key.
+	 * Initialize <code>Cipher</code> with given <code>byte[]</code> key.
 	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
 	 * 
-	 * @see KeyMaterial#KeyProperty(byte[])
+	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
 	 * 
 	 * @param key the key
 	 * */

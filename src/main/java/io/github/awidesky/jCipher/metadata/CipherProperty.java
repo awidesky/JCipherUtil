@@ -12,25 +12,26 @@ package io.github.awidesky.jCipher.metadata;
 public class CipherProperty {
 	/**
 	 * Name of the cipher algorithm, like <code>AES</code> or <code>ChaCha20-Poly1305</code>
-	 * {@link https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names}
+	 * 
+	 * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names</a>
 	 * */
 	public final String ALGORITMH_NAME;
 	
 	/**
 	 * Mode of the cipher algorithm, like <code>CBC</code> or <code>GCM</code>
-	 * {@link https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-modes}
+	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-modes">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-modes</a>
 	 * */
 	public final String ALGORITMH_MODE;
 	
 	/**
 	 * Padding of the cipher algorithm, like <code>NoPadding</code> or <code>PKCS5Padding</code>
-	 * {@link https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-paddings}
+	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-paddings">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-paddings</a>
 	 * */
 	public final String ALGORITMH_PADDING;
 	
 	/**
 	 * Name of the key algorithm, like <code>AES</code> or <code>ChaCha20</code>
-	 * {@link https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms}
+	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms</a>
 	 * */
 	public final String KEY_ALGORITMH_NAME;
 

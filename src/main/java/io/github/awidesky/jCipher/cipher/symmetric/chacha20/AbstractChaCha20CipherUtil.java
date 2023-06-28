@@ -19,7 +19,7 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 /**
  * Some unknown stupid reason, {@code ChaCha20Ciper} in jdk does not let user initiate same cipher object with same key and nonce.
- * (see {@link https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/com/sun/crypto/provider/ChaCha20Cipher.java#L608})
+ * (see @see <a href="https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/com/sun/crypto/provider/ChaCha20Cipher.java#L608">https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/com/sun/crypto/provider/ChaCha20Cipher.java#L608</a>)
  * How the hell am I going to decrypt stuff when I cannot reuse same key and nonce I used to encrypt the source??? 
  * <p>So, in here, I use a punt to avoid this <code>InvalidKeyException</code>, by initiating cipher with different nonce and key.
  * This will (hopefully) do the job...
