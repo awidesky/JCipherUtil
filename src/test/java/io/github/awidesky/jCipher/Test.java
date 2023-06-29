@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -101,19 +100,19 @@ class Test {
 	}
 	
 	@TestFactory
-	@DisplayName("Symmetric Ciphers")
+	@DisplayName("Test all")
 	Collection<DynamicNode> testSymmetric() throws NoSuchAlgorithmException, DigestException, IOException {
-		return symmetricCiphers.entrySet().stream().map(entry ->  //per AES, ChaCha20...
+		List<DynamicNode> l = new ArrayList<>(2);
+		
+		l.add(dynamicContainer("Symmetric ciphers", symmetricCiphers.entrySet().stream().map(entry ->  //per AES, ChaCha20...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))
-		).collect(Collectors.toCollection(ArrayList<DynamicNode>::new));
-	}
+		)));
 	
-	@TestFactory
-	@DisplayName("Asymmetric Ciphers")
-	Collection<DynamicNode> testAsymmetric() throws NoSuchAlgorithmException, DigestException, IOException {
-		return asymmetricCiphers.entrySet().stream().map(entry -> //per RSA...
+		l.add(dynamicContainer("Asymmetric ciphers", asymmetricCiphers.entrySet().stream().map(entry -> //per RSA...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::asymmetricCipherTests))
-		).collect(Collectors.toCollection(ArrayList<DynamicNode>::new));
+		)));
+		
+		return l;
 	}
 	
 	private static DynamicTest getTest(Supplier<? extends CipherUtil> cipherSuppl, String name, ThrowableConsumer<CipherUtil> testCode) {
