@@ -8,10 +8,10 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 
-import io.github.awidesky.jCipher.AbstractNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
@@ -24,9 +24,9 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
  * <p>So, in here, I use a punt to avoid this <code>InvalidKeyException</code>, by initiating cipher with different nonce and key.
  * This will (hopefully) do the job...
  * */
-public abstract class AbstractChaCha20CipherUtil extends AbstractNonceCipherUtil {
+public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUtil {
 
-	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
+	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) {
 		super(cipherMetadata, keyMetadata, bufferSize);
 	}
 

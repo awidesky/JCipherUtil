@@ -1,6 +1,6 @@
 package io.github.awidesky.jCipher.cipher.symmetric.chacha20;
 
-import io.github.awidesky.jCipher.metadata.key.KeySize;
+import io.github.awidesky.jCipher.metadata.KeySize;
 
 public class ChaCha20KeySize extends KeySize {
 

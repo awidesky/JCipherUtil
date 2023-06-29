@@ -9,15 +9,15 @@
 
 package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
-import io.github.awidesky.jCipher.AbstractNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.metadata.IVCipherProperty;
-import io.github.awidesky.jCipher.metadata.key.KeyMetadata;
 
-public class AES_CBCCipherUtil extends AbstractNonceCipherUtil {
+public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
-	public AES_CBCCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
+	public AES_CBCCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}
 	

@@ -1,6 +1,9 @@
-package io.github.awidesky.jCipher.metadata.key;
+package io.github.awidesky.jCipher.cipher.symmetric.key;
 
-public class KeyMetadata {
+import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.metadata.KeySize;
+
+public class SymmetricKeyMetadata extends KeyMetadata {
 	
 	/**
 	 * Standard salt length and iteration count that commonly used in 2023.
@@ -15,9 +18,6 @@ public class KeyMetadata {
 	public static final KeyMetadataBuilder DEFAULT = new KeyMetadataBuilder(64, 600000, 800000);
 	
 	
-
-	/** Size of key in bits */
-	public final int keyLen;
 	/** Length of salt */
 	public final int saltLen;
 	/** Range of salting iteration count */
@@ -29,8 +29,8 @@ public class KeyMetadata {
 	 * @param iterationRangeEnd the upper bound (exclusive) for salting iteration count.
 	 * Iteration count bigger than this value will not be accepted.
 	 * */
-	public KeyMetadata(KeySize keyLen, int saltLen, int iterationRangeStart, int iterationRangeEnd) {
-		this.keyLen = keyLen.getSize();
+	public SymmetricKeyMetadata(KeySize keyLen, int saltLen, int iterationRangeStart, int iterationRangeEnd) {
+		super(keyLen);
 		this.saltLen = saltLen;
 		iterationRange[0] = iterationRangeStart;
 		iterationRange[1] = iterationRangeEnd;
@@ -46,6 +46,6 @@ public class KeyMetadata {
 			iterationRange[1] = iterationRangeEnd;
 		}
 		
-		public KeyMetadata with(KeySize keyLen) { return new KeyMetadata(keyLen, saltLen, iterationRange[0], iterationRange[1]); } 
+		public SymmetricKeyMetadata with(KeySize keyLen) { return new SymmetricKeyMetadata(keyLen, saltLen, iterationRange[0], iterationRange[1]); } 
 	}
 }
