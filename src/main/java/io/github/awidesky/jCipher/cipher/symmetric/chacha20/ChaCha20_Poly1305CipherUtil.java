@@ -1,7 +1,7 @@
 package io.github.awidesky.jCipher.cipher.symmetric.chacha20;
 
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
-import io.github.awidesky.jCipher.metadata.IVCipherProperty;
+import io.github.awidesky.jCipher.properties.IVCipherProperty;
 
 public class ChaCha20_Poly1305CipherUtil extends AbstractChaCha20CipherUtil {
 

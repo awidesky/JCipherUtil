@@ -29,6 +29,7 @@ import java.security.DigestException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -51,6 +52,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipher.cipher.asymmetric.key.AsymmetricKeyMetadata;
+import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.ECDHKeyExchanger;
+import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.KeyExchanger;
 import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSAKeySize;
 import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSA_ECBCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtil;
@@ -69,7 +72,7 @@ import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 @Execution(ExecutionMode.CONCURRENT)
 class Test {
 
-	static final int CIPHERUTILBUFFERSIZE = 501; //odd number for test
+	static final int CIPHERUTILBUFFERSIZE = 51; //odd number for test
 	static final Map<String, Stream<Supplier<SymmetricCipherUtil>>> symmetricCiphers = Map.ofEntries(
 			Map.entry("AES", Stream.of(
 					() -> new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
@@ -87,6 +90,9 @@ class Test {
 					() -> new RSA_ECBCipherUtil(AsymmetricKeyMetadata.with(RSAKeySize.SIZE_2048), CIPHERUTILBUFFERSIZE)
 				))
 			);
+	static final Map<String, Stream<Supplier<KeyExchanger>>> keyExchangers = Map.ofEntries(
+			Map.entry("ECDH", Stream.of(ECDHKeyExchanger::new))
+			);
 			
 
 	static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
@@ -102,7 +108,11 @@ class Test {
 	@TestFactory
 	@DisplayName("Test all")
 	Collection<DynamicNode> testSymmetric() throws NoSuchAlgorithmException, DigestException, IOException {
-		List<DynamicNode> l = new ArrayList<>(2);
+		List<DynamicNode> l = new ArrayList<>(3);
+		
+		l.add(dynamicContainer("KeyExchangers", keyExchangers.entrySet().stream().map(entry ->  //per ECDH...
+			dynamicContainer(entry.getKey(), entry.getValue().map(Test::keyExchangerTests))
+		)));
 		
 		l.add(dynamicContainer("Symmetric ciphers", symmetricCiphers.entrySet().stream().map(entry ->  //per AES, ChaCha20...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))
@@ -131,6 +141,25 @@ class Test {
 		addAsymmetricCipherKeyTests(tests, cipherSuppl);
 		addCommonCipherKeyTests(tests, cipherSuppl, c -> ((AsymmetricCipherUtil) c).init(kp));
 		return dynamicContainer(cipherSuppl.get().toString(), tests);
+	}
+	private static DynamicTest keyExchangerTests(Supplier<KeyExchanger> keyExchSuppl) {
+		return dynamicTest(keyExchSuppl.get().toString(), () -> {
+			KeyExchanger k1 = new ECDHKeyExchanger(); 
+			KeyExchanger k2 = new ECDHKeyExchanger();
+			
+			PublicKey p1 = k1.init();
+			PublicKey p2 = k2.init();
+			
+			SymmetricCipherUtil c1 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
+			c1.init(k1.exchangeKey(p2));
+			
+			SymmetricCipherUtil c2 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
+			c2.init(k2.exchangeKey(p1));
+			
+			assertEquals(TestUtil.hashPlain(src),
+					TestUtil.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
+			
+		});
 	}
 	
 	
@@ -282,7 +311,7 @@ class Test {
 	}
 	
 	private static File mkTempFile(byte[] data) throws IOException {
-		File f = Files.createTempFile("AESGCMTestSrc", "bin").toFile();
+		File f = Files.createTempFile("CipherUtilTestSrc", "bin").toFile();
 		//File fsrc = new File(".\\test.bin");
 		if(f.exists()) { f.delete(); f.createNewFile(); }
 		f.deleteOnExit();
@@ -292,7 +321,7 @@ class Test {
 		return f;
 	}
 	private static File mkEmptyTempFile() throws IOException {
-		File f = Files.createTempFile("AESGCMTestEmpty", "bin").toFile();
+		File f = Files.createTempFile("CipherUtilTestEmpty", "bin").toFile();
 		//File fsrc = new File(".\\test.bin");
 		if(f.exists()) { f.delete(); f.createNewFile(); }
 		f.deleteOnExit();

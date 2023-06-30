@@ -23,7 +23,7 @@ import io.github.awidesky.jCipher.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 import io.github.awidesky.jCipher.util.IllegalMetadataException;
 import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;

@@ -5,7 +5,7 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.spec.ChaCha20ParameterSpec;
 
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
-import io.github.awidesky.jCipher.metadata.IVCipherProperty;
+import io.github.awidesky.jCipher.properties.IVCipherProperty;
 
 public class ChaCha20CipherUtil extends AbstractChaCha20CipherUtil {
 

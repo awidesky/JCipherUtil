@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.metadata;
+package io.github.awidesky.jCipher.properties;
 
 public class IVCipherProperty extends CipherProperty {
 	

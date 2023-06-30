@@ -1,6 +1,6 @@
 package io.github.awidesky.jCipher.cipher.asymmetric.rsa;
 
-import io.github.awidesky.jCipher.metadata.KeySize;
+import io.github.awidesky.jCipher.key.KeySize;
 
 public class RSAKeySize extends KeySize {
 

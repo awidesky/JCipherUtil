@@ -1,7 +1,7 @@
 package io.github.awidesky.jCipher.cipher.symmetric.key;
 
-import io.github.awidesky.jCipher.metadata.KeyMetadata;
-import io.github.awidesky.jCipher.metadata.KeySize;
+import io.github.awidesky.jCipher.key.KeyMetadata;
+import io.github.awidesky.jCipher.key.KeySize;
 
 public class SymmetricKeyMetadata extends KeyMetadata {
 	

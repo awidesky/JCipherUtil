@@ -2,7 +2,7 @@ package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 
 public class AES_ECBCipherUtil extends SymmetricCipherUtil {
 

@@ -9,8 +9,8 @@ import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.cipher.asymmetric.key.AsymmetricKeyMaterial;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.key.KeyMetadata;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {

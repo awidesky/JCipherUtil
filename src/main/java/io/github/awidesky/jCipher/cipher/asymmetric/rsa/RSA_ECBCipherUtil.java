@@ -1,8 +1,8 @@
 package io.github.awidesky.jCipher.cipher.asymmetric.rsa;
 
 import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
-import io.github.awidesky.jCipher.metadata.CipherProperty;
-import io.github.awidesky.jCipher.metadata.KeyMetadata;
+import io.github.awidesky.jCipher.key.KeyMetadata;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 
 public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 

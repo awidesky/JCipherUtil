@@ -11,7 +11,7 @@ package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
-import io.github.awidesky.jCipher.metadata.IVCipherProperty;
+import io.github.awidesky.jCipher.properties.IVCipherProperty;
 
 public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
 
