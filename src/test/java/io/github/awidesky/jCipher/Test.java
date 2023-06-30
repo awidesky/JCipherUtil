@@ -52,8 +52,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipher.cipher.asymmetric.key.AsymmetricKeyMetadata;
-import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.ECDHKeyExchanger;
 import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.KeyExchanger;
+import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.ECDH.ECDHKeyExchanger;
 import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSAKeySize;
 import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSA_ECBCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtil;
@@ -143,9 +143,9 @@ class Test {
 		return dynamicContainer(cipherSuppl.get().toString(), tests);
 	}
 	private static DynamicTest keyExchangerTests(Supplier<KeyExchanger> keyExchSuppl) {
-		return dynamicTest(keyExchSuppl.get().toString(), () -> {
-			KeyExchanger k1 = new ECDHKeyExchanger(); 
-			KeyExchanger k2 = new ECDHKeyExchanger();
+		return dynamicTest(keyExchSuppl.get().toString(), () -> { //TODO : test for all curves?
+			KeyExchanger k1 = keyExchSuppl.get(); 
+			KeyExchanger k2 = keyExchSuppl.get();
 			
 			PublicKey p1 = k1.init();
 			PublicKey p2 = k2.init();

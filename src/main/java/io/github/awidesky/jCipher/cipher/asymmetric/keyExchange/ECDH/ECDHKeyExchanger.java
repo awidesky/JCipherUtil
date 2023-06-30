@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.cipher.asymmetric.keyExchange;
+package io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.ECDH;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -10,6 +10,7 @@ import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
+import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.KeyExchanger;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 /**
@@ -19,11 +20,7 @@ public class ECDHKeyExchanger implements KeyExchanger {
 
 	public static final String KEYALGORITHM = "EC";
 	public static final String KEYAGREEMENTALGORITHM = "ECDH";
-	public static final String curve = "secp256r1";
-	// standard curvennames
-	// secp256r1 [NIST P-256, X9.62 prime256v1]
-	// secp384r1 [NIST P-384]
-	// secp521r1 [NIST P-521]
+	public static final ECDHCurves curve = ECDHCurves.secp521r1; // TODO : constructor with curve
 	private static final KeyPairGenerator keyPairGenerator;
 	private static final KeyAgreement keyAgreement;
 	
@@ -41,7 +38,7 @@ public class ECDHKeyExchanger implements KeyExchanger {
 	@Override
 	public PublicKey init() throws OmittedCipherException { //TODO : 생성자로?
 		try {
-			keyPairGenerator.initialize(new ECGenParameterSpec(curve));
+			keyPairGenerator.initialize(new ECGenParameterSpec(curve.name()));
 			keyPair = keyPairGenerator.genKeyPair();
 			return keyPair.getPublic();
 		} catch (InvalidAlgorithmParameterException e) {
