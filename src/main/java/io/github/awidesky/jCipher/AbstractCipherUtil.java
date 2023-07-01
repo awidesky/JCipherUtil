@@ -154,7 +154,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	protected String fields() {
-		return cipher.getAlgorithm() + " from " + cipher.getProvider();
+		return "\"" + cipher.getAlgorithm() + "\" from \"" + cipher.getProvider() + "\"";
 	}
 	
 	@Override

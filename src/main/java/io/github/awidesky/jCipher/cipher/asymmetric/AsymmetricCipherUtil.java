@@ -79,7 +79,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	
 	@Override
 	protected String fields() {
-		return super.fields() + ", key size : " + keyMetadata.keyLen;
+		return super.fields() + ", key size : " + keyMetadata.keyLen + "bit";
 	}
 	
 }

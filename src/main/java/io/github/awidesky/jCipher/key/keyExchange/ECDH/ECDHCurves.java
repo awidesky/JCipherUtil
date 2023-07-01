@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.ECDH;
+package io.github.awidesky.jCipher.key.keyExchange.ECDH;
 
 //standard curven names https://download.java.net/java/early_access/panama/docs/specs/security/standard-names.html#parameterspec-names
 public enum ECDHCurves {

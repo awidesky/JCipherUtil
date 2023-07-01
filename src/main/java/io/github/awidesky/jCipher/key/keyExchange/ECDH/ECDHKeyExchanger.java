@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.ECDH;
+package io.github.awidesky.jCipher.key.keyExchange.ECDH;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -10,7 +10,7 @@ import java.security.spec.ECGenParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
-import io.github.awidesky.jCipher.cipher.asymmetric.keyExchange.KeyExchanger;
+import io.github.awidesky.jCipher.key.keyExchange.KeyExchanger;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 /**
@@ -60,9 +60,9 @@ public class ECDHKeyExchanger implements KeyExchanger {
 	@Override
 	public String toString() {
 
-		return "KeyPairGenerator : " + keyPairGenerator.getAlgorithm() + " from " + keyPairGenerator.getProvider()
-			+ ", KeyAgreement : " + keyAgreement.getAlgorithm() + " from " + keyAgreement.getProvider()
-			+ " with Curve : " + curve;
+		return "KeyPairGenerator : \"" + keyPairGenerator.getAlgorithm() + "\" from \"" + keyPairGenerator.getProvider()
+			+ "\", KeyAgreement : \"" + keyAgreement.getAlgorithm() + "\" from \"" + keyAgreement.getProvider()
+			+ "\" with Curve : \"" + curve + "\"";
 	}
 
 }

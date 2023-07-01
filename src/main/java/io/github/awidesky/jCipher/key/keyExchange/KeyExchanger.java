@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.cipher.asymmetric.keyExchange;
+package io.github.awidesky.jCipher.key.keyExchange;
 
 import java.security.PublicKey;
 
