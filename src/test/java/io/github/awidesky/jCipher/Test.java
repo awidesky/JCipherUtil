@@ -64,7 +64,8 @@ import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20KeySize;
 import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20_Poly1305CipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.key.keyExchange.KeyExchanger;
-import io.github.awidesky.jCipher.key.keyExchange.ECDH.ECDHKeyExchanger;
+import io.github.awidesky.jCipher.key.keyExchange.ecdh.ECDHKeyExchanger;
+import io.github.awidesky.jCipher.key.keyExchange.xdh.XDHKeyExchanger;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 
@@ -91,7 +92,8 @@ class Test {
 				))
 			);
 	static final Map<String, Stream<Supplier<KeyExchanger>>> keyExchangers = Map.ofEntries(
-			Map.entry("ECDH", Stream.of(ECDHKeyExchanger::new))
+			Map.entry("ECDH", Stream.of(ECDHKeyExchanger::new)),
+			Map.entry("XDH", Stream.of(XDHKeyExchanger::new))
 			);
 			
 
@@ -142,24 +144,26 @@ class Test {
 		addCommonCipherKeyTests(tests, cipherSuppl, c -> ((AsymmetricCipherUtil) c).init(kp));
 		return dynamicContainer(cipherSuppl.get().toString(), tests);
 	}
-	private static DynamicTest keyExchangerTests(Supplier<KeyExchanger> keyExchSuppl) {
-		return dynamicTest(keyExchSuppl.get().toString(), () -> { //TODO : test for all curves?
-			KeyExchanger k1 = keyExchSuppl.get(); 
-			KeyExchanger k2 = keyExchSuppl.get();
-			
-			PublicKey p1 = k1.init();
-			PublicKey p2 = k2.init();
-			
-			SymmetricCipherUtil c1 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
-			c1.init(k1.exchangeKey(p2));
-			
-			SymmetricCipherUtil c2 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
-			c2.init(k2.exchangeKey(p1));
-			
-			assertEquals(TestUtil.hashPlain(src),
-					TestUtil.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
-			
-		});
+	private static DynamicContainer keyExchangerTests(Supplier<KeyExchanger> keyExchSuppl) {
+		return dynamicContainer(keyExchSuppl.get().toString(), Stream.of(keyExchSuppl.get().getAvailableCurves()).map(curveName ->
+			dynamicTest(curveName, () -> {
+				KeyExchanger k1 = keyExchSuppl.get(); 
+				KeyExchanger k2 = keyExchSuppl.get();
+				
+				PublicKey p1 = k1.init(curveName);
+				PublicKey p2 = k2.init(curveName);
+					
+				SymmetricCipherUtil c1 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
+				c1.init(k1.exchangeKey(p2));
+					
+				SymmetricCipherUtil c2 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
+				c2.init(k2.exchangeKey(p1));
+					
+				assertEquals(TestUtil.hashPlain(src),
+						TestUtil.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
+					
+			})
+		));
 	}
 	
 	
