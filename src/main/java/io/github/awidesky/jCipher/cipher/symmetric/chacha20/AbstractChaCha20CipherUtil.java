@@ -25,10 +25,16 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
  * This will (hopefully) do the job...
  * */
 public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUtil {
-
-	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) {
-		super(cipherMetadata, keyMetadata, bufferSize);
-	}
+	
+	/**
+	 * Construct this {@code AbstractChaCha20CipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata) { super(cipherMetadata, keyMetadata); }
+	
+	/**
+	 * Construct this {@code AbstractChaCha20CipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
+	 * */
+	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
 
 	@Override

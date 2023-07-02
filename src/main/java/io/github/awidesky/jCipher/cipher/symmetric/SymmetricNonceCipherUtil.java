@@ -31,7 +31,14 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 
 	protected byte[] nonce;
 	
-	protected SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
+	/**
+	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	public SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata) { super(cipherMetadata, keyMetadata); }
+	/**
+	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
+	 * */
+	public SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
 
 	/**
 	 * Get {@code AlgorithmParameterSpec} of this cipher.

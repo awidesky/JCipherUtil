@@ -11,6 +11,15 @@ public class ChaCha20CipherUtil extends AbstractChaCha20CipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("ChaCha20", "", "", "ChaCha20", 12);
 	
+	/**
+	 * Construct this {@code ChaCha20CipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	public ChaCha20CipherUtil(SymmetricKeyMetadata keyMetadata) {
+		super(METADATA, keyMetadata);
+	}
+	/**
+	 * Construct this {@code ChaCha20CipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
+	 * */
 	public ChaCha20CipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}

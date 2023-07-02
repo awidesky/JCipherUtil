@@ -17,9 +17,15 @@ public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
 
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
-	public AES_CBCCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) {
-		super(METADATA, keyMetadata, bufferSize);
-	}
+	/**
+	 * Construct this {@code AES_CBCCipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	public AES_CBCCipherUtil(SymmetricKeyMetadata keyMetadata) { super(METADATA, keyMetadata); }
+	
+	/**
+	 * Construct this {@code AES_CBCCipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
+	 * */
+	public AES_CBCCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) { super(METADATA, keyMetadata, bufferSize); }
 	
 
 	/**

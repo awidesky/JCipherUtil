@@ -19,6 +19,16 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 	 * */
 	public final int counterLen;
 	
+	/**
+	 * Construct this {@code AES_CTRCipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	public AES_CTRCipherUtil(SymmetricKeyMetadata keyMetadata) {
+		super(METADATA, keyMetadata);
+		counterLen = 4;
+	}
+	/**
+	 * Construct this {@code AES_CTRCipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
+	 * */
 	public AES_CTRCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 		counterLen = 4;

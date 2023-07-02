@@ -22,9 +22,15 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	protected final int BUFFER_SIZE;
 	protected CipherProperty cipherMetadata;
 	
+	/**
+	 * Construct this {@code AbstractCipherUtil} with given {@code CipherProperty} and default buffer size.
+	 * */
 	public AbstractCipherUtil(CipherProperty cipherMetadata) {
 		this(cipherMetadata, 8 * 1024);
 	}
+	/**
+	 * Construct this {@code AbstractCipherUtil} with given {@code CipherProperty} and buffer size.
+	 * */
 	public AbstractCipherUtil(CipherProperty cipherMetadata, int bufferSize) {
 		this.cipherMetadata = cipherMetadata;
 		this.BUFFER_SIZE = bufferSize;

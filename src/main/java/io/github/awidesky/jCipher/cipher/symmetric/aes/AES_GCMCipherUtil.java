@@ -22,9 +22,15 @@ public class AES_GCMCipherUtil extends SymmetricNonceCipherUtil {
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "GCM", "NoPadding", "AES", 12);
 	public final static int GCM_TAG_BIT_LENGTH = 128;
 	
-	public AES_GCMCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) {
-		super(METADATA, keyMetadata, bufferSize);
-	}
+	/**
+	 * Construct this {@code AES_GCMCipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	public AES_GCMCipherUtil(SymmetricKeyMetadata keyMetadata) { super(METADATA, keyMetadata); }
+	
+	/**
+	 * Construct this {@code AES_GCMCipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
+	 * */
+	public AES_GCMCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) { super(METADATA, keyMetadata, bufferSize); }
 	
 
 	/**

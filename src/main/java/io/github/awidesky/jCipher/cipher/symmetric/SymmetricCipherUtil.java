@@ -39,6 +39,16 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	protected byte[] salt;
 	protected int iterationCount;
 
+	/**
+	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and default buffer size.
+	 * */
+	public SymmetricCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata) {
+		super(cipherMetadata);
+		this.keyMetadata = keyMetadata;
+	}
+	/**
+	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
+	 * */
 	public SymmetricCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) {
 		super(cipherMetadata, bufferSize);
 		this.keyMetadata = keyMetadata;
