@@ -75,23 +75,25 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	protected abstract IVCipherProperty getCipherProperty();
 
 	@Override
-	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
+	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
 		generateSalt(sr);
 		generateIterationCount(sr);
 		generateNonce(sr);
+		Cipher c = getCipherInstance();
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
 		mc.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
 		mc.consumeResult(salt);
 		mc.consumeResult(nonce);
+		return c;
 	}
 	
 	@Override
-	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
 		readIterationCount(mp);
 		readSalt(mp);
 		readNonce(mp);
@@ -99,11 +101,13 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
+		Cipher c = getCipherInstance();
 		try {
-			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
+		return c;
 	}
 
 	@Override

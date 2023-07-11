@@ -34,13 +34,15 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	public AbstractCipherUtil(CipherProperty cipherMetadata, int bufferSize) {
 		this.cipherMetadata = cipherMetadata;
 		this.BUFFER_SIZE = bufferSize;
+	}
+	
+	protected Cipher getCipherInstance() {
 		try {
-			cipher = Cipher.getInstance(getCipherProperty().ALGORITMH_NAME + "/" + getCipherProperty().ALGORITMH_MODE + "/" + getCipherProperty().ALGORITMH_PADDING);
+			return Cipher.getInstance(getCipherProperty().ALGORITMH_NAME + "/" + getCipherProperty().ALGORITMH_MODE + "/" + getCipherProperty().ALGORITMH_PADDING);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw new OmittedCipherException(e);
 		}
 	}
-	
 	/**
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
@@ -61,9 +63,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * This method can be override to generate and write additional metadata(like Initial Vector)
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
+	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
 		try {
-			cipher.init(Cipher.ENCRYPT_MODE, getEncryptKey());
+			Cipher c = getCipherInstance();
+			c.init(Cipher.ENCRYPT_MODE, getEncryptKey());
+			return c;
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -76,9 +80,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * This method can be override to read additional metadata(like Initial Vector) from {@code MessageConsumer} 
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
 		try {
-			cipher.init(Cipher.DECRYPT_MODE, getDecryptKey());
+			Cipher c = getCipherInstance();
+			c.init(Cipher.DECRYPT_MODE, getDecryptKey());
+			return c;
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}		
@@ -105,8 +111,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		try (mp; mc) {
-			initEncrypt(mc);
-			processCipher(mp, mc);
+			processCipher(initEncrypt(mc), mp, mc);
 		}
 	}
 
@@ -129,14 +134,13 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		try (mp; mc) {
-			initDecrypt(mp);
-			processCipher(mp, mc);
+			processCipher(initDecrypt(mp), mp, mc);
 		}
 	}
 	
 	/**
 	 * Do Cipher Process with pre-initiated <code>cipher</code>.
-	 * 
+	 * @param c The {@code Cipher} instance 
 	 * @param mp Plain data Provider of source for encryption/decryption
 	 * @param mc Data Consumer that writes encrypted/decryption data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
@@ -144,23 +148,31 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	protected void processCipher(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
+	protected void processCipher(Cipher c, MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
+		updateCipher(c, mp, mc);
+		finishCipher(c, mp, mc);
+	}
+	protected void updateCipher(Cipher c, MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		byte[] buf = new byte[BUFFER_SIZE];
 		while(true) {
 			int read = mp.getSrc(buf);
 			if(read == -1) break;
-			byte[] result = cipher.update(buf, 0, read);
+			byte[] result = c.update(buf, 0, read);
 			if(result != null) mc.consumeResult(result);
 		}
+	}
+	protected void finishCipher(Cipher c, MessageProvider mp, MessageConsumer mc) {
 		try {
-			mc.consumeResult(cipher.doFinal());
+			mc.consumeResult(c.doFinal());
 		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new OmittedCipherException(e);
 		}
 	}
-
+	
+	
 	protected String fields() {
-		return "\"" + cipher.getAlgorithm() + "\" from \"" + cipher.getProvider() + "\"";
+		Cipher c = getCipherInstance();
+		return "\"" + c.getAlgorithm() + "\" from \"" + c.getProvider() + "\"";
 	}
 	
 	@Override

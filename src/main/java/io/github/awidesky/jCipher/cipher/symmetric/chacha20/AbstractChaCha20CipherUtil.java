@@ -38,7 +38,7 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 
 
 	@Override
-	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
 		readIterationCount(mp);
 		readSalt(mp);
 		readNonce(mp);
@@ -46,6 +46,7 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
+		Cipher c = getCipherInstance();
 		try {
 			/**Tweak IV and key*/
 			byte[] iv = nonce.clone();
@@ -54,13 +55,14 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 			//generate random key too. Key iteration process would consume much time.
 			KeyGenerator sf = KeyGenerator.getInstance(getCipherProperty().KEY_ALGORITMH_NAME);
 			sf.init(keyMetadata.keyLen);
-			cipher.init(Cipher.ENCRYPT_MODE, sf.generateKey(), new IvParameterSpec(iv));
+			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), new IvParameterSpec(iv));
 			/**Tweak IV and key*/
 			
-			cipher.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}
+		return c;
 	}
 
 	

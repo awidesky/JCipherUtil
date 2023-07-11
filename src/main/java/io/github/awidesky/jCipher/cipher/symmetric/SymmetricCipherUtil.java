@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.security.Key;
 import java.security.SecureRandom;
 
+import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 
@@ -109,23 +110,24 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	
 
 	@Override
-	protected void initEncrypt(MessageConsumer mc) throws NestedIOException {
+	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
 		generateSalt(sr);
 		generateIterationCount(sr);
-		super.initEncrypt(mc);
+		Cipher c = super.initEncrypt(mc);
 		mc.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
 		mc.consumeResult(salt);
+		return c;
 	}
 
 	@Override
-	protected void initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
 		readIterationCount(mp);
 		readSalt(mp);
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
-		super.initDecrypt(mp);
+		return super.initDecrypt(mp);
 	}
 
 	/**
