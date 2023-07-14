@@ -14,13 +14,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 
-	private byte[] key;
+	private final byte[] key;
 	
 	/**
 	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
@@ -47,8 +46,6 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	 */
 	@Override
 	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
-		this.salt =  Arrays.copyOf(salt, salt.length);
-		this.iterationCount = iterationCount;
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-512");
@@ -60,16 +57,10 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 		for (int i = 0; i < iterationCount; i++) { //key stretching
 			digest.reset();
 			digest.update(result);
-			digest.update(salt);
+			digest.update(Arrays.copyOf(salt, salt.length));
 			result = digest.digest();
 		}
 
 		return new SecretKeySpec(result, 0, keySize / 8, algorithm);
-	}
-	
-	@Override
-	public void destroy() throws DestroyFailedException {
-		super.destroy();
-		for(int i = 0; i < key.length; i++) key[i] = 0;
 	}
 }

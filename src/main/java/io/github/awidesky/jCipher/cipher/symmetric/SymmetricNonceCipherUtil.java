@@ -18,7 +18,9 @@ import java.security.spec.AlgorithmParameterSpec;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
+import io.github.awidesky.jCipher.key.KeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.properties.CipherProperty;
@@ -29,23 +31,17 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 
-	protected byte[] nonce;
-	
 	/**
-	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and default buffer size.
+	 * Construct this {@code SymmetricCipherUtil} with given parameters.
 	 * */
-	public SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata) { super(cipherMetadata, keyMetadata); }
-	/**
-	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
-	 * */
-	public SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
+	public SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) { super(cipherMetadata, keyMetadata, keySize, key, bufferSize); }
 
 	/**
 	 * Get {@code AlgorithmParameterSpec} of this cipher.
 	 * default implementation returns an {@code IvParameterSpec} associated with the <code>nonce</code>.
 	 * 
 	 * */
-	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
+	protected AlgorithmParameterSpec getAlgorithmParameterSpec(byte[] nonce) {
 		return new IvParameterSpec(nonce);
 	}
 	
@@ -53,22 +49,27 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	 * Generate random nonce with given {@code SecureRandom} instance.
 	 * Size of the nonce is determined by {@code CipherProperty}.
 	 * 
+	 * @return generated nonce
 	 * @see IVCipherProperty#NONCESIZE
 	 * */
-	protected void generateNonce(SecureRandom sr) {
-		nonce = new byte[getCipherProperty().NONCESIZE];
+	protected byte[] generateNonce(SecureRandom sr) {
+		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
 		sr.nextBytes(nonce);
+		return nonce;
 	}
+	
 	/**
 	 * Read nonce from given {@code MessageProvider} instance.
 	 * Size of the Nonce is determined by {@code CipherProperty}.
 	 * 
+	 * @return nonce from the {@code MessageProvider}
 	 * @see IVCipherProperty#NONCESIZE
 	 * */
-	protected void readNonce(MessageProvider mp) {
-		nonce = new byte[getCipherProperty().NONCESIZE];
+	protected byte[] readNonce(MessageProvider mp) {
+		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
 		int read = 0;
 		while ((read += mp.getSrc(nonce, read)) != nonce.length);
+		return nonce;
 	}
 	
 	@Override
@@ -77,12 +78,13 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	@Override
 	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
-		generateSalt(sr);
-		generateIterationCount(sr);
-		generateNonce(sr);
+		byte[] salt = new byte[keyMetadata.saltLen]; 
+		sr.nextBytes(salt);
+		int iterationCount = generateIterationCount(sr);
+		byte[] nonce = generateNonce(sr);
 		Cipher c = getCipherInstance();
 		try {
-			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -94,16 +96,16 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	
 	@Override
 	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
-		readIterationCount(mp);
-		readSalt(mp);
-		readNonce(mp);
+		int iterationCount = readIterationCount(mp);
+		byte[] salt = readSalt(mp);
+		byte[] nonce = readNonce(mp);
 		
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
 		Cipher c = getCipherInstance();
 		try {
-			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}

@@ -24,7 +24,7 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 
 /**
- * An utility that provides easy encrypt/decrypt process from/to various input/output.
+ * An utility that provides easy encrypt/decrypt methods from/to various input/output.
  * <p>The {@code CipherUtil} interface provides two generic encrypt/decrypt method named
  * {@link CipherUtil#encrypt(MessageProvider, MessageConsumer)} and {@link CipherUtil#decrypt(MessageProvider, MessageConsumer)},
  * that can be used to encrypt and decrypt from/to many types.
@@ -32,10 +32,14 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
  * {@link CipherUtil#encryptToBase64(MessageProvider)}, {@link CipherUtil#decryptToBase64(MessageProvider)}, {@link CipherUtil#decryptToString(MessageProvider, Charset)}  
  * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
  * single {@code byte[]} buffer, etc)
+ * <p>Every methods in this interface is thread-safe. Each call is run with new {@code Cipher} instance, and does not effect anything to the {@code CipherUtil} instance.
+ * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableCipherUtil}
+ * 
  * 
  * @see MessageProvider
  * @see MessageConsumer
  * @see SymmetricCipherUtil
+ * @see AsymmetricCipherUtil
  * */
 public interface CipherUtil {
 

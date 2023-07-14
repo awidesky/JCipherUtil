@@ -17,13 +17,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.DestroyFailedException;
 
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 
-	private char[] password;
+	private final char[] password;
 	
 	/**
 	 * Initiate <code>PasswordKeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
@@ -42,21 +41,13 @@ public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 	 */
 	@Override
 	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
-		this.salt =  Arrays.copyOf(salt, salt.length);
-		this.iterationCount = iterationCount;
 	    SecretKey pbeKey;
 		try {
-			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, this.salt, iterationCount, keySize));
+			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, Arrays.copyOf(salt, salt.length), iterationCount, keySize));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}
 	    return new SecretKeySpec(pbeKey.getEncoded(), algorithm);
 	}
 	
-	
-	@Override
-	public void destroy() throws DestroyFailedException {
-		super.destroy();
-		for(int i = 0; i < password.length; i++) password[i] = '\0';
-	}
 }

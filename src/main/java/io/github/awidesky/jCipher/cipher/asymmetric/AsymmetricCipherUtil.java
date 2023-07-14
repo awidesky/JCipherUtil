@@ -17,11 +17,6 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 
 	protected AsymmetricKeyMaterial key;
 	protected KeyMetadata keyMetadata;
-	
-	public AsymmetricCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata) {
-		super(cipherMetadata);
-		this.keyMetadata = keyMetadata;
-	}
 
 	public AsymmetricCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
 		super(cipherMetadata, bufferSize);

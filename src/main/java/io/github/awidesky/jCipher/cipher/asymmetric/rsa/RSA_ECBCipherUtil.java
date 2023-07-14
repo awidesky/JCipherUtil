@@ -8,10 +8,6 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 
 	public final static CipherProperty METADATA = new CipherProperty("RSA", "ECB", "PKCS1Padding", "RSA");
 	
-	
-	public RSA_ECBCipherUtil(KeyMetadata keyMetadata) {
-		super(METADATA, keyMetadata);
-	}
 	public RSA_ECBCipherUtil(KeyMetadata keyMetadata, int bufferSize) {
 		super(METADATA, keyMetadata, bufferSize);
 	}

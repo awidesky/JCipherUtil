@@ -13,8 +13,12 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.spec.GCMParameterSpec;
 
+import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
+import io.github.awidesky.jCipher.key.KeySize;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 import io.github.awidesky.jCipher.properties.IVCipherProperty;
 
 public class AES_GCMCipherUtil extends SymmetricNonceCipherUtil {
@@ -23,15 +27,11 @@ public class AES_GCMCipherUtil extends SymmetricNonceCipherUtil {
 	public final static int GCM_TAG_BIT_LENGTH = 128;
 	
 	/**
-	 * Construct this {@code AES_GCMCipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
+	 * Construct this {@code AES_GCMCipherUtil} with given parameters.
 	 * */
-	public AES_GCMCipherUtil(SymmetricKeyMetadata keyMetadata) { super(METADATA, keyMetadata); }
-	
-	/**
-	 * Construct this {@code AES_GCMCipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
-	 * */
-	public AES_GCMCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) { super(METADATA, keyMetadata, bufferSize); }
-	
+	private AES_GCMCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
+		super(cipherMetadata, keyMetadata, keySize, key, bufferSize);
+	}
 
 	/**
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
@@ -41,8 +41,18 @@ public class AES_GCMCipherUtil extends SymmetricNonceCipherUtil {
 
 
 	@Override
-	protected AlgorithmParameterSpec getAlgorithmParameterSpec() {
+	protected AlgorithmParameterSpec getAlgorithmParameterSpec(byte[] nonce) {
 		return new GCMParameterSpec(GCM_TAG_BIT_LENGTH, nonce);
 	}
 
+
+	public static class Builder extends SymmetricCipherUtilBuilder {
+		
+		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
+		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }
+		
+		@Override
+		public AES_GCMCipherUtil build() { return new AES_GCMCipherUtil(METADATA, keyMetadata, keySize, keyMet, bufferSize); }
+		
+	}
 }

@@ -18,16 +18,10 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
-	protected Cipher cipher;
+	//TODO : protected Cipher cipher;
 	protected final int BUFFER_SIZE;
-	protected CipherProperty cipherMetadata;
+	protected final CipherProperty cipherMetadata;
 	
-	/**
-	 * Construct this {@code AbstractCipherUtil} with given {@code CipherProperty} and default buffer size.
-	 * */
-	public AbstractCipherUtil(CipherProperty cipherMetadata) {
-		this(cipherMetadata, 8 * 1024);
-	}
 	/**
 	 * Construct this {@code AbstractCipherUtil} with given {@code CipherProperty} and buffer size.
 	 * */
@@ -149,10 +143,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	protected void processCipher(Cipher c, MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
-		updateCipher(c, mp, mc);
-		finishCipher(c, mp, mc);
-	}
-	protected void updateCipher(Cipher c, MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		byte[] buf = new byte[BUFFER_SIZE];
 		while(true) {
 			int read = mp.getSrc(buf);
@@ -160,8 +150,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			byte[] result = c.update(buf, 0, read);
 			if(result != null) mc.consumeResult(result);
 		}
-	}
-	protected void finishCipher(Cipher c, MessageProvider mp, MessageConsumer mc) {
 		try {
 			mc.consumeResult(c.doFinal());
 		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {

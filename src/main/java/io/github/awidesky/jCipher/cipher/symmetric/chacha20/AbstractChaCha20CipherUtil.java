@@ -9,7 +9,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
+import io.github.awidesky.jCipher.key.KeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.properties.CipherProperty;
 import io.github.awidesky.jCipher.util.IllegalMetadataException;
@@ -26,22 +28,20 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
  * */
 public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUtil {
 	
+
 	/**
-	 * Construct this {@code AbstractChaCha20CipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and default buffer size.
+	 * Construct this {@code AbstractChaCha20CipherUtil} with given parameters.
 	 * */
-	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata) { super(cipherMetadata, keyMetadata); }
-	
-	/**
-	 * Construct this {@code AbstractChaCha20CipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
-	 * */
-	protected AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, int bufferSize) { super(cipherMetadata, keyMetadata, bufferSize); }
+	public AbstractChaCha20CipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
+		super(cipherMetadata, keyMetadata, keySize, key, bufferSize);
+	}
 
 
 	@Override
 	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
-		readIterationCount(mp);
-		readSalt(mp);
-		readNonce(mp);
+		int iterationCount = readIterationCount(mp);
+		byte[] salt = readSalt(mp);
+		byte[] nonce = readNonce(mp);
 		
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
@@ -54,11 +54,11 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 			iv[0] = (byte) ~iv[0];
 			//generate random key too. Key iteration process would consume much time.
 			KeyGenerator sf = KeyGenerator.getInstance(getCipherProperty().KEY_ALGORITMH_NAME);
-			sf.init(keyMetadata.keyLen);
+			sf.init(keySize.size);
 			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), new IvParameterSpec(iv));
 			/**Tweak IV and key*/
 			
-			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keyMetadata.keyLen, salt, iterationCount), getAlgorithmParameterSpec());
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}

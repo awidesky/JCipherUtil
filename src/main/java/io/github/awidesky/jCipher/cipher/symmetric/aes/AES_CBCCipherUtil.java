@@ -9,8 +9,12 @@
 
 package io.github.awidesky.jCipher.cipher.symmetric.aes;
 
+import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
+import io.github.awidesky.jCipher.key.KeySize;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 import io.github.awidesky.jCipher.properties.IVCipherProperty;
 
 public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
@@ -18,20 +22,27 @@ public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
 	public final static IVCipherProperty METADATA = new IVCipherProperty("AES", "CBC", "PKCS5PADDING", "AES", 16);
 	
 	/**
-	 * Construct this {@code AES_CBCCipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
+	 * Construct this {@code AES_CBCCipherUtil} with given parameters.
 	 * */
-	public AES_CBCCipherUtil(SymmetricKeyMetadata keyMetadata) { super(METADATA, keyMetadata); }
+	private AES_CBCCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
+		super(cipherMetadata, keyMetadata, keySize, key, bufferSize);
+	}
 	
-	/**
-	 * Construct this {@code AES_CBCCipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
-	 * */
-	public AES_CBCCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) { super(METADATA, keyMetadata, bufferSize); }
-	
-
 	/**
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	@Override
 	protected IVCipherProperty getCipherProperty() { return METADATA; }
+
+
+	public static class Builder extends SymmetricCipherUtilBuilder {
+		
+		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
+		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }
+		
+		@Override
+		public AES_CBCCipherUtil build() { return new AES_CBCCipherUtil(METADATA, keyMetadata, keySize, keyMet, bufferSize); }
+		
+	}
 
 }

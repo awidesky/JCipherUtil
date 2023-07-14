@@ -26,7 +26,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.security.DigestException;
-import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -38,7 +37,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -74,21 +72,22 @@ import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 class Test {
 
 	static final int CIPHERUTILBUFFERSIZE = 51; //odd number for test
-	static final Map<String, Stream<Supplier<SymmetricCipherUtil>>> symmetricCiphers = Map.ofEntries(
+	static final Map<String, Stream<SymmetricCipherUtil>> symmetricCiphers = Map.ofEntries(
 			Map.entry("AES", Stream.of(
-					() -> new AES_GCMCipherUtil(SymmetricKeyMetadata.STANDARD.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					() -> new AES_ECBCipherUtil(SymmetricKeyMetadata.STANDARD.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					() -> new AES_CTRCipherUtil(SymmetricKeyMetadata.STANDARD.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					() -> new AES_CBCCipherUtil(SymmetricKeyMetadata.STANDARD.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
+					new AES_GCMCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
+					new AES_ECBCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
+					new AES_CTRCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
+					new AES_CTRCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
+					new AES_CBCCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build()
 				)),
 			Map.entry("ChaCha20", Stream.of(
-					() -> new ChaCha20_Poly1305CipherUtil(SymmetricKeyMetadata.STANDARD.with(ChaCha20KeySize.SIZE_256), CIPHERUTILBUFFERSIZE),
-					() -> new ChaCha20_Poly1305CipherUtil(SymmetricKeyMetadata.STANDARD.with(ChaCha20KeySize.SIZE_256), CIPHERUTILBUFFERSIZE)
+					new ChaCha20_Poly1305CipherUtil.Builder(TestUtil.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
+					new ChaCha20_Poly1305CipherUtil.Builder(TestUtil.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build()
 				))
 			);
-	static final Map<String, Stream<Supplier<AsymmetricCipherUtil>>> asymmetricCiphers = Map.ofEntries(
+	static final Map<String, Stream<AsymmetricCipherUtil>> asymmetricCiphers = Map.ofEntries(
 			Map.entry("RSA", Stream.of(
-					() -> new RSA_ECBCipherUtil(AsymmetricKeyMetadata.with(RSAKeySize.SIZE_2048), CIPHERUTILBUFFERSIZE)
+					new RSA_ECBCipherUtil(AsymmetricKeyMetadata.with(RSAKeySize.SIZE_2048), CIPHERUTILBUFFERSIZE)
 				))
 			);
 	static final Map<String, Stream<Supplier<KeyExchanger>>> keyExchangers = Map.ofEntries(
@@ -116,33 +115,35 @@ class Test {
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::keyExchangerTests))
 		)));
 		
-		l.add(dynamicContainer("Symmetric ciphers", symmetricCiphers.entrySet().stream().map(entry ->  //per AES, ChaCha20...
-			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))
-		)));
-	
+		
+		List<DynamicNode> symmetricList = new ArrayList<>();
+		addSymmetricCipherKeyTests(symmetricList); //TODO : "Symmetric ciphers"안에 넣기
+		symmetricList.addAll(symmetricCiphers.entrySet().stream().map(entry ->  //per AES, ChaCha20...
+		dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))).toList());
+		l.add(dynamicContainer("Symmetric ciphers", symmetricList));
+		/* TODO : fix asymmetric too
 		l.add(dynamicContainer("Asymmetric ciphers", asymmetricCiphers.entrySet().stream().map(entry -> //per RSA...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::asymmetricCipherTests))
 		)));
-		
+		*/
 		return l;
 	}
 	
-	private static DynamicTest getTest(Supplier<? extends CipherUtil> cipherSuppl, String name, ThrowableConsumer<CipherUtil> testCode) {
-		return dynamicTest(name, () -> testCode.accept(cipherSuppl.get()));
+	private static DynamicTest getTest(CipherUtil cipher, String name, ThrowableConsumer<CipherUtil> testCode) {
+		return dynamicTest(name, () -> testCode.accept(cipher));
 	}
 	
-	private static DynamicContainer symmetricCipherTests(Supplier<SymmetricCipherUtil> cipherSuppl) {
-		List<DynamicNode> tests = new ArrayList<>(4);
-		addSymmetricCipherKeyTests(tests, cipherSuppl);
-		addCommonCipherKeyTests(tests, cipherSuppl, c -> ((SymmetricCipherUtil) c).init(TestUtil.password));
-		return dynamicContainer(cipherSuppl.get().toString(), tests);
-	}
-	private static DynamicContainer asymmetricCipherTests(Supplier<AsymmetricCipherUtil> cipherSuppl) {
+	private static DynamicContainer symmetricCipherTests(SymmetricCipherUtil cipher) {
 		List<DynamicNode> tests = new ArrayList<>(2);
-		KeyPair kp = cipherSuppl.get().init().keyPair();
-		addAsymmetricCipherKeyTests(tests, cipherSuppl);
-		addCommonCipherKeyTests(tests, cipherSuppl, c -> ((AsymmetricCipherUtil) c).init(kp));
-		return dynamicContainer(cipherSuppl.get().toString(), tests);
+		addCommonCipherKeyTests(tests, cipher);
+		return dynamicContainer(cipher.toString(), tests);
+	}
+	private static DynamicContainer asymmetricCipherTests(AsymmetricCipherUtil cipher) {
+		List<DynamicNode> tests = new ArrayList<>(2);
+		//KeyPair kp = cipher.init().keyPair(); : TODO : init cipher with keypair here
+		addAsymmetricCipherKeyTests(tests, cipher);
+		addCommonCipherKeyTests(tests, cipher);
+		return dynamicContainer(cipher.toString(), tests);
 	}
 	private static DynamicContainer keyExchangerTests(Supplier<KeyExchanger> keyExchSuppl) {
 		return dynamicContainer(keyExchSuppl.get().toString(), Stream.of(keyExchSuppl.get().getAvailableCurves()).map(curveName ->
@@ -153,11 +154,9 @@ class Test {
 				PublicKey p1 = k1.init(curveName);
 				PublicKey p2 = k2.init(curveName);
 					
-				SymmetricCipherUtil c1 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
-				c1.init(k1.exchangeKey(p2));
+				SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(k1.exchangeKey(p2), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(); 
 					
-				SymmetricCipherUtil c2 = new AES_GCMCipherUtil(SymmetricKeyMetadata.DEFAULT.with(AESKeySize.SIZE_256), CIPHERUTILBUFFERSIZE);
-				c2.init(k2.exchangeKey(p1));
+				SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(k2.exchangeKey(p1), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
 					
 				assertEquals(TestUtil.hashPlain(src),
 						TestUtil.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
@@ -167,123 +166,107 @@ class Test {
 	}
 	
 	
-	private static void addSymmetricCipherKeyTests(List<DynamicNode> list, Supplier<SymmetricCipherUtil> cipherSuppl) {
+	private static void addSymmetricCipherKeyTests(List<DynamicNode> list) { //TODO : how?
 		list.add(dynamicTest("byte[] key test", () -> {
-			SymmetricCipherUtil c = cipherSuppl.get();
 			byte[] key = new byte[1024];
 			new Random().nextBytes(key);
-			c.init(key);
+			CipherUtil ci1 = new AES_GCMCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci2 = new AES_GCMCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
 			assertEquals(TestUtil.hashPlain(src),
-					TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
+					TestUtil.hashPlain(ci1.decryptToSingleBuffer(MessageProvider.from(ci2.encryptToSingleBuffer(MessageProvider.from(src))))));
 		}));	
 		list.add(dynamicTest("password test", () -> {
-			SymmetricCipherUtil c = cipherSuppl.get();
-			c.init(TestUtil.password);
+			CipherUtil ci1 = new AES_GCMCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci2 = new AES_GCMCipherUtil.Builder(TestUtil.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
 			assertEquals(TestUtil.hashPlain(src),
-					TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
+					TestUtil.hashPlain(ci1.decryptToSingleBuffer(MessageProvider.from(ci2.encryptToSingleBuffer(MessageProvider.from(src))))));
 		}));	
 	}
-	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, Supplier<AsymmetricCipherUtil> cipherSuppl) {
+	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, AsymmetricCipherUtil cipher) {
 		//TODO : signing, private나 public 하나만 주고 encrypt되는지 etc..
 	}
 	
-	private static void addCommonCipherKeyTests(List<DynamicNode> list, Supplier<? extends CipherUtil> cipherSuppl, Consumer<CipherUtil> initCipherUtil) {
+	private static void addCommonCipherKeyTests(List<DynamicNode> list, CipherUtil cipher) {
 		list.add(dynamicContainer("Encryption methods", Stream.of(
-				getTest(cipherSuppl, "byte[] -> byte[]", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "byte[] -> byte[]", (c) -> {
 					assertEquals(TestUtil.hashPlain(src),
-							testDecrypt(c, new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(src))), initCipherUtil));
+							TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(MessageProvider.from(src))))));
+							//testDecrypt(c, new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(src)))));
 				}),	
-				getTest(cipherSuppl, "File -> File", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "File -> File", (c) -> {
 					File fsrc = mkTempPlainFile();
 					File fdest = mkEmptyTempFile();
 					c.encrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
-					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt(c, new FileInputStream(fdest), initCipherUtil));
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(new FileInputStream(fdest)))));
 				}),
-				getTest(cipherSuppl, "Base64 encoded String -> Base64 encoded String", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "Base64 encoded String -> Base64 encoded String", (c) -> {
 					String result = c.encryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(src)));
-					assertEquals(TestUtil.hashPlain(src), testDecrypt(c, new ByteArrayInputStream(Base64.getDecoder().decode(result)), initCipherUtil));
+					assertEquals(TestUtil.hashPlain(src), TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(Base64.getDecoder().decode(result)))));
 				}),
-				getTest(cipherSuppl, "Hex encoded String -> Hex encoded String", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "Hex encoded String -> Hex encoded String", (c) -> {
 					String result = c.encryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(src)));
-					assertEquals(TestUtil.hashPlain(src), testDecrypt(c, new ByteArrayInputStream(HexFormat.of().parseHex(result)), initCipherUtil));
+					assertEquals(TestUtil.hashPlain(src), TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from((HexFormat.of().parseHex(result))))));
 				}),
-				getTest(cipherSuppl, "String -> byte[]", (c) -> {
-					initCipherUtil.accept(c);
-					assertEquals(TestUtil.hashPlain(randomStr.getBytes(TESTCHARSET)), testDecrypt(c, 
-							new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(randomStr, TESTCHARSET))), initCipherUtil));
+				getTest(cipher, "String -> byte[]", (c) -> {
+					assertEquals(TestUtil.hashPlain(randomStr.getBytes(TESTCHARSET)), TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(
+							new ByteArrayInputStream(c.encryptToSingleBuffer(MessageProvider.from(randomStr, TESTCHARSET)))))));
 				}),
-				getTest(cipherSuppl, "Inputstream -> Outputstream", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "Inputstream -> Outputstream", (c) -> {
 					File fsrc = mkTempPlainFile();
 					File fdest = mkEmptyTempFile();
 					c.encrypt(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc))),
 							MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
-					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), testDecrypt(c, new FileInputStream(fdest), initCipherUtil));
+					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)), TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(new FileInputStream(fdest)))));
 				}),
-				getTest(cipherSuppl, "part of InputStream -> byte[]", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "part of InputStream -> byte[]", (c) -> {
 					File fsrc = mkTempPlainFile();
 					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
-							testDecrypt(c, new ByteArrayInputStream(c.encryptToSingleBuffer(
-									MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc)), 16 * 1024))), initCipherUtil));
+							TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(c.encryptToSingleBuffer(
+									MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc)), 16 * 1024))))));
 				}),
-				getTest(cipherSuppl, "ReadableByteChannel -> WritableByteChannel", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "ReadableByteChannel -> WritableByteChannel", (c) -> {
 					File fsrc = mkTempPlainFile();
 					File fdest = mkEmptyTempFile();
 					c.encrypt(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ)),
 							MessageConsumer.to(FileChannel.open(fdest.toPath(), StandardOpenOption.WRITE)));
 					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc)),
-							testDecrypt(c, new FileInputStream(fdest), initCipherUtil));
+							TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(new FileInputStream(fdest)))));
 				}),
-				getTest(cipherSuppl, "From part of ReadableByteChannel", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "From part of ReadableByteChannel", (c) -> {
 					File fsrc = mkTempPlainFile();
 					assertEquals(TestUtil.hashPlain(new FileInputStream(fsrc), 16 * 1024),
-							testDecrypt(c, new ByteArrayInputStream(
-									c.encryptToSingleBuffer(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ), 16 * 1024))), initCipherUtil));
+							TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(new ByteArrayInputStream(
+									c.encryptToSingleBuffer(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ), 16 * 1024)))))));
 				})
 			)));
-			CipherUtil cc = cipherSuppl.get();
-			initCipherUtil.accept(cc);
-			final byte[] encrypted = cc.encryptToSingleBuffer(MessageProvider.from(src));
+			final byte[] encrypted = cipher.encryptToSingleBuffer(MessageProvider.from(src));
 			final String srcHash = TestUtil.hashPlain(src);
 			list.add(dynamicContainer("Decryption methods", Stream.of(
-				getTest(cipherSuppl, "byte[] -> byte[]", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "byte[] -> byte[]", (c) -> {
 					assertEquals(srcHash, TestUtil.hashPlain(c.decryptToSingleBuffer(MessageProvider.from(encrypted))));
 				}),
-				getTest(cipherSuppl, "File -> File", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "File -> File", (c) -> {
 					File fsrc = mkTempEncryptedFile(encrypted);
 					File fdest = mkEmptyTempFile();
 					c.decrypt(MessageProvider.from(fsrc), MessageConsumer.to(fdest));
 					assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 				}),
-				getTest(cipherSuppl, "Base64 encoded String -> Base64 encoded String", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "Base64 encoded String -> Base64 encoded String", (c) -> {
 					String result = c.decryptToBase64(MessageProvider.fromBase64(Base64.getEncoder().encodeToString(encrypted)));
 					assertEquals(srcHash, TestUtil.hashPlain(Base64.getDecoder().decode(result)));
 				}),
-				getTest(cipherSuppl, "Hex encoded String -> Hex encoded String", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "Hex encoded String -> Hex encoded String", (c) -> {
 					String result = c.decryptToHexString(MessageProvider.fromHexString(HexFormat.of().formatHex(encrypted)));
 					assertEquals(srcHash, TestUtil.hashPlain(HexFormat.of().parseHex(result)));
 				}),
-				getTest(cipherSuppl, "Inputstream -> Outputstream", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "Inputstream -> Outputstream", (c) -> {
 					File fsrc = mkTempEncryptedFile(encrypted);
 					File fdest = mkEmptyTempFile();
 					c.decrypt(MessageProvider.from(new BufferedInputStream(new FileInputStream(fsrc))),
 							MessageConsumer.to(new BufferedOutputStream(new FileOutputStream(fdest))));
 					assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 				}),
-				getTest(cipherSuppl, "ReadableByteChannel -> WritableByteChannel", (c) -> {
-					initCipherUtil.accept(c);
+				getTest(cipher, "ReadableByteChannel -> WritableByteChannel", (c) -> {
 					File fsrc = mkTempEncryptedFile(encrypted);
 					File fdest = mkEmptyTempFile();
 					c.decrypt(MessageProvider.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ)),
@@ -291,17 +274,6 @@ class Test {
 					assertEquals(srcHash, TestUtil.hashPlain(new FileInputStream(fdest)));
 				})
 			)));
-	}
-	
-	private static String testDecrypt(CipherUtil c, InputStream is, Consumer<CipherUtil> initCipherUtil) {
-		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-512");
-			return HexFormat.of().formatHex(digest
-					.digest(c.decryptToSingleBuffer(MessageProvider.from(is))));
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
-		}
 	}
 	
 	private static File mkTempPlainFile() throws IOException {

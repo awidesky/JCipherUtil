@@ -3,8 +3,12 @@ package io.github.awidesky.jCipher.cipher.symmetric.aes;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
+import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
+import io.github.awidesky.jCipher.key.KeySize;
+import io.github.awidesky.jCipher.properties.CipherProperty;
 import io.github.awidesky.jCipher.properties.IVCipherProperty;
 
 public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
@@ -19,39 +23,40 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 	 * */
 	public final int counterLen;
 	
-	/**
-	 * Construct this {@code AES_CTRCipherUtil} with given {@code SymmetricKeyMetadata} and default buffer size.
-	 * */
-	public AES_CTRCipherUtil(SymmetricKeyMetadata keyMetadata) {
-		super(METADATA, keyMetadata);
-		counterLen = 4;
+	private AES_CTRCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
+		this(cipherMetadata, keyMetadata, keySize, key, bufferSize, 4);
 	}
-	/**
-	 * Construct this {@code AES_CTRCipherUtil} with given {@code SymmetricKeyMetadata} and buffer size.
-	 * */
-	public AES_CTRCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize) {
-		super(METADATA, keyMetadata, bufferSize);
-		counterLen = 4;
-	}
+
 	/**
 	 * Initiate this object with given <code>counterLength</code>.
 	 * 
 	 * @throws IllegalArgumentException if <code>counterLength</code> is smaller than 1 or greater than 16.
 	 * */
-	public AES_CTRCipherUtil(SymmetricKeyMetadata keyMetadata, int bufferSize, int counterLength) {
-		super(METADATA, keyMetadata, bufferSize);
+	private AES_CTRCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize, int counterLength) {
+		super(cipherMetadata, keyMetadata, keySize, key, bufferSize);
 		if(counterLength < 1 || 16 < counterLength) throw new IllegalArgumentException("Invalid counter length : " + counterLength + ", must be 0 < c < 17");
 		this.counterLen = counterLength;
 	}
 
 	@Override
-	protected void generateNonce(SecureRandom sr) {
-		nonce = new byte[METADATA.NONCESIZE - counterLen];
+	protected byte[] generateNonce(SecureRandom sr) {
+		byte[] nonce = new byte[METADATA.NONCESIZE - counterLen];
 		sr.nextBytes(nonce);
 		nonce = Arrays.copyOfRange(nonce, 0, 16);
+		return nonce;
 	}
 	
 	@Override
 	protected IVCipherProperty getCipherProperty() { return METADATA; }
 
+
+	public static class Builder extends SymmetricCipherUtilBuilder {
+		
+		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
+		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }
+		
+		@Override
+		public AES_CTRCipherUtil build() { return new AES_CTRCipherUtil(METADATA, keyMetadata, keySize, keyMet, bufferSize); }
+		
+	}
 }
