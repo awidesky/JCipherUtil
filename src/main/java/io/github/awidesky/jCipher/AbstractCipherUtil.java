@@ -1,5 +1,6 @@
 package io.github.awidesky.jCipher;
 
+import java.io.ByteArrayOutputStream;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
@@ -117,20 +118,124 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	protected void processCipher(Cipher c, MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
 		byte[] buf = new byte[BUFFER_SIZE];
-		while(true) {
-			int read = mp.getSrc(buf);
-			if(read == -1) break;
-			byte[] result = c.update(buf, 0, read);
-			if(result != null) mc.consumeResult(result);
-		}
+		while(updateCipher(c, buf, mp, mc) != -1) { }
+		doFinal(c, mc);
+	}
+	
+	protected int updateCipher(Cipher c, byte[] buf, MessageProvider mp, MessageConsumer mc) {
+		int read = mp.getSrc(buf);
+		if(read == -1) return -1;
+		byte[] result = c.update(buf, 0, read);
+		if(result != null) mc.consumeResult(result);
+		return read;
+	}
+	protected int doFinal(Cipher c, MessageConsumer mc) {
 		try {
-			mc.consumeResult(c.doFinal());
+			byte[] res = c.doFinal();
+			mc.consumeResult(res);
+			return res.length;
 		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
 			throw new OmittedCipherException(e);
 		}
 	}
 	
 	
+	@Override
+	public CipherTunnel cipherEncryptTunnel(MessageProvider mp, MessageConsumer mc) {
+		return new CipherTunnel(initEncrypt(mc), mp, mc, BUFFER_SIZE) {
+			@Override
+			public int transfer() {
+				return updateCipher(c, buf, mp, mc);
+			}
+			@Override
+			public int transferFinal() { //TODO : 코드 재사용? 
+				int read = 0;
+				int total = 0;
+				while(true) {
+					read = updateCipher(c, buf, mp, mc);
+					if(read == -1) break;
+					total += read;
+				}
+				total += doFinal(c, mc);
+				return total;
+			}
+		};
+	}
+
+	@Override
+	public CipherTunnel cipherDecryptTunnel(MessageProvider mp, MessageConsumer mc) {
+		return new CipherTunnel(initDecrypt(mp), mp, mc, BUFFER_SIZE) {
+			@Override
+			public int transfer() {
+				return updateCipher(c, buf, mp, mc);
+			}
+			@Override
+			public int transferFinal() {
+				int read = 0;
+				int total = 0;
+				while(true) {
+					read = updateCipher(c, buf, mp, mc);
+					if(read == -1) break;
+					total += read;
+				}
+				total += doFinal(c, mc);
+				return total;
+			}
+		};
+	}
+
+	@Override
+	public UpdatableEncrypter UpdatableEncryptCipher(MessageConsumer mc) {
+		return new UpdatableEncrypter(initEncrypt(mc), mc, BUFFER_SIZE) {
+			@Override
+			public int update(byte[] buf) {
+				byte[] result = c.update(buf);
+				if(result != null) mc.consumeResult(result);
+				return result.length;
+			}
+			
+			@Override
+			public int doFinal(byte[] buf) {
+				try {
+					byte[] result = c.doFinal(buf);
+					mc.consumeResult(result);
+					return result.length;
+				} catch (IllegalBlockSizeException | BadPaddingException | NestedIOException e) {
+					throw new OmittedCipherException(e);
+				}
+			}
+		};
+	}
+
+	@Override
+	public UpdatableDecrypter UpdatableDecryptCipher(MessageProvider mp) {
+		return new UpdatableDecrypter(initDecrypt(mp), mp, BUFFER_SIZE) {
+			@Override
+			public byte[] update() {
+				int read = mp.getSrc(buf);
+				if(read == -1) return null;
+				return c.update(buf, 0, read);
+			}
+			
+			@Override
+			public byte[] doFinal() {
+				ByteArrayOutputStream bao = new ByteArrayOutputStream();
+				while(true) {
+					byte[] b = update();
+					if(b == null) break;
+					bao.writeBytes(b);
+				}
+				try {
+					bao.writeBytes(c.doFinal());
+				} catch (IllegalBlockSizeException | BadPaddingException e) {
+					throw new OmittedCipherException(e);
+				}
+				return bao.toByteArray();
+			}
+		};
+	}
+	
+
 	protected String fields() {
 		Cipher c = getCipherInstance();
 		return "\"" + c.getAlgorithm() + "\" from \"" + c.getProvider() + "\"";

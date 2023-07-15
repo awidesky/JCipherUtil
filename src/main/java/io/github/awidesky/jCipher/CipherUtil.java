@@ -192,4 +192,10 @@ public interface CipherUtil {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
 	}
 	
+	
+	public CipherTunnel cipherEncryptTunnel(MessageProvider mp, MessageConsumer mc);
+	public CipherTunnel cipherDecryptTunnel(MessageProvider mp, MessageConsumer mc);
+	public UpdatableEncrypter UpdatableEncryptCipher(MessageConsumer mc);
+	public UpdatableDecrypter UpdatableDecryptCipher(MessageProvider mp);
+	
 }
