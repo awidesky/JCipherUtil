@@ -35,7 +35,7 @@ public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
 	protected IVCipherProperty getCipherProperty() { return METADATA; }
 
 
-	public static class Builder extends SymmetricCipherUtilBuilder {
+	public static class Builder extends SymmetricCipherUtilBuilder<AES_CBCCipherUtil> {
 		
 		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
 		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }

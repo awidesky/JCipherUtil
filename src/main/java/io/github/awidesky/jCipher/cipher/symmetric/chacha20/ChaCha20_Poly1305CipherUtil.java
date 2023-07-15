@@ -22,7 +22,7 @@ public class ChaCha20_Poly1305CipherUtil extends AbstractChaCha20CipherUtil {
 	protected IVCipherProperty getCipherProperty() { return METADATA; }
 
 
-	public static class Builder extends SymmetricCipherUtilBuilder {
+	public static class Builder extends SymmetricCipherUtilBuilder<ChaCha20_Poly1305CipherUtil> {
 		
 		public Builder(byte[] key, ChaCha20KeySize keySize) { super(key, keySize); }
 		public Builder(char[] password, ChaCha20KeySize keySize) { super(password, keySize); }

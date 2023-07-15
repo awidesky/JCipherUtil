@@ -46,7 +46,7 @@ public class AES_GCMCipherUtil extends SymmetricNonceCipherUtil {
 	}
 
 
-	public static class Builder extends SymmetricCipherUtilBuilder {
+	public static class Builder extends SymmetricCipherUtilBuilder<AES_GCMCipherUtil> {
 		
 		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
 		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }

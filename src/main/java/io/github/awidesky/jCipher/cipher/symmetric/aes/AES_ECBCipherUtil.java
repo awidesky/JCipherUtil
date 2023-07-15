@@ -8,8 +8,6 @@ import io.github.awidesky.jCipher.key.KeySize;
 import io.github.awidesky.jCipher.properties.CipherProperty;
 
 
-
-
 public class AES_ECBCipherUtil extends SymmetricCipherUtil {
 
 	public final static CipherProperty METADATA = new CipherProperty("AES", "ECB", "PKCS5PADDING", "AES");
@@ -24,7 +22,7 @@ public class AES_ECBCipherUtil extends SymmetricCipherUtil {
 	@Override
 	protected CipherProperty getCipherProperty() { return METADATA; }
 
-	public static class Builder extends SymmetricCipherUtilBuilder {
+	public static class Builder extends SymmetricCipherUtilBuilder<AES_ECBCipherUtil> {
 		
 		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
 		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }

@@ -15,7 +15,7 @@ import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.key.KeySize;
 
-public abstract class SymmetricCipherUtilBuilder {
+public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil> {
 
 	protected SymmetricKeyMaterial keyMet;
 	protected KeySize keySize;
@@ -42,12 +42,12 @@ public abstract class SymmetricCipherUtilBuilder {
 		this.keySize = keySize;
 	}
 	
-	public SymmetricCipherUtilBuilder keyMetadata(SymmetricKeyMetadata keyMetadata) {
+	public SymmetricCipherUtilBuilder<T> keyMetadata(SymmetricKeyMetadata keyMetadata) {
 		this.keyMetadata = keyMetadata;
 		return this;
 	}
 	
-	public SymmetricCipherUtilBuilder bufferSize(int bufferSize) {
+	public SymmetricCipherUtilBuilder<T> bufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 		return this;
 	}
@@ -55,5 +55,5 @@ public abstract class SymmetricCipherUtilBuilder {
 	
 	/**
 	 * */
-	public abstract SymmetricCipherUtil build();
+	public abstract T build();
 }
