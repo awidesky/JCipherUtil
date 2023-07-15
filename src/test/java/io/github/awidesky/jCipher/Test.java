@@ -164,14 +164,14 @@ class Test {
 		list.add(dynamicTest("byte[] key test", () -> {
 			byte[] key = new byte[1024];
 			new Random().nextBytes(key);
-			CipherUtil ci1 = new AES_GCMCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
-			CipherUtil ci2 = new AES_GCMCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(MessageProvider.from(ci2.encryptToSingleBuffer(MessageProvider.from(src))))));
 		}));	
 		list.add(dynamicTest("password test", () -> {
-			CipherUtil ci1 = new AES_GCMCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
-			CipherUtil ci2 = new AES_GCMCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(MessageProvider.from(ci2.encryptToSingleBuffer(MessageProvider.from(src))))));
 		}));	
