@@ -52,7 +52,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	/**
 	 * Generate new {@code SecretKeySpec} for the symmetric cipher.
 	 * */
-	private SecretKeySpec generateKey(byte[] salt, int iterationCount) { //TODO : do not regenerate key if it's already generated!
+	private SecretKeySpec generateKey(byte[] salt, int iterationCount) {
 		return key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount);
 	}
 	

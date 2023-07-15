@@ -26,7 +26,7 @@ public abstract class SymmetricKeyMaterial {
 	 * @param iterationCount the iteration count.
 	 * @throws OmittedCipherException if an {@link RuntimeException}(like {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException}) is thrown
 	 */
-	public abstract SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException; //TODO : to getKey
+	public abstract SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException;
 	
 
 }

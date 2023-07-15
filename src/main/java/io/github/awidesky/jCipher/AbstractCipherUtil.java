@@ -16,7 +16,6 @@ import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class AbstractCipherUtil implements CipherUtil {
 
-	//TODO : protected Cipher cipher;
 	protected final int BUFFER_SIZE;
 	protected final CipherProperty cipherMetadata;
 	
