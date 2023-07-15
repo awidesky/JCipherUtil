@@ -1,80 +1,51 @@
 package io.github.awidesky.jCipher.cipher.asymmetric;
 
-import java.security.Key;
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.InvalidKeyException;
+import java.util.Optional;
 
-import javax.security.auth.DestroyFailedException;
+import javax.crypto.Cipher;
 
 import io.github.awidesky.jCipher.AbstractCipherUtil;
 import io.github.awidesky.jCipher.cipher.asymmetric.key.AsymmetricKeyMaterial;
-import io.github.awidesky.jCipher.key.KeyMetadata;
+import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
+import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.properties.CipherProperty;
+import io.github.awidesky.jCipher.util.IllegalMetadataException;
+import io.github.awidesky.jCipher.util.NestedIOException;
 import io.github.awidesky.jCipher.util.OmittedCipherException;
 
 public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 
 	protected AsymmetricKeyMaterial key;
-	protected KeyMetadata keyMetadata;
 
-	public AsymmetricCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, int bufferSize) {
+	public AsymmetricCipherUtil(CipherProperty cipherMetadata, AsymmetricKeyMaterial keyMet, int bufferSize) {
 		super(cipherMetadata, bufferSize);
-		this.keyMetadata = keyMetadata;
+		this.key = keyMet;
 	}
 
-	/**
-	 * Initialize this {@code AsymmetricCipherUtil} with new key.
-	 * */
-	public AsymmetricCipherUtil init() {
+	@Override
+	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
 		try {
-			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new OmittedCipherException(e); }
-		this.key = new AsymmetricKeyMaterial(getCipherProperty().KEY_ALGORITMH_NAME,  keyMetadata.keyLen);
-		return this;
-	}
-	/**
-	 * Initialize this {@code AsymmetricCipherUtil} with given {@code PublicKey}.
-	 * */
-	public AsymmetricCipherUtil init(PublicKey key) {
-		try {
-			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new OmittedCipherException(e); }
-		this.key = new AsymmetricKeyMaterial(key);
-		return this;
-	}
-	/**
-	 * Initialize this {@code AsymmetricCipherUtil} with given {@code PrivateKey}.
-	 * */
-	public AsymmetricCipherUtil init(PrivateKey key) {
-		try {
-			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new OmittedCipherException(e); }
-		this.key = new AsymmetricKeyMaterial(key);
-		return this;
-	}
-	/**
-	 * Initialize this {@code AsymmetricCipherUtil} with given {@code KeyPair}.
-	 * */
-	public AsymmetricCipherUtil init(KeyPair keyPair) {
-		try {
-			if(this.key != null) this.key.destroy();
-		} catch (DestroyFailedException e) { throw new OmittedCipherException(e); }
-		this.key = new AsymmetricKeyMaterial(keyPair);
-		return this;
+			Cipher c = getCipherInstance();
+			c.init(Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
+					() -> new IllegalMetadataException("This " + toString() + " instance does not have a public key!")));
+			return c;
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}
 	}
 
-	/***/
 	@Override
-	protected Key getEncryptKey() { return key.getKey().getPublic(); }
-	@Override
-	protected Key getDecryptKey() { return key.getKey().getPrivate(); }
-
-	public KeyPair keyPair() { return key.getKey(); }
-	
-	@Override
-	protected String fields() {
-		return super.fields() + ", key size : " + keyMetadata.keyLen + "bit";
+	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
+		try {
+			Cipher c = getCipherInstance();
+			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
+					() -> new IllegalMetadataException("This " + toString() + " instance does not have a private key!")));
+			return c;
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}
 	}
 	
+
 }

@@ -1,7 +1,5 @@
 package io.github.awidesky.jCipher;
 
-import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
@@ -41,14 +39,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	protected abstract CipherProperty getCipherProperty();
-	/**
-	 * Generate new {@code Key} for encryption.
-	 * */
-	protected abstract Key getEncryptKey();
-	/**
-	 * Generate new {@code Key} for decryption.
-	 * */
-	protected abstract Key getDecryptKey();
 
 	/**
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
@@ -57,15 +47,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * This method can be override to generate and write additional metadata(like Initial Vector)
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
-		try {
-			Cipher c = getCipherInstance();
-			c.init(Cipher.ENCRYPT_MODE, getEncryptKey());
-			return c;
-		} catch (InvalidKeyException e) {
-			throw new OmittedCipherException(e);
-		}
-	}
+	protected abstract Cipher initEncrypt(MessageConsumer mc) throws NestedIOException;
 
 	/**
 	 * Initialize <code>Cipher</code> in decrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
@@ -74,15 +56,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * This method can be override to read additional metadata(like Initial Vector) from {@code MessageConsumer} 
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
-		try {
-			Cipher c = getCipherInstance();
-			c.init(Cipher.DECRYPT_MODE, getDecryptKey());
-			return c;
-		} catch (InvalidKeyException e) {
-			throw new OmittedCipherException(e);
-		}		
-	}
+	protected abstract Cipher initDecrypt(MessageProvider mp) throws NestedIOException;
 
 
 	

@@ -9,45 +9,41 @@
 
 package io.github.awidesky.jCipher.cipher.asymmetric;
 
-import io.github.awidesky.jCipher.cipher.symmetric.key.ByteArrayKeyMaterial;
-import io.github.awidesky.jCipher.cipher.symmetric.key.PasswordKeyMaterial;
-import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
-import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
-import io.github.awidesky.jCipher.key.KeySize;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
-public abstract class AsymmetricCipherUtilBuilder {
+import io.github.awidesky.jCipher.cipher.asymmetric.key.AsymmetricKeyMaterial;
+import io.github.awidesky.jCipher.cipher.asymmetric.key.KeyPairKeyMaterial;
+import io.github.awidesky.jCipher.cipher.asymmetric.key.PrivateKeyOnlyKeyMaterial;
+import io.github.awidesky.jCipher.cipher.asymmetric.key.PublicKeyOnlyKeyMaterial;
 
-	protected SymmetricKeyMaterial keyMet;
-	protected KeySize keySize;
-	protected SymmetricKeyMetadata keyMetadata = SymmetricKeyMetadata.DEFAULT;
+public abstract class AsymmetricCipherUtilBuilder <T extends AsymmetricCipherUtil> {
+
+	protected AsymmetricKeyMaterial keyMet;
 	protected int bufferSize = 8 * 1024;
 	
 	/**
-	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given password and key size.
-	 * 
-	 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
+	 * Initialize this {@code AsymmetricCipherUtil} with given {@code PublicKey}.
 	 * */
-	public AsymmetricCipherUtilBuilder(char[] password, KeySize keySize) {
-		keyMet = new PasswordKeyMaterial(password);
-		this.keySize = keySize;
+	public AsymmetricCipherUtilBuilder(PublicKey key) {
+		keyMet = new PublicKeyOnlyKeyMaterial(key);
 	}
 	/**
-	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given <code>byte[]</code> key and key size.
-	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
-	 * 
-	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
+	 * Initialize this {@code AsymmetricCipherUtil} with given {@code PrivateKey}.
 	 * */
-	public AsymmetricCipherUtilBuilder(byte[] key, KeySize keySize) {
-		keyMet = new ByteArrayKeyMaterial(key);;
-		this.keySize = keySize;
+	public AsymmetricCipherUtilBuilder(PrivateKey key) {
+		keyMet = new PrivateKeyOnlyKeyMaterial(key);
+	}
+	/**
+	 * Initialize this {@code AsymmetricCipherUtil} with given {@code KeyPair}.
+	 * */
+	public AsymmetricCipherUtilBuilder(KeyPair keyPair) {
+		keyMet = new KeyPairKeyMaterial(keyPair);
 	}
 	
-	public AsymmetricCipherUtilBuilder keyMetadata(SymmetricKeyMetadata keyMetadata) {
-		this.keyMetadata = keyMetadata;
-		return this;
-	}
-	
-	public AsymmetricCipherUtilBuilder bufferSize(int bufferSize) {
+
+	public AsymmetricCipherUtilBuilder<T> bufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 		return this;
 	}
@@ -55,5 +51,5 @@ public abstract class AsymmetricCipherUtilBuilder {
 	
 	/**
 	 * */
-	protected abstract AsymmetricCipherUtil getCipherUtil();
+	public abstract T build();
 }

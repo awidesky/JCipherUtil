@@ -11,7 +11,6 @@ package io.github.awidesky.jCipher.cipher.symmetric;
 
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
-import java.security.Key;
 import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
@@ -48,16 +47,6 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		this.key = key;
 	}
 	
-	/**
-	 * Generate new {@code Key} for encryption. Encryption and decryption is done by the same key.
-	 * */
-	@Override
-	protected Key getEncryptKey() { throw new UnsupportedOperationException("must call generateKey() with proper salt."); }
-	/**
-	 * Generate new {@code Key} for decryption. Encryption and decryption is done by the same key.
-	 * */
-	@Override
-	protected Key getDecryptKey() { throw new UnsupportedOperationException("must call generateKey() with proper salt."); }
 
 
 	/**
