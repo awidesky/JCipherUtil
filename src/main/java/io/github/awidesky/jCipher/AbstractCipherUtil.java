@@ -197,7 +197,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			@Override
 			public int doFinal(byte[] buf) {
 				try {
-					byte[] result = c.doFinal(buf);
+					byte[] result = (buf == null) ? c.doFinal() : c.doFinal(buf); 
 					mc.consumeResult(result);
 					return result.length;
 				} catch (IllegalBlockSizeException | BadPaddingException | NestedIOException e) {

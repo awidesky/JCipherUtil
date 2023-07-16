@@ -210,7 +210,9 @@ public interface MessageProvider extends AutoCloseable {
 			public int getSrc(byte[] buffer, int off) throws NestedIOException {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(buffer).position(off);
-					return in.read(buf);
+					int read = in.read(buf);
+					if(read == -1) closeResource();
+					return read;
 				} catch (IOException e) {
 					closeResource();
 					throw new NestedIOException(e);
