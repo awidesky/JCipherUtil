@@ -64,6 +64,9 @@ import io.github.awidesky.jCipher.key.keyExchange.ecdh.ECDHKeyExchanger;
 import io.github.awidesky.jCipher.key.keyExchange.xdh.XDHKeyExchanger;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
+import io.github.awidesky.jCipher.util.CipherTunnel;
+import io.github.awidesky.jCipher.util.UpdatableDecrypter;
+import io.github.awidesky.jCipher.util.UpdatableEncrypter;
 
 @DisplayName("ALL Cipher Tests")
 @Execution(ExecutionMode.CONCURRENT)

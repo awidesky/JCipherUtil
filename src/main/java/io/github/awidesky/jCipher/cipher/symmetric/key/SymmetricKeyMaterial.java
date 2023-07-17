@@ -14,7 +14,7 @@ import java.security.spec.InvalidKeySpecException;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 public abstract class SymmetricKeyMaterial {
 

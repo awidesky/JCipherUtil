@@ -14,9 +14,9 @@ import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.key.KeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.properties.CipherProperty;
-import io.github.awidesky.jCipher.util.IllegalMetadataException;
-import io.github.awidesky.jCipher.util.NestedIOException;
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.IllegalMetadataException;
+import io.github.awidesky.jCipher.util.exceptions.NestedIOException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 
 /**

@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipher.util;
+package io.github.awidesky.jCipher.util.exceptions;
 
 public class IllegalMetadataException extends RuntimeException {
 

@@ -18,7 +18,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 public class PublicKeyOnlyKeyMaterial extends AsymmetricKeyMaterial {
 

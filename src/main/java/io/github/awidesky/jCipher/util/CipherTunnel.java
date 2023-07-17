@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher;
+package io.github.awidesky.jCipher.util;
 
 import javax.crypto.Cipher;
 
@@ -32,6 +32,20 @@ public abstract class CipherTunnel {
 		this.buf = new byte[bufferSize];
 	}
 	
-	public abstract int transfer();
-	public abstract int transferFinal();
+	public int transfer() { return update(c, buf, mp, mc); }
+	
+	public int transferFinal() { //TODO : 코드 재사용? 
+		int read = 0;
+		int total = 0;
+		while(true) {
+			read = update(c, buf, mp, mc);
+			if(read == -1) break;
+			total += read;
+		}
+		total += doFinal(c, mc);
+		return total;
+	}
+	
+	protected abstract int update(Cipher cipher, byte[] buffer, MessageProvider msgp, MessageConsumer msgc);
+	protected abstract int doFinal(Cipher cipher, MessageConsumer msgc);
 }

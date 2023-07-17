@@ -6,7 +6,7 @@ import java.security.spec.NamedParameterSpec;
 import java.util.stream.Stream;
 
 import io.github.awidesky.jCipher.key.keyExchange.KeyExchanger;
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 public class XDHKeyExchanger extends KeyExchanger {
 

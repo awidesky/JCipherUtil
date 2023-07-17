@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
 
-import io.github.awidesky.jCipher.util.NestedIOException;
+import io.github.awidesky.jCipher.util.exceptions.NestedIOException;
 
 /**
  * An Interface that abstracts providing cipher source data from various sources(e.g. byte array, a file, base64 encoded text, an <code>InputStream</code> etc.).

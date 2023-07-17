@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 

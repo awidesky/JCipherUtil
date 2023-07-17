@@ -23,9 +23,9 @@ import io.github.awidesky.jCipher.key.KeySize;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
 import io.github.awidesky.jCipher.properties.CipherProperty;
-import io.github.awidesky.jCipher.util.IllegalMetadataException;
-import io.github.awidesky.jCipher.util.NestedIOException;
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.IllegalMetadataException;
+import io.github.awidesky.jCipher.util.exceptions.NestedIOException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 /**
  * Abstract <code>CipherUtil</code> class that uses salt and iteration count for key derivation.

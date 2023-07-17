@@ -10,7 +10,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 public abstract class KeyExchanger {
 	

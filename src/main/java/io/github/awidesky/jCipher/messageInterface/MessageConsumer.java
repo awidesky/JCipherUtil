@@ -17,7 +17,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import io.github.awidesky.jCipher.util.NestedIOException;
+import io.github.awidesky.jCipher.util.exceptions.NestedIOException;
 
 
 /**

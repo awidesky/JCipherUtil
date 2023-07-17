@@ -14,7 +14,7 @@ import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipher.cipher.asymmetric.key.AsymmetricKeyMaterial;
 import io.github.awidesky.jCipher.properties.CipherProperty;
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 

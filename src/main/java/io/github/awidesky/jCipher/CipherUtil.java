@@ -19,8 +19,11 @@ import java.util.HexFormat;
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.util.NestedIOException;
-import io.github.awidesky.jCipher.util.OmittedCipherException;
+import io.github.awidesky.jCipher.util.CipherTunnel;
+import io.github.awidesky.jCipher.util.UpdatableDecrypter;
+import io.github.awidesky.jCipher.util.UpdatableEncrypter;
+import io.github.awidesky.jCipher.util.exceptions.NestedIOException;
+import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 
 /**

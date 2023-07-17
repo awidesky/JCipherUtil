@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipher.util;
+package io.github.awidesky.jCipher.util.exceptions;
 
 /**
  * {@code NestedOmittedCipherException} is an {@code RuntimeException} that encapsulates
