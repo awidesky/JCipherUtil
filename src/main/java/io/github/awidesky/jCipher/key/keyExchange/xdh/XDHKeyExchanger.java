@@ -5,20 +5,19 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.NamedParameterSpec;
 import java.util.stream.Stream;
 
-import io.github.awidesky.jCipher.key.keyExchange.KeyExchanger;
+import io.github.awidesky.jCipher.key.keyExchange.EllipticCurveKeyExchanger;
+import io.github.awidesky.jCipher.properties.EllipticCurveKeyExchangeProperty;
 import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
-public class XDHKeyExchanger extends KeyExchanger {
+public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 
-	public static final String KEYPAIRALGORITHM = "XDH";
-	public static final String KEYAGREEMENTALGORITHM = "XDH";
+	
 	private XDHCurves curve = XDHCurves.X25519;
 
-	@Override
-	protected String getKeyAgreementAlgorithm() { return KEYAGREEMENTALGORITHM; }
-
-	@Override
-	protected String getKeyPairAlgorithm() { return KEYPAIRALGORITHM; }
+	
+	public XDHKeyExchanger() {
+		super(new EllipticCurveKeyExchangeProperty("XDH", "XDH"));
+	}
 
 	/**
 	 * Init with default curve

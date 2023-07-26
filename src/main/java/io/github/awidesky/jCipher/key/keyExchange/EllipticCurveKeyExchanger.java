@@ -10,25 +10,26 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
+import io.github.awidesky.jCipher.properties.EllipticCurveKeyExchangeProperty;
 import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
-public abstract class KeyExchanger {
+public abstract class EllipticCurveKeyExchanger {
 	
 	private final KeyPairGenerator keyPairGenerator;
 	private final KeyAgreement keyAgreement;
 	private KeyPair keyPair;
+	protected final EllipticCurveKeyExchangeProperty property; 
 	
-	public KeyExchanger() {
+	public EllipticCurveKeyExchanger(EllipticCurveKeyExchangeProperty property) {
+		this.property = property;
 		try {
-			keyPairGenerator = KeyPairGenerator.getInstance(getKeyPairAlgorithm());
-			keyAgreement = KeyAgreement.getInstance(getKeyAgreementAlgorithm());
+			keyPairGenerator = KeyPairGenerator.getInstance(property.KEYPAIRALGORITHM);
+			keyAgreement = KeyAgreement.getInstance(property.KEYAGREEMENTALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}
 	}
 	
-	protected abstract String getKeyAgreementAlgorithm();
-	protected abstract String getKeyPairAlgorithm();
 	protected abstract AlgorithmParameterSpec getKeyPairParameterSpec();
 	public abstract String[] getAvailableCurves();
 	public abstract PublicKey init() throws OmittedCipherException;

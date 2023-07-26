@@ -5,23 +5,22 @@ import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.util.stream.Stream;
 
-import io.github.awidesky.jCipher.key.keyExchange.KeyExchanger;
+import io.github.awidesky.jCipher.key.keyExchange.EllipticCurveKeyExchanger;
+import io.github.awidesky.jCipher.properties.EllipticCurveKeyExchangeProperty;
 import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 /**
  * https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange
  * */
-public class ECDHKeyExchanger extends KeyExchanger {
+public class ECDHKeyExchanger extends EllipticCurveKeyExchanger {
 
-	public static final String KEYPAIRALGORITHM = "EC";
-	public static final String KEYAGREEMENTALGORITHM = "ECDH";
 	private ECDHCurves curve = ECDHCurves.secp521r1; // TODO : constructor with curve
 
-	@Override
-	protected String getKeyAgreementAlgorithm() { return KEYAGREEMENTALGORITHM; }
 
-	@Override
-	protected String getKeyPairAlgorithm() { return KEYPAIRALGORITHM; }
+	public ECDHKeyExchanger() {
+		super(new EllipticCurveKeyExchangeProperty("EC", "ECDH"));
+	}
+
 
 	/**
 	 * Init with default curve

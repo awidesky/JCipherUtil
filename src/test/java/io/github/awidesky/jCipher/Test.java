@@ -59,7 +59,7 @@ import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20_Poly1305Cip
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
-import io.github.awidesky.jCipher.key.keyExchange.KeyExchanger;
+import io.github.awidesky.jCipher.key.keyExchange.EllipticCurveKeyExchanger;
 import io.github.awidesky.jCipher.key.keyExchange.ecdh.ECDHKeyExchanger;
 import io.github.awidesky.jCipher.key.keyExchange.xdh.XDHKeyExchanger;
 import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
@@ -91,7 +91,7 @@ class Test {
 					new RSA_ECBSupplier(RSAKeySize.SIZE_2048, CIPHERUTILBUFFERSIZE)
 				))
 			);
-	static final Map<String, Stream<Supplier<KeyExchanger>>> keyExchangers = Map.ofEntries(
+	static final Map<String, Stream<Supplier<EllipticCurveKeyExchanger>>> keyExchangers = Map.ofEntries(
 			Map.entry("ECDH", Stream.of(ECDHKeyExchanger::new)),
 			Map.entry("XDH", Stream.of(XDHKeyExchanger::new))
 			);
@@ -138,11 +138,11 @@ class Test {
 		addCommonCipherTests(tests, cipherSuppl.withBothKey());
 		return dynamicContainer(cipherSuppl.withBothKey().toString(), tests);
 	}
-	private static DynamicContainer keyExchangerTests(Supplier<KeyExchanger> keyExchSuppl) {
+	private static DynamicContainer keyExchangerTests(Supplier<EllipticCurveKeyExchanger> keyExchSuppl) {
 		return dynamicContainer(keyExchSuppl.get().toString(), Stream.of(keyExchSuppl.get().getAvailableCurves()).map(curveName ->
 			dynamicTest(curveName, () -> {
-				KeyExchanger k1 = keyExchSuppl.get(); 
-				KeyExchanger k2 = keyExchSuppl.get();
+				EllipticCurveKeyExchanger k1 = keyExchSuppl.get(); 
+				EllipticCurveKeyExchanger k2 = keyExchSuppl.get();
 				
 				PublicKey p1 = k1.init(curveName);
 				PublicKey p2 = k2.init(curveName);
