@@ -13,7 +13,7 @@ public class CipherProperty {
 	/**
 	 * Name of the cipher algorithm, like <code>AES</code> or <code>ChaCha20-Poly1305</code>
 	 * 
-	 * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names</a>
+	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names</a>
 	 * */
 	public final String ALGORITMH_NAME;
 	

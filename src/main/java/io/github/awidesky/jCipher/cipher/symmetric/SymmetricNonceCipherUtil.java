@@ -33,8 +33,9 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 
 	/**
 	 * Construct this {@code SymmetricCipherUtil} with given parameters.
+	 * Subclasses should call this constructor with appropriate {@code CipherProperty} object(mostly static final field).
 	 * */
-	public SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) { super(cipherMetadata, keyMetadata, keySize, key, bufferSize); }
+	protected SymmetricNonceCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) { super(cipherMetadata, keyMetadata, keySize, key, bufferSize); }
 
 	/**
 	 * Get {@code AlgorithmParameterSpec} of this cipher.

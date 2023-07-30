@@ -1,6 +1,10 @@
 package io.github.awidesky.jCipher.key.keyExchange.xdh;
 
-//standard curven names https://download.java.net/java/early_access/panama/docs/specs/security/standard-names.html#parameterspec-names
+/**
+ * Available Elliptic curves for XDH Key exchange algorithm.
+ * <a href=https://download.java.net/java/early_access/panama/docs/specs/security/standard-names.html#parameterspec-names>
+ * https://download.java.net/java/early_access/panama/docs/specs/security/standard-names.html#parameterspec-names<a>
+ */
 public enum XDHCurves {
 
 	X25519("X25519"),

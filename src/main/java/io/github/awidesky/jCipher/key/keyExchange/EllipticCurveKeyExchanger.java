@@ -13,6 +13,11 @@ import javax.crypto.KeyAgreement;
 import io.github.awidesky.jCipher.properties.EllipticCurveKeyExchangeProperty;
 import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
+/**
+ * An abstract class for Key exchange process via Elliptic curve key agreement(key exchange) protocol like DiffieHellman algorithm.
+ * @see KeyAgreement
+ * @see EllipticCurveKeyExchangeProperty
+ * */
 public abstract class EllipticCurveKeyExchanger {
 	
 	private final KeyPairGenerator keyPairGenerator;
@@ -20,7 +25,11 @@ public abstract class EllipticCurveKeyExchanger {
 	private KeyPair keyPair;
 	protected final EllipticCurveKeyExchangeProperty property; 
 	
-	public EllipticCurveKeyExchanger(EllipticCurveKeyExchangeProperty property) {
+	/** 
+	 * Initiate this {@code EllipticCurveKeyExchanger} whit given {@code EllipticCurveKeyExchangeProperty}.
+	 * Subclasses should call this constructor with appropriate {@code EllipticCurveKeyExchangeProperty} object(mostly static final field).
+	 * */
+	protected EllipticCurveKeyExchanger(EllipticCurveKeyExchangeProperty property) {
 		this.property = property;
 		try {
 			keyPairGenerator = KeyPairGenerator.getInstance(property.KEYPAIRALGORITHM);
@@ -30,14 +39,27 @@ public abstract class EllipticCurveKeyExchanger {
 		}
 	}
 	
+	/**
+	 * @return {@code AlgorithmParameterSpec} of this {@code EllipticCurveKeyExchanger}, 
+	 * which usually defined in the subclasses.
+	 * */
 	protected abstract AlgorithmParameterSpec getKeyPairParameterSpec();
+	/**
+	 * @return {@code String} array that holds name of every available elliptic curves.
+	 * */
 	public abstract String[] getAvailableCurves();
-	public abstract PublicKey init() throws OmittedCipherException;
-	public abstract PublicKey init(String curveName) throws OmittedCipherException;
+	/**
+	 * @return name of the elliptic curve that is currently used(if non was specified, default curve)
+	 * */
 	public abstract String getCurve();
 	
 
-	protected PublicKey generateKeyPair() { //TODO : 생성자로?
+	/**
+	 * Initiate this {@code EllipticCurveKeyExchanger} and generate new {@code KeyPair}.
+	 * 
+	 * @return {@code PublicKey} of generated {@code KeyPair}
+	 * */
+	protected PublicKey generateKeyPair() {
 		try {
 			keyPairGenerator.initialize(getKeyPairParameterSpec());
 			keyPair = keyPairGenerator.genKeyPair();
@@ -47,7 +69,12 @@ public abstract class EllipticCurveKeyExchanger {
 		}
 	}
 	
-
+	/**
+	 * Do Key agreement process and generate shared secret.
+	 * 
+	 * @param other {@code PublicKey} obtained from peer
+	 * @return byte array contains generated shared secret(can be used as a secret key for {@code SymmetricCipherUtil}
+	 * */
 	public byte[] exchangeKey(PublicKey other) throws OmittedCipherException {
 		try {
 			keyAgreement.init(keyPair.getPrivate());
@@ -58,6 +85,12 @@ public abstract class EllipticCurveKeyExchanger {
 		}
 	}
 
+	
+	/**
+	 * Returns a {@code String} that represents this {@code EllipticCurveKeyExchanger} object.
+	 * Result {@code String} contains simple class name, and algorithm & provider name of the {@code KeyPairGenerator} and {@code KeyAgreement}
+	 * used in this {@code EllipticCurveKeyExchanger} object.
+	 * */
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [\"" + keyPairGenerator.getAlgorithm() + "\" from \"" + keyPairGenerator.getProvider()
