@@ -39,8 +39,9 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 
 	/**
 	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
+	 * Subclasses should call this constructor with appropriate {@code CipherProperty} object(mostly static final field).
 	 * */
-	public SymmetricCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
+	protected SymmetricCipherUtil(CipherProperty cipherMetadata, SymmetricKeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
 		super(cipherMetadata, bufferSize);
 		this.keyMetadata = keyMetadata;
 		this.keySize = keySize;

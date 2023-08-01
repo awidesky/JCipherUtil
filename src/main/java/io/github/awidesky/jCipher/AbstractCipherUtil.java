@@ -24,8 +24,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	
 	/**
 	 * Construct this {@code AbstractCipherUtil} with given {@code CipherProperty} and buffer size.
+	 *  Subclasses should call this constructor with appropriate {@code CipherProperty} object(mostly static final field).
 	 * */
-	public AbstractCipherUtil(CipherProperty cipherMetadata, int bufferSize) {
+	protected AbstractCipherUtil(CipherProperty cipherMetadata, int bufferSize) {
 		this.cipherMetadata = cipherMetadata;
 		this.BUFFER_SIZE = bufferSize;
 	}

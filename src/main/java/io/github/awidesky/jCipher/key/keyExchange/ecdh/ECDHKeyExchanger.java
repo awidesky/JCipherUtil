@@ -1,51 +1,67 @@
 package io.github.awidesky.jCipher.key.keyExchange.ecdh;
 
-import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.util.stream.Stream;
 
 import io.github.awidesky.jCipher.key.keyExchange.EllipticCurveKeyExchanger;
 import io.github.awidesky.jCipher.properties.EllipticCurveKeyExchangeProperty;
-import io.github.awidesky.jCipher.util.exceptions.OmittedCipherException;
 
 /**
- * https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange
+ * An {@code EllipticCurveKeyExchanger} subclass that uses ECDH(Elliptic-curve Diffie–Hellman) Key exchange protocol.
+ * <a href="https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange">
+ * https://cryptobook.nakov.com/asymmetric-key-ciphers/ecdh-key-exchange<a>
+ * <a href="https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman">
+ * https://en.wikipedia.org/wiki/Elliptic-curve_Diffie%E2%80%93Hellman<a>
  * */
 public class ECDHKeyExchanger extends EllipticCurveKeyExchanger {
 
-	private ECDHCurves curve = ECDHCurves.secp521r1; // TODO : constructor with curve
-
-
-	public ECDHKeyExchanger() {
-		super(new EllipticCurveKeyExchangeProperty("EC", "ECDH"));
-	}
-
+	/**
+	 * Name of the elliptic curve.
+	 * @see ECDHCurves
+	 * */
+	private final String curve;
 
 	/**
-	 * Init with default curve
+	 * Initiate the object with given {@code ECDHCurves} parameter.
+	 * 
+	 * @see ECDHCurves
+	 * @param curve An elliptic curve for ECDH key exchange.
 	 * */
-	@Override
-	public PublicKey init() throws OmittedCipherException {
-		return init(ECDHCurves.secp521r1);
+	public ECDHKeyExchanger(ECDHCurves curve) {
+		super(new EllipticCurveKeyExchangeProperty("EC", "ECDH"));
+		this.curve = curve.name();
 	}
-	public PublicKey init(ECDHCurves curve) {
+	/**
+	 * Initiate the object with given name of the curve.
+	 * Curves that is <i>not<i> specified in {@code ECDHCurves} may be supported(if JCE in user's JDK/JRE supports the curve), 
+	 * but it is recommended to use one of the officially supported curves.
+	 * <p>See <a href=https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names>
+	 * https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names<a> 
+	 * for available elliptic curves.
+	 * 
+	 * @see ECDHCurves
+	 * @param curve An elliptic curve for ECDH key exchange.
+	 * */
+	public ECDHKeyExchanger(String curve) {
+		super(new EllipticCurveKeyExchangeProperty("EC", "ECDH"));
 		this.curve = curve;
-		return init(curve.name());
-	}
-	@Override
-	public PublicKey init(String curveName) throws OmittedCipherException {
-		this.curve = ECDHCurves.valueOf(curveName);
-		return generateKeyPair();
 	}
 
+	/**
+	 * @return {@code AlgorithmParameterSpec} of this {@code ECDHKeyExchanger}
+	 * */
 	@Override
-	protected AlgorithmParameterSpec getKeyPairParameterSpec() { return new ECGenParameterSpec(curve.name()); }
+	protected AlgorithmParameterSpec getKeyPairParameterSpec() { return new ECGenParameterSpec(curve); }
 	
+	/**
+	 * @return All names of the available curves that specified in {@code ECDHCurves}
+	 */
 	@Override
 	public String[] getAvailableCurves() { return Stream.of(ECDHCurves.values()).map(ECDHCurves::name).toArray(String[]::new); }
 
+	/** @return The name of the curve used in this {@code ECDHKeyExchanger} instance */
 	@Override
-	public String getCurve() { return curve.curveName; }
+	public String getCurve() { return curve; }
 
 }
