@@ -36,7 +36,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -91,9 +90,9 @@ class Test {
 					new RSA_ECBSupplier(RSAKeySize.SIZE_2048, CIPHERUTILBUFFERSIZE)
 				))
 			);
-	static final Map<String, Stream<Supplier<EllipticCurveKeyExchanger>>> keyExchangers = Map.ofEntries(
-			Map.entry("ECDH", Stream.of(ECDHKeyExchanger::new)),
-			Map.entry("XDH", Stream.of(XDHKeyExchanger::new))
+	static final Map<String, Stream<EllipticCurveKeyExchanger[]>> keyExchangers = Map.ofEntries(
+			Map.entry("ECDH", Stream.of(ECDHKeyExchanger.getAvailableCurves()).map(c -> new ECDHKeyExchanger[] {new ECDHKeyExchanger(c), new ECDHKeyExchanger(c)})),
+			Map.entry("XDH", Stream.of(XDHKeyExchanger.getAvailableCurves()).map(c -> new XDHKeyExchanger[] {new XDHKeyExchanger(c), new XDHKeyExchanger(c)}))
 			);
 			
 
@@ -138,23 +137,20 @@ class Test {
 		addCommonCipherTests(tests, cipherSuppl.withBothKey());
 		return dynamicContainer(cipherSuppl.withBothKey().toString(), tests);
 	}
-	private static DynamicContainer keyExchangerTests(Supplier<EllipticCurveKeyExchanger> keyExchSuppl) {
-		return dynamicContainer(keyExchSuppl.get().toString(), Stream.of(keyExchSuppl.get().getAvailableCurves()).map(curveName ->
-			dynamicTest(curveName, () -> {
-				EllipticCurveKeyExchanger k1 = keyExchSuppl.get(); 
-				EllipticCurveKeyExchanger k2 = keyExchSuppl.get();
+	private static DynamicNode keyExchangerTests(EllipticCurveKeyExchanger[] keyExchArr) {
+		return dynamicTest(keyExchArr[0].getCurve(), () -> {
+			EllipticCurveKeyExchanger k1 = keyExchArr[0]; 
+			EllipticCurveKeyExchanger k2 = keyExchArr[1];
 				
-				PublicKey p1 = k1.init(curveName);
-				PublicKey p2 = k2.init(curveName);
+			PublicKey p1 = k1.init();
+			PublicKey p2 = k2.init();
 					
-				SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(k1.exchangeKey(p2), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(); 
-				SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(k2.exchangeKey(p1), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(k1.exchangeKey(p2), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(); 
+			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(k2.exchangeKey(p1), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
 					
-				assertEquals(Hash.hashPlain(src),
-						Hash.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
-					
-			})
-		));
+			assertEquals(Hash.hashPlain(src),
+					Hash.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
+		});
 	}
 	
 	

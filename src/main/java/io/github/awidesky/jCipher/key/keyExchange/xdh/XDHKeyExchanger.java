@@ -21,7 +21,15 @@ public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 	private final String curve;
 
 	/**
-	 * Initiate the object with given {@code XDHCurves} parameter.
+	 * Creates the object with default curve(X25519).
+	 * 
+	 * @see XDHCurves
+	 * */
+	public XDHKeyExchanger() {
+		this(XDHCurves.X25519);
+	}
+	/**
+	 * Creates the object with given {@code XDHCurves} parameter.
 	 * 
 	 * @see XDHCurves
 	 * @param curve An elliptic curve for XDH key exchange.
@@ -31,7 +39,7 @@ public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 		this.curve = curve.name();
 	}
 	/**
-	 * Initiate the object with given name of the curve.
+	 * Creates the object with given name of the curve.
 	 * Curves that is <i>not<i> specified in {@code XDHCurves} may be supported(if JCE in user's JDK/JRE supports the curve), 
 	 * but it is recommended to use one of the officially supported curves.
 	 * <p>See <a href=https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names>
@@ -55,8 +63,7 @@ public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 	/**
 	 * @return All names of the available curves that specified in {@code XDHCurves}
 	 */
-	@Override
-	public String[] getAvailableCurves() { return Stream.of(XDHCurves.values()).map(XDHCurves::name).toArray(String[]::new); }
+	public static String[] getAvailableCurves() { return Stream.of(XDHCurves.values()).map(XDHCurves::name).toArray(String[]::new); }
 
 	/** @return The name of the curve used in this {@code XDHKeyExchanger} instance */
 	@Override

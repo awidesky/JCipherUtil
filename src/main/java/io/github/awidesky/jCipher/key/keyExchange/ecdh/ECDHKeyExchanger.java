@@ -23,7 +23,15 @@ public class ECDHKeyExchanger extends EllipticCurveKeyExchanger {
 	private final String curve;
 
 	/**
-	 * Initiate the object with given {@code ECDHCurves} parameter.
+	 * Creates the object with default curve(secp521r1).
+	 * 
+	 * @see ECDHCurves
+	 * */
+	public ECDHKeyExchanger() {
+		this(ECDHCurves.secp521r1);
+	}
+	/**
+	 * Creates the object with given {@code ECDHCurves} parameter.
 	 * 
 	 * @see ECDHCurves
 	 * @param curve An elliptic curve for ECDH key exchange.
@@ -33,7 +41,7 @@ public class ECDHKeyExchanger extends EllipticCurveKeyExchanger {
 		this.curve = curve.name();
 	}
 	/**
-	 * Initiate the object with given name of the curve.
+	 * Creates the object with given name of the curve.
 	 * Curves that is <i>not<i> specified in {@code ECDHCurves} may be supported(if JCE in user's JDK/JRE supports the curve), 
 	 * but it is recommended to use one of the officially supported curves.
 	 * <p>See <a href=https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names>
@@ -57,8 +65,7 @@ public class ECDHKeyExchanger extends EllipticCurveKeyExchanger {
 	/**
 	 * @return All names of the available curves that specified in {@code ECDHCurves}
 	 */
-	@Override
-	public String[] getAvailableCurves() { return Stream.of(ECDHCurves.values()).map(ECDHCurves::name).toArray(String[]::new); }
+	public static String[] getAvailableCurves() { return Stream.of(ECDHCurves.values()).map(ECDHCurves::name).toArray(String[]::new); }
 
 	/** @return The name of the curve used in this {@code ECDHKeyExchanger} instance */
 	@Override

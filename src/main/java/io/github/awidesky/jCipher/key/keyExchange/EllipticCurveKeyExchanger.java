@@ -26,7 +26,7 @@ public abstract class EllipticCurveKeyExchanger {
 	protected final EllipticCurveKeyExchangeProperty property; 
 	
 	/** 
-	 * Initiate this {@code EllipticCurveKeyExchanger} whit given {@code EllipticCurveKeyExchangeProperty}.
+	 * Creates this {@code EllipticCurveKeyExchanger} whit given {@code EllipticCurveKeyExchangeProperty}.
 	 * Subclasses should call this constructor with appropriate {@code EllipticCurveKeyExchangeProperty} object(mostly static final field).
 	 * */
 	protected EllipticCurveKeyExchanger(EllipticCurveKeyExchangeProperty property) {
@@ -45,15 +45,10 @@ public abstract class EllipticCurveKeyExchanger {
 	 * */
 	protected abstract AlgorithmParameterSpec getKeyPairParameterSpec();
 	/**
-	 * @return {@code String} array that holds name of every available elliptic curves.
-	 * */
-	public abstract String[] getAvailableCurves();
-	/**
 	 * @return name of the elliptic curve that is currently used(if non was specified, default curve)
 	 * */
 	public abstract String getCurve();
 	
-
 	/**
 	 * Initiate this {@code EllipticCurveKeyExchanger} and generate new {@code KeyPair}.
 	 * 
@@ -67,6 +62,15 @@ public abstract class EllipticCurveKeyExchanger {
 		} catch (InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
+	}
+	
+	/**
+	 * Initiate this {@code EllipticCurveKeyExchanger} and return new {@code PublicKey}.
+	 * 
+	 * @return {@code PublicKey} of generated {@code KeyPair}
+	 * */
+	public PublicKey init() {
+		return generateKeyPair();
 	}
 	
 	/**
