@@ -11,9 +11,9 @@ package io.github.awidesky.jCipher.cipherSupplier;
 
 import java.security.KeyPair;
 
-import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
-import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSAKeySize;
-import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSA_ECBCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa.RSAKeySize;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa.RSA_ECBCipherUtil;
 
 public class RSA_ECBSupplier extends AsymmetricSupplier {
 

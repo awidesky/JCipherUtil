@@ -45,28 +45,29 @@ import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
-import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
-import io.github.awidesky.jCipher.cipher.asymmetric.rsa.RSAKeySize;
-import io.github.awidesky.jCipher.cipher.symmetric.SymmetricCipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.aes.AESKeySize;
-import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CBCCipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CTRCipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_ECBCipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_GCMCipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20CipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20KeySize;
-import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20_Poly1305CipherUtil;
-import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
 import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
-import io.github.awidesky.jCipher.key.keyExchange.EllipticCurveKeyExchanger;
-import io.github.awidesky.jCipher.key.keyExchange.ecdh.ECDHKeyExchanger;
-import io.github.awidesky.jCipher.key.keyExchange.xdh.XDHKeyExchanger;
-import io.github.awidesky.jCipher.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipher.messageInterface.MessageProvider;
-import io.github.awidesky.jCipher.util.CipherTunnel;
-import io.github.awidesky.jCipher.util.UpdatableDecrypter;
-import io.github.awidesky.jCipher.util.UpdatableEncrypter;
+import io.github.awidesky.jCipherUtil.CipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa.RSAKeySize;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AESKeySize;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_CBCCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_CTRCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_ECBCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_GCMCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20CipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20KeySize;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20_Poly1305CipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
+import io.github.awidesky.jCipherUtil.key.keyExchange.EllipticCurveKeyExchanger;
+import io.github.awidesky.jCipherUtil.key.keyExchange.ecdh.ECDHKeyExchanger;
+import io.github.awidesky.jCipherUtil.key.keyExchange.xdh.XDHKeyExchanger;
+import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
+import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.util.CipherTunnel;
+import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
+import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
 
 @DisplayName("ALL Cipher Tests")
 @Execution(ExecutionMode.CONCURRENT)
@@ -75,15 +76,15 @@ class Test {
 	static final int CIPHERUTILBUFFERSIZE = 31; //odd number for test
 	static final Map<String, Stream<SymmetricCipherUtil>> symmetricCiphers = Map.ofEntries(
 			Map.entry("AES", Stream.of(
-					new AES_GCMCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
-					new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
-					new AES_CTRCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
-					new AES_CTRCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
-					new AES_CBCCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build()
+					new AES_GCMCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
+					new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
+					new AES_CTRCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
+					new AES_CTRCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
+					new AES_CBCCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build()
 				)),
 			Map.entry("ChaCha20", Stream.of(
-					new ChaCha20_Poly1305CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
-					new ChaCha20CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build()
+					new ChaCha20_Poly1305CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
+					new ChaCha20CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build()
 				))
 			);
 	static final Map<String, Stream<AsymmetricSupplier>> asymmetricCiphers = Map.ofEntries(
@@ -146,8 +147,8 @@ class Test {
 			PublicKey p1 = k1.init();
 			PublicKey p2 = k2.init();
 					
-			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(k1.exchangeKey(p2), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(); 
-			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(k2.exchangeKey(p1), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(k1.exchangeKey(p2), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(); 
+			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(k2.exchangeKey(p1), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
 					
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(c2.decryptToSingleBuffer(MessageProvider.from(c1.encryptToSingleBuffer(MessageProvider.from(src))))));
@@ -159,14 +160,14 @@ class Test {
 		list.add(dynamicTest("byte[] key test", () -> {
 			byte[] key = new byte[1024];
 			new Random().nextBytes(key);
-			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
-			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
+			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(MessageProvider.from(ci2.encryptToSingleBuffer(MessageProvider.from(src))))));
 		}));	
 		list.add(dynamicTest("password test", () -> {
-			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
-			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build();
+			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
+			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(MessageProvider.from(ci2.encryptToSingleBuffer(MessageProvider.from(src))))));
 		}));	

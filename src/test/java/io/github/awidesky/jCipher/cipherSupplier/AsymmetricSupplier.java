@@ -9,8 +9,8 @@
 
 package io.github.awidesky.jCipher.cipherSupplier;
 
-import io.github.awidesky.jCipher.cipher.asymmetric.AsymmetricCipherUtil;
-import io.github.awidesky.jCipher.key.KeySize;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.key.KeySize;
 
 public abstract class AsymmetricSupplier {
 
