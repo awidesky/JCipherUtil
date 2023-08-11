@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
-import javax.crypto.spec.IvParameterSpec;
 
 import io.github.awidesky.jCipher.cipher.symmetric.SymmetricNonceCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMaterial;
@@ -55,7 +54,7 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 			//generate random key too. Key iteration process would consume much time.
 			KeyGenerator sf = KeyGenerator.getInstance(getCipherProperty().KEY_ALGORITMH_NAME);
 			sf.init(keySize.size);
-			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), new IvParameterSpec(iv));
+			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), getAlgorithmParameterSpec(iv));
 			/**Tweak IV and key*/
 			
 			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
