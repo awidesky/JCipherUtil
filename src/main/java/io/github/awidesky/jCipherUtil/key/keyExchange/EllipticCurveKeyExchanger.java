@@ -92,7 +92,7 @@ public abstract class EllipticCurveKeyExchanger {
 	
 	/**
 	 * Returns a {@code String} that represents this {@code EllipticCurveKeyExchanger} object.
-	 * Result {@code String} contains simple class name, and algorithm & provider name of the {@code KeyPairGenerator} and {@code KeyAgreement}
+	 * Result {@code String} contains simple class name, and algorithm/provider name of the {@code KeyPairGenerator} and {@code KeyAgreement}
 	 * used in this {@code EllipticCurveKeyExchanger} object.
 	 * */
 	@Override

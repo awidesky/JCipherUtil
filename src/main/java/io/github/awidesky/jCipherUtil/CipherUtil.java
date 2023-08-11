@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.HexFormat;
 
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
@@ -36,7 +37,8 @@ import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
  * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
  * single {@code byte[]} buffer, etc)
  * <p>Every methods in this interface is thread-safe. Each call is run with new {@code Cipher} instance, and does not effect anything to the {@code CipherUtil} instance.
- * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableCipherUtil}
+ * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableEncrypter} 
+ * and {@link UpdatableDecrypter}
  * 
  * 
  * @see MessageProvider

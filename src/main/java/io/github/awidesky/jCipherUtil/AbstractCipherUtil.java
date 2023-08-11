@@ -71,10 +71,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * Encrypt from source(designated as <code>MessageProvider</code>)
 	 * and writes to given destination(designated as <code>MessageConsumer</code>).
 	 * <p>Default implementation calls two method {@link SymmetricCipherUtil#initEncrypt(MessageConsumer)},
-	 * {@link SymmetricCipherUtil#processCipher(MessageProvider, MessageConsumer)}, and close both parameters.
+	 * {@link SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)}, and close both parameters.
 	 *
 	 * @see SymmetricCipherUtil#initEncrypt(MessageConsumer)
-	 * @see SymmetricCipherUtil#processCipher(MessageProvider, MessageConsumer)
+	 * @see SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
@@ -94,10 +94,10 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * Decrypt from source(designated as <code>MessageProvider</code>)
 	 * and writes to given destination(designated as <code>MessageConsumer</code>).
 	 * <p>Default implementation calls two method {@link SymmetricCipherUtil#initDecrypt(MessageProvider)},
-	 * {@link SymmetricCipherUtil#processCipher(MessageProvider, MessageConsumer)}, and close both parameters.
+	 * {@link SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)}, and close both parameters.
 	 *
 	 * @see SymmetricCipherUtil#initEncrypt(MessageConsumer)
-	 * @see SymmetricCipherUtil#processCipher(MessageProvider, MessageConsumer)
+	 * @see SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
