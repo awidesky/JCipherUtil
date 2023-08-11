@@ -1,6 +1,9 @@
 package io.github.awidesky.jCipher;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -33,7 +36,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	
 	protected Cipher getCipherInstance() {
 		try {
-			return Cipher.getInstance(getCipherProperty().ALGORITMH_NAME + "/" + getCipherProperty().ALGORITMH_MODE + "/" + getCipherProperty().ALGORITMH_PADDING);
+			return Cipher.getInstance(Stream.of(getCipherProperty().ALGORITMH_NAME, getCipherProperty().ALGORITMH_MODE, getCipherProperty().ALGORITMH_PADDING)
+					.filter(Predicate.not(""::equals)).collect(Collectors.joining("/")));
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
 			throw new OmittedCipherException(e);
 		}
