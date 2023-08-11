@@ -53,6 +53,7 @@ import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CBCCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_CTRCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_ECBCipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.aes.AES_GCMCipherUtil;
+import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20CipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20KeySize;
 import io.github.awidesky.jCipher.cipher.symmetric.chacha20.ChaCha20_Poly1305CipherUtil;
 import io.github.awidesky.jCipher.cipher.symmetric.key.SymmetricKeyMetadata;
@@ -82,7 +83,7 @@ class Test {
 				)),
 			Map.entry("ChaCha20", Stream.of(
 					new ChaCha20_Poly1305CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build(),
-					new ChaCha20_Poly1305CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build()
+					new ChaCha20CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(SymmetricKeyMetadata.DEFAULT).build()
 				))
 			);
 	static final Map<String, Stream<AsymmetricSupplier>> asymmetricCiphers = Map.ofEntries(
