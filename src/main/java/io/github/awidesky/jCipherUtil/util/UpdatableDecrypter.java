@@ -15,16 +15,16 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
 
 public class UpdatableDecrypter {
 	
 	final private Cipher c;
-	final private MessageProvider mp;
+	final private InPut mp;
 	final private byte[] buf;
 	
-	public UpdatableDecrypter(Cipher c, MessageProvider mp, int bufferSize) {
+	public UpdatableDecrypter(Cipher c, InPut mp, int bufferSize) {
 		this.c = c;
 		this.mp = mp;
 		this.buf = new byte[bufferSize];

@@ -27,7 +27,7 @@ import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
  * An Interface that abstracts providing cipher source data from various sources(e.g. byte array, a file, base64 encoded text, an <code>InputStream</code> etc.).
  * <p>This interface does not care if the data is encryped, decrypted, or not.
  * */
-public interface MessageProvider extends AutoCloseable {
+public interface InPut extends AutoCloseable {
 	/**
 	 * Reads from Source data(may be a plainText or cipherText) and fills the buffer
 	 * 
@@ -60,7 +60,7 @@ public interface MessageProvider extends AutoCloseable {
 	 * 
 	 * @param src source of the data
 	 * */
-	public static MessageProvider from(byte[] src) {
+	public static InPut from(byte[] src) {
 		return from(new ByteArrayInputStream(src));
 	}
 	/**
@@ -68,17 +68,17 @@ public interface MessageProvider extends AutoCloseable {
 	 * 
 	 * @param src source of the data
 	 * */
-	public static MessageProvider from(File src) throws FileNotFoundException {
+	public static InPut from(File src) throws FileNotFoundException {
 		return from(new FileInputStream(src));
 	}
 	/**
 	 * Provide data from a <code>String</code>.
 	 * <p>Encode <code>String</code> with <code>Charset.defaultCharset()</code>.
 	 * 
-	 * @see MessageProvider#from(String, Charset)
+	 * @see InPut#from(String, Charset)
 	 * @param str source of the data
 	 * */
-	public static MessageProvider from(String str) {
+	public static InPut from(String str) {
 		return from(str, Charset.defaultCharset());
 	}
 	/**
@@ -88,15 +88,15 @@ public interface MessageProvider extends AutoCloseable {
 	 * @param str source of the data
 	 * @param encoding character set to encode the <code>String</code>
 	 * */
-	public static MessageProvider from(String str, Charset encoding) {
-		return MessageProvider.from(new ByteArrayInputStream(str.getBytes(encoding)));
+	public static InPut from(String str, Charset encoding) {
+		return InPut.from(new ByteArrayInputStream(str.getBytes(encoding)));
 	}
 	/**
 	 * Provide data from a Base64 encoded <code>String</code>
 	 * 
 	 * @param base64 Base64 encoded <code>String</code>
 	 * */
-	public static MessageProvider fromBase64(String base64) {
+	public static InPut fromBase64(String base64) {
 		return from(Base64.getDecoder().decode(base64));
 	}
 	/**
@@ -104,17 +104,17 @@ public interface MessageProvider extends AutoCloseable {
 	 * 
 	 * @param hex Hex encoded <code>String</code>
 	 * */
-	public static MessageProvider fromHexString(String hex) {
-		return MessageProvider.from(HexFormat.of().parseHex(hex.toLowerCase()));
+	public static InPut fromHexString(String hex) {
+		return InPut.from(HexFormat.of().parseHex(hex.toLowerCase()));
 	}
 	/**
 	 * Provide data from a <code>InputStream</code>.<p>
 	 * This method closes <code>InputStream</code> after the Cipher process is successfully finished
 	 * 
-	 * @see MessageProvider#from(InputStream, boolean)
+	 * @see InPut#from(InputStream, boolean)
 	 * @param src <code>InputStream</code> to source of the data
 	 * */
-	public static MessageProvider from(InputStream src) {
+	public static InPut from(InputStream src) {
 		return from(src, true);
 	}
 	/**
@@ -123,8 +123,8 @@ public interface MessageProvider extends AutoCloseable {
 	 * @param src <code>InputStream</code> to source of the data
 	 * @param close whether or not close <code>InputStream</code> after the Cipher process is successfully finished
 	 * */
-	public static MessageProvider from(InputStream src, boolean close) {
-		return new MessageProvider() {
+	public static InPut from(InputStream src, boolean close) {
+		return new InPut() {
 			private InputStream in = src;
 			@Override
 			public int getSrc(byte[] buffer, int off) throws NestedIOException {
@@ -147,11 +147,11 @@ public interface MessageProvider extends AutoCloseable {
 	 * but only up to <code>len</code> bytes from the <code>InputStream</code> are provided.
 	 * This method closes <code>InputStream</code> after the Cipher process is successfully finished
 	 * 
-	 * @see MessageProvider#from(InputStream, long, boolean)
+	 * @see InPut#from(InputStream, long, boolean)
 	 * @param src <code>InputStream</code> to source of the data
 	 * @param len  the maximum number of bytes to provide
 	 * */
-	public static MessageProvider from(InputStream src, long len) {
+	public static InPut from(InputStream src, long len) {
 		return from(src, len, true);
 	}
 	/**
@@ -162,8 +162,8 @@ public interface MessageProvider extends AutoCloseable {
 	 * @param len  the maximum number of bytes to provide
 	 * @param close whether or not close <code>InputStream</code> after the Cipher process is successfully finished
 	 * */
-	public static MessageProvider from(InputStream src, long len, boolean close) {
-		return new MessageProvider() {
+	public static InPut from(InputStream src, long len, boolean close) {
+		return new InPut() {
 			private InputStream in = src;
 			private long length = len;
 			@Override
@@ -191,10 +191,10 @@ public interface MessageProvider extends AutoCloseable {
 	 * Provide data from a <code>ReadableByteChannel</code>
 	 * This method closes <code>ReadableByteChannel</code> after the Cipher process is successfully finished
 	 * 
-	 * @see MessageProvider#from(ReadableByteChannel, boolean)
+	 * @see InPut#from(ReadableByteChannel, boolean)
 	 * @param src <code>ReadableByteChannel</code> to source of the data
 	 * */
-	public static MessageProvider from(ReadableByteChannel src) {
+	public static InPut from(ReadableByteChannel src) {
 		return from(src, true);
 	}
 	/**
@@ -203,8 +203,8 @@ public interface MessageProvider extends AutoCloseable {
 	 * @param src <code>ReadableByteChannel</code> to source of the data
 	 * @param close whether or not close <code>ReadableByteChannel</code> after the Cipher process is successfully finished
 	 * */
-	public static MessageProvider from(ReadableByteChannel src, boolean close) {
-		return new MessageProvider() {
+	public static InPut from(ReadableByteChannel src, boolean close) {
+		return new InPut() {
 			private ReadableByteChannel in = src;
 			@Override
 			public int getSrc(byte[] buffer, int off) throws NestedIOException {
@@ -230,11 +230,11 @@ public interface MessageProvider extends AutoCloseable {
 	 * but only up to <code>len</code> bytes from the <code>ReadableByteChannel</code> are provided.
 	 * This method closes <code>ReadableByteChannel</code> after the Cipher process is successfully finished
 	 * 
-	 * @see MessageProvider#from(ReadableByteChannel, long, boolean)
+	 * @see InPut#from(ReadableByteChannel, long, boolean)
 	 * @param src <code>ReadableByteChannel</code> to source of the data
 	 * @param len  the maximum number of bytes to provide
 	 * */
-	public static MessageProvider from(ReadableByteChannel src, long len) {
+	public static InPut from(ReadableByteChannel src, long len) {
 		return from(src, len, true);
 	}
 	/**
@@ -245,8 +245,8 @@ public interface MessageProvider extends AutoCloseable {
 	 * @param len  the maximum number of bytes to provide
 	 * @param close whether or not close <code>ReadableByteChannel</code> after the Cipher process is successfully finished
 	 * */
-	public static MessageProvider from(ReadableByteChannel src, long len, boolean close) {
-		return new MessageProvider() {
+	public static InPut from(ReadableByteChannel src, long len, boolean close) {
+		return new InPut() {
 			private ReadableByteChannel in = src;
 			private long length = len;
 			

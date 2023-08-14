@@ -18,8 +18,8 @@ import java.util.HexFormat;
 
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
 import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
@@ -30,10 +30,10 @@ import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
 /**
  * An utility that provides easy encrypt/decrypt methods from/to various input/output.
  * <p>The {@code CipherUtil} interface provides two generic encrypt/decrypt method named
- * {@link CipherUtil#encrypt(MessageProvider, MessageConsumer)} and {@link CipherUtil#decrypt(MessageProvider, MessageConsumer)},
+ * {@link CipherUtil#encrypt(InPut, OutPut)} and {@link CipherUtil#decrypt(InPut, OutPut)},
  * that can be used to encrypt and decrypt from/to many types.
  * <p>Also, The {@code CipherUtil} interface provides several utility encrypt/decrypt method like 
- * {@link CipherUtil#encryptToBase64(MessageProvider)}, {@link CipherUtil#decryptToBase64(MessageProvider)}, {@link CipherUtil#decryptToString(MessageProvider, Charset)}  
+ * {@link CipherUtil#encryptToBase64(InPut)}, {@link CipherUtil#decryptToBase64(InPut)}, {@link CipherUtil#decryptToString(InPut, Charset)}  
  * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
  * single {@code byte[]} buffer, etc)
  * <p>Every methods in this interface is thread-safe. Each call is run with new {@code Cipher} instance, and does not effect anything to the {@code CipherUtil} instance.
@@ -41,8 +41,8 @@ import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
  * and {@link UpdatableDecrypter}
  * 
  * 
- * @see MessageProvider
- * @see MessageConsumer
+ * @see InPut
+ * @see OutPut
  * @see SymmetricCipherUtil
  * @see AsymmetricCipherUtil
  * */
@@ -58,7 +58,7 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException;
+	public void encrypt(InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException;
 	/**
 	 * Simple way to decrypt from a source to a destination.
 	 * 
@@ -69,7 +69,7 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException;
+	public void decrypt(InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException;
 	
 	
 	/**
@@ -84,7 +84,7 @@ public interface CipherUtil {
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	public default void encrypt(InputStream in, OutputStream out) throws NestedIOException, OmittedCipherException {
-		encrypt(MessageProvider.from(in), MessageConsumer.to(out));
+		encrypt(InPut.from(in), OutPut.to(out));
 	}
 
 	/**
@@ -99,7 +99,7 @@ public interface CipherUtil {
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	public default void decrypt(InputStream in, OutputStream out) throws NestedIOException, OmittedCipherException {
-		decrypt(MessageProvider.from(in), MessageConsumer.to(out));
+		decrypt(InPut.from(in), OutPut.to(out));
 	}
 	
 	/**
@@ -110,9 +110,9 @@ public interface CipherUtil {
 	 * @throws NestedIOException 
 	 * @throws OmittedCipherException 
 	 * */
-	public default byte[] encryptToSingleBuffer(MessageProvider mp) throws NestedIOException, OmittedCipherException {
+	public default byte[] encryptToSingleBuffer(InPut mp) throws NestedIOException, OmittedCipherException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		encrypt(mp, MessageConsumer.to(bos));
+		encrypt(mp, OutPut.to(bos));
 		return bos.toByteArray();
 	}
 	/**
@@ -125,7 +125,7 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String encryptToBase64(MessageProvider mp) throws NestedIOException, OmittedCipherException {
+	public default String encryptToBase64(InPut mp) throws NestedIOException, OmittedCipherException {
 		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(mp));
 	}
 	/**
@@ -138,7 +138,7 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String encryptToHexString(MessageProvider mp) throws NestedIOException, OmittedCipherException {
+	public default String encryptToHexString(InPut mp) throws NestedIOException, OmittedCipherException {
 		return HexFormat.of().formatHex(encryptToSingleBuffer(mp));
 	}
 	/**
@@ -151,9 +151,9 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default byte[] decryptToSingleBuffer(MessageProvider mp) throws NestedIOException, OmittedCipherException {
+	public default byte[] decryptToSingleBuffer(InPut mp) throws NestedIOException, OmittedCipherException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		decrypt(mp, MessageConsumer.to(bos));
+		decrypt(mp, OutPut.to(bos));
 		return bos.toByteArray();
 	}
 	/**
@@ -166,7 +166,7 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToString(MessageProvider mp, Charset encoding) throws NestedIOException, OmittedCipherException {
+	public default String decryptToString(InPut mp, Charset encoding) throws NestedIOException, OmittedCipherException {
 		return new String(decryptToSingleBuffer(mp), encoding);
 	}
 	/**
@@ -179,7 +179,7 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToBase64(MessageProvider mp) throws NestedIOException, OmittedCipherException {
+	public default String decryptToBase64(InPut mp) throws NestedIOException, OmittedCipherException {
 		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(mp));
 	}
 
@@ -193,14 +193,14 @@ public interface CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToHexString(MessageProvider mp) throws NestedIOException, OmittedCipherException {
+	public default String decryptToHexString(InPut mp) throws NestedIOException, OmittedCipherException {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
 	}
 	
 	
-	public CipherTunnel cipherEncryptTunnel(MessageProvider mp, MessageConsumer mc);
-	public CipherTunnel cipherDecryptTunnel(MessageProvider mp, MessageConsumer mc);
-	public UpdatableEncrypter UpdatableEncryptCipher(MessageConsumer mc);
-	public UpdatableDecrypter UpdatableDecryptCipher(MessageProvider mp);
+	public CipherTunnel cipherEncryptTunnel(InPut mp, OutPut mc);
+	public CipherTunnel cipherDecryptTunnel(InPut mp, OutPut mc);
+	public UpdatableEncrypter UpdatableEncryptCipher(OutPut mc);
+	public UpdatableDecrypter UpdatableDecryptCipher(InPut mp);
 	
 }

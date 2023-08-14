@@ -11,7 +11,7 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricNonceCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
@@ -37,7 +37,7 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 
 
 	@Override
-	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(InPut mp) throws NestedIOException {
 		int iterationCount = readIterationCount(mp);
 		byte[] salt = readSalt(mp);
 		byte[] nonce = readNonce(mp);

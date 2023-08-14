@@ -11,21 +11,21 @@ package io.github.awidesky.jCipherUtil.util;
 
 import javax.crypto.Cipher;
 
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
 /**
- * Provides a tunnel between {@code MessageProvider} and {@code MessageConsumer}
+ * Provides a tunnel between {@code InPut} and {@code OutPut}
  * The buffer size is defined in {@code AbstractCipherUtil#BUFFER_SIZE}
  * */
 public abstract class CipherTunnel {
 	
 	final protected Cipher c;
-	final protected MessageProvider mp;
-	final protected MessageConsumer mc;
+	final protected InPut mp;
+	final protected OutPut mc;
 	final byte[] buf;
 	
-	public CipherTunnel(Cipher c, MessageProvider mp, MessageConsumer mc, int bufferSize) {
+	public CipherTunnel(Cipher c, InPut mp, OutPut mc, int bufferSize) {
 		this.c = c;
 		this.mp = mp;
 		this.mc = mc;
@@ -46,6 +46,6 @@ public abstract class CipherTunnel {
 		return total;
 	}
 	
-	protected abstract int update(Cipher cipher, byte[] buffer, MessageProvider msgp, MessageConsumer msgc);
-	protected abstract int doFinal(Cipher cipher, MessageConsumer msgc);
+	protected abstract int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc);
+	protected abstract int doFinal(Cipher cipher, OutPut msgc);
 }

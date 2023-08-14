@@ -21,8 +21,8 @@ import javax.crypto.spec.IvParameterSpec;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.properties.IVCipherProperty;
 import io.github.awidesky.jCipherUtil.util.exceptions.IllegalMetadataException;
@@ -60,13 +60,13 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	}
 	
 	/**
-	 * Read nonce from given {@code MessageProvider} instance.
+	 * Read nonce from given {@code InPut} instance.
 	 * Size of the Nonce is determined by {@code CipherProperty}.
 	 * 
-	 * @return nonce from the {@code MessageProvider}
+	 * @return nonce from the {@code InPut}
 	 * @see IVCipherProperty#NONCESIZE
 	 * */
-	protected byte[] readNonce(MessageProvider mp) {
+	protected byte[] readNonce(InPut mp) {
 		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
 		int read = 0;
 		while ((read += mp.getSrc(nonce, read)) != nonce.length);
@@ -77,7 +77,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	protected abstract IVCipherProperty getCipherProperty();
 
 	@Override
-	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
+	protected Cipher initEncrypt(OutPut mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
 		byte[] salt = new byte[keyMetadata.saltLen]; 
 		sr.nextBytes(salt);
@@ -96,7 +96,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	}
 	
 	@Override
-	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(InPut mp) throws NestedIOException {
 		int iterationCount = readIterationCount(mp);
 		byte[] salt = readSalt(mp);
 		byte[] nonce = readNonce(mp);

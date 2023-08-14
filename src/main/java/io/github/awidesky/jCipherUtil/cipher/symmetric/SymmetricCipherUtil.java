@@ -20,8 +20,8 @@ import io.github.awidesky.jCipherUtil.AbstractCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
@@ -59,7 +59,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	
 
 	@Override
-	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
+	protected Cipher initEncrypt(OutPut mc) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
 		byte[] salt = new byte[keyMetadata.saltLen]; 
 		sr.nextBytes(salt);
@@ -77,7 +77,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	}
 
 	@Override
-	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(InPut mp) throws NestedIOException {
 		int iterationCount = readIterationCount(mp);
 		byte[] salt = readSalt(mp);
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
@@ -105,25 +105,25 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 
 
 	/**
-	 * Read salt from given {@code MessageProvider} instance.
+	 * Read salt from given {@code InPut} instance.
 	 * Size of the salt is determined by {@code KeyMetadata}.
 	 * 
 	 * @see KeyMetadata#saltLen
 	 * */
-	protected byte[] readSalt(MessageProvider mp) {
+	protected byte[] readSalt(InPut mp) {
 		byte[] salt = new byte[keyMetadata.saltLen]; 
 		int read = 0;
 		while ((read += mp.getSrc(salt, read)) != salt.length);
 		return salt;
 	}
 	/**
-	 * Read iteration count from given {@code MessageProvider} instance.
+	 * Read iteration count from given {@code InPut} instance.
 	 * Size of the iteration count is determined by {@code KeyMetadata}.
 	 * @return 
 	 * 
 	 * @see KeyMetadata#iterationRange
 	 * */
-	protected int readIterationCount(MessageProvider mp) {
+	protected int readIterationCount(InPut mp) {
 		byte[] iterationByte = new byte[4];
 		int read = 0;
 		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);

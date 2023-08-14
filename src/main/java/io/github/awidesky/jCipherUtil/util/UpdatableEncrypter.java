@@ -14,26 +14,26 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 
 import io.github.awidesky.jCipherUtil.CipherUtil;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
 
 
 /**
  *  This class allows user to manually input the buffer to encrypt multiple times.
- *  In contrast to {@code CipherUtil#encrypt(MessageProvider, MessageConsumer)},
+ *  In contrast to {@code CipherUtil#encrypt(InPut, OutPut)},
  *  {@code UpdatableEncryptera} can continue a multiple-part encryption with {@code UpdatableEncrypter#update(byte[])} method.
  *  
- *  <p>The instance of this class is irrelevant from {@code CipherUtil} instance that provided it via {@code CipherUtil#UpdatableEncryptCipher(MessageConsumer)}.
+ *  <p>The instance of this class is irrelevant from {@code CipherUtil} instance that provided it via {@code CipherUtil#UpdatableEncryptCipher(OutPut)}.
  *  Every metadata and cipher algorithm follows those of the {@code CipherUtil} instance, but calling {@code update(byte[])} and {@code doFinal(byte[] buf)} will not affect it.   
- *  @see CipherUtil#UpdatableEncryptCipher(MessageConsumer)
+ *  @see CipherUtil#UpdatableEncryptCipher(OutPut)
  * */
 public class UpdatableEncrypter {
 
 	private final Cipher c;
-	private final MessageConsumer mc;
+	private final OutPut mc;
 	
-	public UpdatableEncrypter(Cipher c, MessageConsumer mc) {
+	public UpdatableEncrypter(Cipher c, OutPut mc) {
 		this.c = c;
 		this.mc = mc;
 	}

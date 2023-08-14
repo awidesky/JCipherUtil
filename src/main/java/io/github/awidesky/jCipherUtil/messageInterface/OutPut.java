@@ -24,7 +24,7 @@ import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
  * An Interface that abstracts consuming cipher result and send to various destinations(e.g. byte array, a file, base64 encoded text, an <code>OutputStrea</code> etc.).
  * <p>This interface does not care if the data is encryped, decrypted, or not.
  * */
-public interface MessageConsumer extends AutoCloseable {
+public interface OutPut extends AutoCloseable {
 
 	/**
 	 * Consume data(may be a plainText or cipherText) and writes to the destination(may be a <code>String</code>, <code>File</code>, <code>OutPutStream</code> etc.)
@@ -49,17 +49,17 @@ public interface MessageConsumer extends AutoCloseable {
 	 * 
 	 * @param f <code>File</code> to write the data
 	 * */
-	public static MessageConsumer to(File f) throws FileNotFoundException {
+	public static OutPut to(File f) throws FileNotFoundException {
 		return to(new FileOutputStream(f));
 	}
 	/**
 	 * Consume data and writes to a <code>OutputStream</code>.<p>
 	 * This method closes <code>OutputStream</code> after the Cipher process is finished
 	 * 
-	 * @see MessageConsumer#to(OutputStream, boolean)
+	 * @see OutPut#to(OutputStream, boolean)
 	 * @param os <code>OutputStream</code> to write the data
 	 * */
-	public static MessageConsumer to(OutputStream os) {
+	public static OutPut to(OutputStream os) {
 		return to(os, true);
 	}
 	/**
@@ -68,8 +68,8 @@ public interface MessageConsumer extends AutoCloseable {
 	 * @param os <code>OutputStream</code> to write the data
 	 * @param close whether or not close <code>OutputStream</code> after the Cipher process is finished
 	 * */
-	public static MessageConsumer to(OutputStream os, boolean close) {
-		return new MessageConsumer() {
+	public static OutPut to(OutputStream os, boolean close) {
+		return new OutPut() {
 			private OutputStream out = os;
 			@Override
 			public void consumeResult(byte[] buffer) throws NestedIOException {
@@ -91,10 +91,10 @@ public interface MessageConsumer extends AutoCloseable {
 	 * Consume data and writes to a <code>WritableByteChannel</code>
 	 * This method closes <code>WritableByteChannel</code> after the Cipher process is finished
 	 * 
-	 * @see MessageConsumer#to(WritableByteChannel, boolean)
+	 * @see OutPut#to(WritableByteChannel, boolean)
 	 * @param ch <code>WritableByteChannel</code> to write the data
 	 * */
-	public static MessageConsumer to(WritableByteChannel ch) {
+	public static OutPut to(WritableByteChannel ch) {
 		return to(ch, true);
 	}
 	/**
@@ -103,8 +103,8 @@ public interface MessageConsumer extends AutoCloseable {
 	 * @param ch <code>WritableByteChannel</code> to write the data
 	 * @param close whether or not close <code>WritableByteChannel</code> after the Cipher process is finished
 	 * */
-	public static MessageConsumer to(WritableByteChannel ch, boolean close) {
-		return new MessageConsumer() {
+	public static OutPut to(WritableByteChannel ch, boolean close) {
+		return new OutPut() {
 			private WritableByteChannel out = ch;
 			@Override
 			public void consumeResult(byte[] buffer) throws NestedIOException {

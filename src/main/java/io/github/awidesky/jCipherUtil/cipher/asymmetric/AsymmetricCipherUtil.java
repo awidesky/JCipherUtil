@@ -7,8 +7,8 @@ import javax.crypto.Cipher;
 
 import io.github.awidesky.jCipherUtil.AbstractCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMaterial;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
@@ -24,7 +24,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	}
 
 	@Override
-	protected Cipher initEncrypt(MessageConsumer mc) throws NestedIOException {
+	protected Cipher initEncrypt(OutPut mc) throws NestedIOException {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
@@ -36,7 +36,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	}
 
 	@Override
-	protected Cipher initDecrypt(MessageProvider mp) throws NestedIOException {
+	protected Cipher initDecrypt(InPut mp) throws NestedIOException {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(

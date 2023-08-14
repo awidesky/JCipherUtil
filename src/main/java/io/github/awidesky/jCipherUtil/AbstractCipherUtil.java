@@ -11,8 +11,8 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
-import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
@@ -50,31 +50,31 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	/**
 	 * Initialize <code>Cipher</code> in encrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
 	 * In default, this method generates random salt and iteration count, initiate the <code>Cipher</code> instance, and write iteration count and salt
-	 * to {@code MessageConsumer}.
+	 * to {@code OutPut}.
 	 * This method can be override to generate and write additional metadata(like Initial Vector)
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract Cipher initEncrypt(MessageConsumer mc) throws NestedIOException;
+	protected abstract Cipher initEncrypt(OutPut mc) throws NestedIOException;
 
 	/**
 	 * Initialize <code>Cipher</code> in decrypt mode so that it can be usable(be able to call <code>cipher.update</code>, <code>cipher.doFinal</code>
-	 * In default, this method reads iteration count and salt from {@code MessageProvider}, and initiate the <code>Cipher</code> instance
+	 * In default, this method reads iteration count and salt from {@code InPut}, and initiate the <code>Cipher</code> instance
 	 * .
-	 * This method can be override to read additional metadata(like Initial Vector) from {@code MessageConsumer} 
+	 * This method can be override to read additional metadata(like Initial Vector) from {@code OutPut} 
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract Cipher initDecrypt(MessageProvider mp) throws NestedIOException;
+	protected abstract Cipher initDecrypt(InPut mp) throws NestedIOException;
 
 
 	
 	/**
-	 * Encrypt from source(designated as <code>MessageProvider</code>)
-	 * and writes to given destination(designated as <code>MessageConsumer</code>).
-	 * <p>Default implementation calls two method {@link SymmetricCipherUtil#initEncrypt(MessageConsumer)},
-	 * {@link SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)}, and close both parameters.
+	 * Encrypt from source(designated as <code>InPut</code>)
+	 * and writes to given destination(designated as <code>OutPut</code>).
+	 * <p>Default implementation calls two method {@link SymmetricCipherUtil#initEncrypt(OutPut)},
+	 * {@link SymmetricCipherUtil#processCipher(Cipher, InPut, OutPut)}, and close both parameters.
 	 *
-	 * @see SymmetricCipherUtil#initEncrypt(MessageConsumer)
-	 * @see SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)
+	 * @see SymmetricCipherUtil#initEncrypt(OutPut)
+	 * @see SymmetricCipherUtil#processCipher(Cipher, InPut, OutPut)
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
@@ -84,20 +84,20 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	@Override
-	public void encrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
+	public void encrypt(InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException {
 		try (mp; mc) {
 			processCipher(initEncrypt(mc), mp, mc);
 		}
 	}
 
 	/**
-	 * Decrypt from source(designated as <code>MessageProvider</code>)
-	 * and writes to given destination(designated as <code>MessageConsumer</code>).
-	 * <p>Default implementation calls two method {@link SymmetricCipherUtil#initDecrypt(MessageProvider)},
-	 * {@link SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)}, and close both parameters.
+	 * Decrypt from source(designated as <code>InPut</code>)
+	 * and writes to given destination(designated as <code>OutPut</code>).
+	 * <p>Default implementation calls two method {@link SymmetricCipherUtil#initDecrypt(InPut)},
+	 * {@link SymmetricCipherUtil#processCipher(Cipher, InPut, OutPut)}, and close both parameters.
 	 *
-	 * @see SymmetricCipherUtil#initEncrypt(MessageConsumer)
-	 * @see SymmetricCipherUtil#processCipher(Cipher, MessageProvider, MessageConsumer)
+	 * @see SymmetricCipherUtil#initEncrypt(OutPut)
+	 * @see SymmetricCipherUtil#processCipher(Cipher, InPut, OutPut)
 	 * 
 	 * @param mp Plain data Provider of source for encryption
 	 * @param mc Data Consumer that writes encrypted data to designated destination 
@@ -107,7 +107,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
 	@Override
-	public void decrypt(MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
+	public void decrypt(InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException {
 		try (mp; mc) {
 			processCipher(initDecrypt(mp), mp, mc);
 		}
@@ -123,20 +123,20 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	protected void processCipher(Cipher c, MessageProvider mp, MessageConsumer mc) throws NestedIOException, OmittedCipherException {
+	protected void processCipher(Cipher c, InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException {
 		byte[] buf = new byte[BUFFER_SIZE];
 		while(updateCipher(c, buf, mp, mc) != -1) { }
 		doFinalCipher(c, mc);
 	}
 	
-	protected int updateCipher(Cipher c, byte[] buf, MessageProvider mp, MessageConsumer mc) {
+	protected int updateCipher(Cipher c, byte[] buf, InPut mp, OutPut mc) {
 		int read = mp.getSrc(buf);
 		if(read == -1) return -1;
 		byte[] result = c.update(buf, 0, read);
 		if(result != null) mc.consumeResult(result);
 		return read;
 	}
-	protected int doFinalCipher(Cipher c, MessageConsumer mc) {
+	protected int doFinalCipher(Cipher c, OutPut mc) {
 		try {
 			byte[] res = c.doFinal();
 			mc.consumeResult(res);
@@ -148,40 +148,40 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	
 	
 	@Override
-	public CipherTunnel cipherEncryptTunnel(MessageProvider mp, MessageConsumer mc) {
+	public CipherTunnel cipherEncryptTunnel(InPut mp, OutPut mc) {
 		return new CipherTunnel(initEncrypt(mc), mp, mc, BUFFER_SIZE) {
 			@Override
-			protected int update(Cipher cipher, byte[] buffer, MessageProvider msgp, MessageConsumer msgc) {
+			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
 				return updateCipher(cipher, buffer, msgp, msgc);
 			}
 			@Override
-			protected int doFinal(Cipher cipher, MessageConsumer msgc) {
+			protected int doFinal(Cipher cipher, OutPut msgc) {
 				return doFinalCipher(cipher, mc);
 			}
 		};
 	}
 
 	@Override
-	public CipherTunnel cipherDecryptTunnel(MessageProvider mp, MessageConsumer mc) {
+	public CipherTunnel cipherDecryptTunnel(InPut mp, OutPut mc) {
 		return new CipherTunnel(initDecrypt(mp), mp, mc, BUFFER_SIZE) {
 			@Override
-			protected int update(Cipher cipher, byte[] buffer, MessageProvider msgp, MessageConsumer msgc) {
+			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
 				return updateCipher(cipher, buffer, msgp, msgc);
 			}
 			@Override
-			protected int doFinal(Cipher cipher, MessageConsumer msgc) {
+			protected int doFinal(Cipher cipher, OutPut msgc) {
 				return doFinalCipher(cipher, mc);
 			}
 		};
 	}
 
 	@Override
-	public UpdatableEncrypter UpdatableEncryptCipher(MessageConsumer mc) {
+	public UpdatableEncrypter UpdatableEncryptCipher(OutPut mc) {
 		return new UpdatableEncrypter(initEncrypt(mc), mc);
 	}
 
 	@Override
-	public UpdatableDecrypter UpdatableDecryptCipher(MessageProvider mp) {
+	public UpdatableDecrypter UpdatableDecryptCipher(InPut mp) {
 		return new UpdatableDecrypter(initDecrypt(mp), mp, BUFFER_SIZE);
 	}
 	
