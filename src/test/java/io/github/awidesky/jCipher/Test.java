@@ -216,7 +216,6 @@ class Test {
 					if(b != null) dec.write(b);
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
-				/*
 				dynamicTest("CipherUtilOutputStream <-> CipherUtilInputStream", () -> {
 					File encDest = mkEmptyTempFile();
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
@@ -228,36 +227,7 @@ class Test {
 					
 					dec.write(ci.read());
 					int n = 0;
-					//StringBuilder s = new StringBuilder();
-					while((n = ci.read(buf)) != -1) {
-						//s.append(n + " ");
-						dec.write(buf, 0, n);
-					}
-					//System.out.println(s);
-					assertEquals(HexFormat.of().formatHex(src), HexFormat.of().formatHex(dec.toByteArray()));
-				}),	
-				*/
-				dynamicTest("CipherUtilOutputStream", () -> {
-					File encDest = mkEmptyTempFile();
-					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher);
-
-					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
-					byte[] result = cipher.decryptToSingleBuffer(MessageProvider.from(encDest));
-					
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(result));
-				}),	
-				dynamicTest("CipherUtilInputStream", () -> {
-					File encDest = mkEmptyTempFile();
-					cipher.encrypt(MessageProvider.from(src), MessageConsumer.to(encDest));
-					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					byte[] buf = new byte[src.length / 2];
-					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher);
-					
-					dec.write(ci.read());
-					int n = 0;
-					while((n = ci.read(buf)) != -1) {
-						dec.write(buf, 0, n);
-					}
+					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
 				dynamicTest("byte[] <-> byte[]", () -> {
