@@ -66,6 +66,8 @@ import io.github.awidesky.jCipherUtil.key.keyExchange.xdh.XDHKeyExchanger;
 import io.github.awidesky.jCipherUtil.messageInterface.MessageConsumer;
 import io.github.awidesky.jCipherUtil.messageInterface.MessageProvider;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
+import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
+import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
 import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
 import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
 
@@ -210,7 +212,52 @@ class Test {
 					ue.doFinal(null);
 					UpdatableDecrypter ud = cipher.UpdatableDecryptCipher(MessageProvider.from(enc.toByteArray()));
 					dec.write(ud.update());
-					dec.write(ud.doFinal());
+					byte[] b = ud.doFinal();
+					if(b != null) dec.write(b);
+					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+				}),	
+				/*
+				dynamicTest("CipherUtilOutputStream <-> CipherUtilInputStream", () -> {
+					File encDest = mkEmptyTempFile();
+					ByteArrayOutputStream dec = new ByteArrayOutputStream();
+					byte[] buf = new byte[src.length / 2];
+					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher);
+					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher);
+
+					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
+					
+					dec.write(ci.read());
+					int n = 0;
+					//StringBuilder s = new StringBuilder();
+					while((n = ci.read(buf)) != -1) {
+						//s.append(n + " ");
+						dec.write(buf, 0, n);
+					}
+					//System.out.println(s);
+					assertEquals(HexFormat.of().formatHex(src), HexFormat.of().formatHex(dec.toByteArray()));
+				}),	
+				*/
+				dynamicTest("CipherUtilOutputStream", () -> {
+					File encDest = mkEmptyTempFile();
+					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher);
+
+					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
+					byte[] result = cipher.decryptToSingleBuffer(MessageProvider.from(encDest));
+					
+					assertEquals(Hash.hashPlain(src), Hash.hashPlain(result));
+				}),	
+				dynamicTest("CipherUtilInputStream", () -> {
+					File encDest = mkEmptyTempFile();
+					cipher.encrypt(MessageProvider.from(src), MessageConsumer.to(encDest));
+					ByteArrayOutputStream dec = new ByteArrayOutputStream();
+					byte[] buf = new byte[src.length / 2];
+					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher);
+					
+					dec.write(ci.read());
+					int n = 0;
+					while((n = ci.read(buf)) != -1) {
+						dec.write(buf, 0, n);
+					}
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
 				dynamicTest("byte[] <-> byte[]", () -> {
