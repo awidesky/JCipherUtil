@@ -162,7 +162,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * */
 	@Override
 	protected String fields() {
-		return super.fields() + ", key size : " + keySize.size + "bit, salt size : " //TODO : inclusive exclusive
+		return super.fields() + ", key size : " + keySize.size + "bit, salt size : "
 				+ keyMetadata.saltLen + "byte, iteration count : [" + keyMetadata.iterationRangeStart + ", " + keyMetadata.iterationRangeEnd + ")";
 	}
 	
