@@ -67,7 +67,7 @@ public abstract class CipherTunnel {
 	 * Repeat filling the buffer, update cipher process, and store the result until there is nothing left to read. 
 	 * @return amount of total data read and processed in bytes
 	 */
-	public int transferFinal() { //TODO : 코드 재사용? 
+	public int transferFinal() { 
 		int read = 0;
 		int total = 0;
 		while(true) {
