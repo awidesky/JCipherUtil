@@ -35,14 +35,10 @@ public interface OutPut extends AutoCloseable {
 	public void consumeResult(byte[] buffer) throws NestedIOException;
 	/**
 	 * Close attached resource if needed.
-	 * */
-	public void closeResource() throws NestedIOException; //TODO : is this necessarily?
-	/**
-	 * Close attached resource if needed.
 	 * <p>This method just calls {@code OutPut#closeResource()}
 	 * */
 	@Override
-	public default void close() throws NestedIOException { closeResource(); }
+	public void close() throws NestedIOException;
 	
 	
 	/**
@@ -77,12 +73,12 @@ public interface OutPut extends AutoCloseable {
 				try {
 					out.write(buffer);
 				} catch (IOException e) {
-					closeResource();
+					close();
 					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws NestedIOException {
+			public void close() throws NestedIOException {
 				try { if(close) out.close(); }
 				catch (IOException e) { throw new NestedIOException(e);	}
 			}
@@ -113,12 +109,12 @@ public interface OutPut extends AutoCloseable {
 					ByteBuffer buf = ByteBuffer.wrap(buffer);
 					while(buf.hasRemaining()) out.write(buf);
 				} catch (IOException e) {
-					closeResource();
+					close();
 					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws NestedIOException {
+			public void close() throws NestedIOException {
 				try { if(close) out.close(); }
 				catch (IOException e) { throw new NestedIOException(e);	}
 			}
