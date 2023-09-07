@@ -46,7 +46,7 @@ public abstract class AsymmetricCipherUtilBuilder <T extends AsymmetricCipherUti
 	}
 	
 	/**
-	 * Determine buffer size. Default is 8KB.
+	 * Determine buffer value. Default is 8KB.
 	 * <p>This method is optional operation. 
 	 * */
 	public AsymmetricCipherUtilBuilder<T> bufferSize(int bufferSize) {

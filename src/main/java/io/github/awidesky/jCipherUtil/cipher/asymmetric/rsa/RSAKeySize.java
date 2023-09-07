@@ -3,7 +3,7 @@ package io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 
 /**
- * Denotes RSA key size in bits.
+ * Denotes RSA key value in bits.
  */
 public class RSAKeySize extends KeySize {
 
@@ -13,7 +13,7 @@ public class RSAKeySize extends KeySize {
 	public static final RSAKeySize SIZE_4096 = new RSAKeySize(4096);
 	public static final RSAKeySize SIZE_8192 = new RSAKeySize(8192);
 
-	/** Create custom RSA key size. */
+	/** Create custom RSA key value. */
 	public RSAKeySize(int size) { super(size); }
 
 }

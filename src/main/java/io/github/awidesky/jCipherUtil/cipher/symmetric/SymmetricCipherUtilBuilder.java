@@ -18,7 +18,7 @@ import io.github.awidesky.jCipherUtil.key.KeySize;
 /**
  * A builder class for symmetric cipherUtil.
  * Necessary data are {@code SymmetricKeyMaterial} and {@code KeySize}. These values must be provided to constructor.
- * Optional data is {@code KeyMetadata} and buffer size. These values are each default initialized to {@code KeyMetadata#DEFAULT}
+ * Optional data is {@code KeyMetadata} and buffer value. These values are each default initialized to {@code KeyMetadata#DEFAULT}
  * and 8KB, but custom value can configured by {@code SymmetricCipherUtilBuilder#keyMetadata(KeyMetadata)} and
  * {@code SymmetricCipherUtilBuilder#bufferSize(int)}
  * @param <T>
@@ -31,7 +31,7 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 	protected int bufferSize = 8 * 1024;
 	
 	/**
-	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given password and key size.
+	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given password and key value.
 	 * 
 	 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
 	 * */
@@ -40,7 +40,7 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 		this.keySize = keySize;
 	}
 	/**
-	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given <code>byte[]</code> key and key size.
+	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given <code>byte[]</code> key and key value.
 	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
 	 * 
 	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
@@ -59,7 +59,7 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 		return this;
 	}
 	/**
-	 * Configure buffer size. original default value is 8KB.
+	 * Configure buffer value. original default value is 8KB.
 	 * This is optional operation.
 	 * */
 	public SymmetricCipherUtilBuilder<T> bufferSize(int bufferSize) {

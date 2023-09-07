@@ -32,13 +32,13 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 
 	@Override
 	protected String fields() {
-		return super.fields() + ", key size : " + getKeyLength() + "bit";
+		return super.fields() + ", key value : " + getKeyLength() + "bit";
 	}
 	
 	/**
 	 * Returns estimated length of current key.
 	 * 
-	 * @return key size of current {@code AsymmetricKeyMaterial}. Value may not be precise.
+	 * @return key value of current {@code AsymmetricKeyMaterial}. Value may not be precise.
 	 * */
 	public int getKeyLength() {
 		try {
@@ -59,12 +59,12 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 	/**
 	 * Returns new key pair of this RSA algorithm.
 	 * 
-	 * @param keySize Required size of key
+	 * @param keySize Required value of key
 	 */
 	public static KeyPair generateKeyPair(RSAKeySize keySize) {
 		try {
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(METADATA.KEY_ALGORITMH_NAME);
-			keyPairGenerator.initialize(keySize.size);
+			keyPairGenerator.initialize(keySize.value);
 			return keyPairGenerator.genKeyPair();
 		} catch (NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);

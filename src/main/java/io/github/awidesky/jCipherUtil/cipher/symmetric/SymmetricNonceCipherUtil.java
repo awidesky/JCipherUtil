@@ -97,7 +97,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		byte[] nonce = generateNonce(sr);
 		Cipher c = getCipherInstance();
 		try {
-			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
+			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -121,7 +121,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		}
 		Cipher c = getCipherInstance();
 		try {
-			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
@@ -129,7 +129,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	}
 
 	/**
-	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by size of the nonce.
+	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by value of the nonce.
 	 * */
 	@Override
 	protected String fields() {

@@ -33,7 +33,7 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
  * That includes initiating encryption/decryption, generating/reading salt/iteration count.
  * <p>
  * Necessary parameters for symmetric cipher are salt and iteration count.
- * In encryption mode, random salt of given size and random iteration count between given range is generated.
+ * In encryption mode, random salt of given value and random iteration count between given range is generated.
  * Those values are stored very first of the output. Iteration count is stored in first to prevent reading illegal value
  * (unlike salt, abnormal value of iteration count can lead to various fatal problems. See {@link KeyMetadata}).
  * The length of the salt is not saved; it must be known in advance.
@@ -72,7 +72,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * Generate new {@code SecretKeySpec} for the symmetric cipher.
 	 * */
 	private SecretKeySpec generateKey(byte[] salt, int iterationCount) {
-		return key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount);
+		return key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount);
 	}
 	
 
@@ -158,11 +158,11 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	}
 
 	/**
-	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by size of the key and salt, iteration count range.
+	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by value of the key and salt, iteration count range.
 	 * */
 	@Override
 	protected String fields() {
-		return super.fields() + ", key size : " + keySize.size + "bit, salt size : "
+		return super.fields() + ", key value : " + keySize.value + "bit, salt value : "
 				+ keyMetadata.saltLen + "byte, iteration count : [" + keyMetadata.iterationRangeStart + ", " + keyMetadata.iterationRangeEnd + ")";
 	}
 	

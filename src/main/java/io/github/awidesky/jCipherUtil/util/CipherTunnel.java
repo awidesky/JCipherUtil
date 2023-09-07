@@ -49,7 +49,7 @@ public abstract class CipherTunnel {
 	 * @param c a {@code javax.crypto.Cipher} that is already initiated({@code Cipher.init} method mus be called before passing it)
 	 * @param in input data to be encrypted or decrypted depending on mode of {@code c}
 	 * @param out output destination to store data that is encrypted or decrypted depending on mode of {@code c}
-	 * @param bufferSize size of the buffer. {@code bufferSize} amount of data will processed in one {@code CipherTunnel#transfer()} call.
+	 * @param bufferSize value of the buffer. {@code bufferSize} amount of data will processed in one {@code CipherTunnel#transfer()} call.
 	 */
 	public CipherTunnel(Cipher c, InPut in, OutPut out, int bufferSize) {
 		this.c = c;

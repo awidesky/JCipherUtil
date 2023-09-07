@@ -173,7 +173,7 @@ class Test {
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));
-		list.add(dynamicTest("large key size test", () -> {
+		list.add(dynamicTest("large key value test", () -> {
 			int largeKeySize = 5207;
 			ByteArrayKeyMaterial bk = new ByteArrayKeyMaterial(new byte[] { 1, 2, 3, 4, 5 });
 			SecretKey key =  bk.genKey("AES", largeKeySize * 8, new byte[] { 6, 7, 8, 9, 10 }, 1000);

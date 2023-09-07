@@ -42,7 +42,7 @@ public class ChaCha20CipherUtil extends AbstractChaCha20CipherUtil {
 	public static class Builder extends SymmetricCipherUtilBuilder<ChaCha20CipherUtil> {
 		
 		/**
-		 * Specify binary private key data and ChaCha20 key size.
+		 * Specify binary private key data and ChaCha20 key value.
 		 * <p>The private key data is <b>not</b> directly used as an ChaCha20 key. Instead it will salted and hashed
 		 * multiple times.
 		 * 
@@ -50,7 +50,7 @@ public class ChaCha20CipherUtil extends AbstractChaCha20CipherUtil {
 		 * */
 		public Builder(byte[] key, ChaCha20KeySize keySize) { super(key, keySize); }
 		/**
-		 * Specify password and ChaCha20 key size.
+		 * Specify password and ChaCha20 key value.
 		 * 
 		 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
 		 * */

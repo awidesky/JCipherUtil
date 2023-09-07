@@ -65,11 +65,11 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 			//Generate random key without use of ByteArrayKeyMaterial. 
 			//Key iteration process would consume much more time.
 			KeyGenerator sf = KeyGenerator.getInstance(getCipherProperty().KEY_ALGORITMH_NAME);
-			sf.init(keySize.size);
+			sf.init(keySize.value);
 			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), getAlgorithmParameterSpec(iv));
 			
 			/** initialize with actual key and IV */
-			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.size, salt, iterationCount), getAlgorithmParameterSpec(nonce));
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}

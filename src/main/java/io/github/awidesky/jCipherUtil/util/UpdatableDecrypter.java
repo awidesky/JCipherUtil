@@ -43,7 +43,7 @@ public class UpdatableDecrypter {
 	 * 
 	 * @param c a {@code javax.crypto.Cipher} that is already initiated({@code Cipher.init} method must be called before passing it) as decryption mode.
 	 * @param in input destination to read encrypted data.
-	 * @param bufferSize size of a buffer used to read from the input. output buffer from {@code UpdatableDecrypter#update()} may or may not have the same length.
+	 * @param bufferSize value of a buffer used to read from the input. output buffer from {@code UpdatableDecrypter#update()} may or may not have the same length.
 	 */
 	public UpdatableDecrypter(Cipher c, InPut in, int bufferSize) {
 		this.c = c;
@@ -54,7 +54,7 @@ public class UpdatableDecrypter {
 	/**
 	 * Read encrypted data from the input, process it, and return the output.
 	 * <ㅔ>
-	 * Size of the output buffer may be different from the size of internal buffer, or it could even be
+	 * Size of the output buffer may be different from the value of internal buffer, or it could even be
 	 * an empty array if there is no output(when the underlying cipher is a block cipher and the input data
 	 * is too short to result in a new block).
 	 * <ㅔ>

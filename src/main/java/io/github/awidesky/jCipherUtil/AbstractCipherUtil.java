@@ -31,7 +31,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	protected final int BUFFER_SIZE;
 	
 	/**
-	 * Initialize buffer size.
+	 * Initialize buffer value.
 	 * */
 	protected AbstractCipherUtil(int bufferSize) {
 		this.BUFFER_SIZE = bufferSize;

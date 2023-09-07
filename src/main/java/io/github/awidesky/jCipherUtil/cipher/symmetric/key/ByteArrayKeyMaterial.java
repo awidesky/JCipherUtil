@@ -19,7 +19,7 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 
 /**
  * A byte array key material generates key with given byte array.
- * Length of the array is irrelevant from generated key size, but since it's the only secret data used in key generation,
+ * Length of the array is irrelevant from generated key value, but since it's the only secret data used in key generation,
  * it is recommended to use long data.
  * <p>
  * The given byte array is not used directly as a secret key; it's salted and hashed multiple({@code iteration count}) times.
@@ -49,7 +49,7 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
 	 * 
-	 * @param algorithm metadata of the Cipher. used to find key algorithm and key size.
+	 * @param algorithm metadata of the Cipher. used to find key algorithm and key value.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
 	 */

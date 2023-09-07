@@ -22,7 +22,7 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 
 /**
  * A password key material generates key with given password.
- * Length of the password is irrelevant from generated key size, but since it's the only secret data used in key generation,
+ * Length of the password is irrelevant from generated key value, but since it's the only secret data used in key generation,
  * it is recommended to use long password.
  * <p>
  * The given password is not used directly as a secret key; it's salted and hashed multiple times via {@code PBKDF2WithHmacSHA512} algorithm.
@@ -43,7 +43,7 @@ public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata and password.
-	 * @param algorithm metadata of the Cipher. used to find key algorithm and key size.
+	 * @param algorithm metadata of the Cipher. used to find key algorithm and key value.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
 	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException} is thrown

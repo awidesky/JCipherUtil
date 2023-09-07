@@ -14,7 +14,7 @@ package io.github.awidesky.jCipherUtil.cipher.symmetric.key;
  * lead to massive overhead. If iteration count value stored in the input is ill-formed
  * (possibly corrupted data or wrong metadata interpretation when decrypting, or inappropriate value is used due to user's mistake.
  * To prevent this is why implementation of {@code CipherUtil#initEncrypt} writes iteration count at the very first of the output,
- * making sure the canonical/absolute location of iteration count is always solid no matter the size of other metadata like salt and IV),
+ * making sure the canonical/absolute location of iteration count is always solid no matter the value of other metadata like salt and IV),
  * the cipher process may fail(the value is negative) at best.
  * <p>
  * On the other hand, it can cause vulnerability(the value is too small), or even hang like forever(the value is way to large).

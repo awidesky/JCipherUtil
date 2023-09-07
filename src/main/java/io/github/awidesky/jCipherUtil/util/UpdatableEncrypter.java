@@ -52,7 +52,7 @@ public class UpdatableEncrypter {
 	 * Encrypt given buffer and write to the output.
 	 * 
 	 * @param buf data to be encrypted.
-	 * @return amount of encrypted data written to the output. May different from size of the input buffer.
+	 * @return amount of encrypted data written to the output. May different from value of the input buffer.
 	 */
 	public int update(byte[] buf) {
 		byte[] result = c.update(buf);
@@ -65,7 +65,7 @@ public class UpdatableEncrypter {
 	 * final result to the output.
 	 *  
 	 * @param buf last part of data to be encrypted. <code>null</code> is permitted if there's no data to encrypt at the moment.
-	 * @return amount of encrypted data written to the output. May different from size of the input buffer.
+	 * @return amount of encrypted data written to the output. May different from value of the input buffer.
 	 */
 	public int doFinal(byte[] buf) {
 		try {

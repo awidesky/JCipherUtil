@@ -60,7 +60,7 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 	public static class Builder extends SymmetricCipherUtilBuilder<AES_CTRCipherUtil> {
 		
 		/**
-		 * Specify binary private key data and AES key size.
+		 * Specify binary private key data and AES key value.
 		 * <p>The private key data is <b>not</b> directly used as an AES key. Instead it will salted and hashed
 		 * multiple times.
 		 * 
@@ -68,7 +68,7 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 		 * */
 		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
 		/**
-		 * Specify password and AES key size.
+		 * Specify password and AES key value.
 		 * 
 		 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
 		 * */
