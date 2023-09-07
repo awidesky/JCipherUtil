@@ -5,7 +5,7 @@ package io.github.awidesky.jCipherUtil.cipher.symmetric.key;
  * {@code KeyMetadata} instance can be generated vi constructor with custom parameters,
  * but it is available to use pre-generated {@code KeyMetadata#STANDARD} and {@code KeyMetadata#DEFAULT}.
  * {@code STANDARD} is told to be safe enough by OWASP in current time
- * {@link https://en.wikipedia.org/wiki/PBKDF2}, but {@code CipherUtil} will use {@code DEFAULT}-which is more secure-
+ * (<a href=https://en.wikipedia.org/wiki/PBKDF2>https://en.wikipedia.org/wiki/PBKDF2</a>), but {@code CipherUtil} will use {@code DEFAULT}-which is more secure-
  * in default for security margin.
  * <p>
  * The iteration count is not represented as a single scalar, but as a <i>range</i>. And it must be specified in decryption mode too.
