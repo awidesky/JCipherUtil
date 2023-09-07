@@ -33,12 +33,12 @@ public class KeyMetadata {
 	 * In 2023, OWASP recommended to use 600,000 iterations for PBKDF2-HMAC-SHA256 and 210,000 for PBKDF2-HMAC-SHA512.
 	 * <p><a href=https://en.wikipedia.org/wiki/PBKDF2>https://en.wikipedia.org/wiki/PBKDF2</a>
 	 */
-	public static final KeyMetadata STANDARD = new KeyMetadata(32, 210000, 400000);
+	public static final KeyMetadata STANDARD = new KeyMetadata(32, 210_000, 400_000);
 	/**
 	 * Standard salt length and iteration count that used default in {@code CipherUtil}.
 	 * Uses 64 byte length salt and iteration coin in range of 600,000~800,000, providing better security than {@code STANDARD}
 	 */
-	public static final KeyMetadata DEFAULT = new KeyMetadata(64, 600000, 800000);
+	public static final KeyMetadata DEFAULT = new KeyMetadata(64, 600_000, 800_000);
 	
 	
 	/** Length of salt */
