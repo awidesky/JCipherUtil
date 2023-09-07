@@ -18,13 +18,13 @@ import java.util.HexFormat;
 
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
 import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
-import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
 
 
 /**
@@ -43,6 +43,7 @@ import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
  * 
  * @see InPut
  * @see OutPut
+ * @see AbstractCipherUtil
  * @see SymmetricCipherUtil
  * @see AsymmetricCipherUtil
  * */
@@ -51,30 +52,30 @@ public interface CipherUtil {
 	/**
 	 * Simple way to encrypt from a source to a destination.
 	 * 
-	 * @param mp Plain data Provider of source for encryption
-	 * @param mc CipherUtil data Consumer that writes encrypted data to designated destination 
+	 * @param in Plain data Provider of source for encryption
+	 * @param out CipherUtil data Consumer that writes encrypted data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public void encrypt(InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException;
+	public void encrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException;
 	/**
 	 * Simple way to decrypt from a source to a destination.
 	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @param mc Plain data Consumer that writes decrypted data to designated destination 
+	 * @param in CipherUtil data Provider of source for decryption
+	 * @param out Plain data Consumer that writes decrypted data to designated destination 
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public void decrypt(InPut mp, OutPut mc) throws NestedIOException, OmittedCipherException;
+	public void decrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException;
 	
 	
 	/**
 	 * Simple way to encrypt from a {@code InputStreamr} to a {@code OutputStream}.<p>
-	 * Both <code>Stream</code>s are closed after cipher process is finished.
+	 * Both streams are closed after cipher process is finished.
 	 * 
 	 * @param in Source for encryption
 	 * @param out The destination 
@@ -89,7 +90,7 @@ public interface CipherUtil {
 
 	/**
 	 * Simple way to decrypt from a {@code InputStreamr} to a {@code OutputStream}.<p>
-	 * Both <code>Stream</code>s are closed after cipher process is finished.
+	 * Both streams are closed after cipher process is finished.
 	 * 
 	 * @param in Source for encryption
 	 * @param out The destination 
@@ -103,104 +104,135 @@ public interface CipherUtil {
 	}
 	
 	/**
-	 * Encrypt whole data into single <code>byte[]</code> and return it
+	 * Encrypt whole data into single {@code byte[]} and return it
 	 * 
-	 * @param mp Plain data Provider of source for encryption
-	 * @return the <code>byte</code> array that has all encrypted data
+	 * @param in Plain data Provider of source for encryption
+	 * @return the {@code byte} array that has all encrypted data
 	 * @throws NestedIOException 
 	 * @throws OmittedCipherException 
 	 * */
-	public default byte[] encryptToSingleBuffer(InPut mp) throws NestedIOException, OmittedCipherException {
+	public default byte[] encryptToSingleBuffer(InPut in) throws NestedIOException, OmittedCipherException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		encrypt(mp, OutPut.to(bos));
+		encrypt(in, OutPut.to(bos));
 		return bos.toByteArray();
 	}
 	/**
-	 * Encrypt whole data and represent the binary data as <code>Base64</code> encoding
+	 * Encrypt whole data and represent the binary data as {@code Base64} encoding
 	 * 
-	 * @param mp Plain data Provider of source for encryption
-	 * @return <code>Base64</code> text that encoded from encrypted data
+	 * @param in Plain data Provider of source for encryption
+	 * @return {@code Base64} text that encoded from encrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String encryptToBase64(InPut mp) throws NestedIOException, OmittedCipherException {
-		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(mp));
+	public default String encryptToBase64(InPut in) throws NestedIOException, OmittedCipherException {
+		return Base64.getEncoder().encodeToString(encryptToSingleBuffer(in));
 	}
 	/**
 	 * Encrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
 	 * 
-	 * @param mp Plain data Provider of source for encryption
+	 * @param in Plain data Provider of source for encryption
 	 * @return hex format text that encoded from encrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String encryptToHexString(InPut mp) throws NestedIOException, OmittedCipherException {
-		return HexFormat.of().formatHex(encryptToSingleBuffer(mp));
+	public default String encryptToHexString(InPut in) throws NestedIOException, OmittedCipherException {
+		return HexFormat.of().formatHex(encryptToSingleBuffer(in));
 	}
 	/**
-	 * Decrypt whole data into single <code>byte[]</code> and return it
+	 * Decrypt whole data into single {@code byte[]} and return it
 	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @return the <code>byte</code> array that has all decrypted data
+	 * @param in CipherUtil data Provider of source for decryption
+	 * @return the {@code byte[]} array that has all decrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default byte[] decryptToSingleBuffer(InPut mp) throws NestedIOException, OmittedCipherException {
+	public default byte[] decryptToSingleBuffer(InPut in) throws NestedIOException, OmittedCipherException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		decrypt(mp, OutPut.to(bos));
+		decrypt(in, OutPut.to(bos));
 		return bos.toByteArray();
 	}
 	/**
-	 * Decrypt whole data and encode it to <code>String</code>
+	 * Decrypt whole data and encode it to {@code String}
 	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
+	 * @param in CipherUtil data Provider of source for decryption
 	 * @return text that encoded from decrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToString(InPut mp, Charset encoding) throws NestedIOException, OmittedCipherException {
-		return new String(decryptToSingleBuffer(mp), encoding);
+	public default String decryptToString(InPut in, Charset encoding) throws NestedIOException, OmittedCipherException {
+		return new String(decryptToSingleBuffer(in), encoding);
 	}
 	/**
-	 * Decrypt whole data and represent the binary data as <code>Base64</code> encoding
+	 * Decrypt whole data and represent the binary data as {@code Base64} encoding
 	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
-	 * @return <code>Base64</code> text that encoded from decrypted data
+	 * @param in CipherUtil data Provider of source for decryption
+	 * @return {@code Base64} text that encoded from decrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToBase64(InPut mp) throws NestedIOException, OmittedCipherException {
-		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(mp));
+	public default String decryptToBase64(InPut in) throws NestedIOException, OmittedCipherException {
+		return Base64.getEncoder().encodeToString(decryptToSingleBuffer(in));
 	}
 
 	/**
 	 * Decrypt whole data and represent the binary data as hex format(e.g. 5f3759df)
 	 * 
-	 * @param mp CipherUtil data Provider of source for decryption
+	 * @param in CipherUtil data Provider of source for decryption
 	 * @return hex format text that encoded from encrypted data
 	 * @throws NestedIOException if {@code IOException} is thrown. if this cipher process related with
 	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library occurs.
 	 * */
-	public default String decryptToHexString(InPut mp) throws NestedIOException, OmittedCipherException {
-		return HexFormat.of().formatHex(decryptToSingleBuffer(mp));
+	public default String decryptToHexString(InPut in) throws NestedIOException, OmittedCipherException {
+		return HexFormat.of().formatHex(decryptToSingleBuffer(in));
 	}
 	
-	
-	public CipherTunnel cipherEncryptTunnel(InPut mp, OutPut mc);
-	public CipherTunnel cipherDecryptTunnel(InPut mp, OutPut mc);
-	public UpdatableEncrypter UpdatableEncryptCipher(OutPut mc);
-	public UpdatableDecrypter UpdatableDecryptCipher(InPut mp);
+	/**
+	 * Return a {@code CipherTunnel} that reads data from input, and write the encrypted data to the output.
+	 * @see CipherTunnel
+	 * 
+	 * @param in the input where the plain source data resides
+	 * @param out the output destination for the encrypted data to be written
+	 * @return a {@code CipherTunnel} in encrypt mode connected between given input and output
+	 */
+	public CipherTunnel cipherEncryptTunnel(InPut in, OutPut out);
+	/**
+	 * Return a {@code CipherTunnel} that reads data from input, and write the decrypted data to the output.
+	 * @see CipherTunnel
+	 * 
+	 * @param in the input where the encrypted source data resides
+	 * @param out the output destination for the decrypted data to be written
+	 * @return a {@code CipherTunnel} in decrypt mode connected between given input and output
+	 */
+	public CipherTunnel cipherDecryptTunnel(InPut in, OutPut out);
+	/**
+	 * Return an {@code UpdatableEncrypter} that receives input
+	 * from user and writes encrypted data to the given output.
+	 * @see UpdatableEncrypter
+	 * 
+	 * @param out output destination that encrypted data will be saved.
+	 * @return an {@code UpdatableEncrypter} that encrypts data and write the result in the output
+	 */
+	public UpdatableEncrypter UpdatableEncryptCipher(OutPut out);
+	/**
+	 * Return an {@code UpdatableDecrypter} that reads encrypted data
+	 * from the given input and returns the decrypted result to user.
+	 * @see UpdatableDecrypter
+	 * 
+	 * @param in the input where the encrypted source data resides
+	 * @return an {@code UpdatableDecrypter} that decrypts data from the given input.
+	 */
+	public UpdatableDecrypter UpdatableDecryptCipher(InPut in);
 	
 }

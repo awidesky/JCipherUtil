@@ -3,7 +3,13 @@ package io.github.awidesky.jCipherUtil.properties;
 import java.security.KeyPairGenerator;
 
 import javax.crypto.KeyAgreement;
-
+/**
+ * Stores necessarily properties of the Key exchange process.
+ * This includes the name of <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#keypairgenerator-algorithms">key pair generation algorithm</a> and
+ * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#keyagreement-algorithms">key agreement algorithm</a>.
+ * Every concrete subclass of {@code EllipticCurveKeyExchanger} must provide a {@code EllipticCurveKeyExchangeProperty} object
+ * that explains the key exchange protocol to protected constructor of the superclass.
+ * */
 public class EllipticCurveKeyExchangeProperty {
 
 	/**

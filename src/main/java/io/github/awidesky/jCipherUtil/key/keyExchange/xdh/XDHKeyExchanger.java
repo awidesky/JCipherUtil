@@ -10,7 +10,7 @@ import io.github.awidesky.jCipherUtil.properties.EllipticCurveKeyExchangePropert
 
 /**
  * An {@code EllipticCurveKeyExchanger} subclass that uses XDH(external Diffie–Hellman assumption) Key exchange protocol.
- * <a href="https://en.wikipedia.org/wiki/XDH_assumption">https://en.wikipedia.org/wiki/XDH_assumption<a>
+ * <p><a href="https://en.wikipedia.org/wiki/XDH_assumption">https://en.wikipedia.org/wiki/XDH_assumption<a>
  * */
 public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 	
@@ -40,7 +40,7 @@ public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 	}
 	/**
 	 * Creates the object with given name of the curve.
-	 * Curves that is <i>not<i> specified in {@code XDHCurves} may be supported(if JCE in user's JDK/JRE supports the curve), 
+	 * Curves that is not specified in {@code XDHCurves} may be supported(if JCE in user's JDK/JRE supports the curve), 
 	 * but it is recommended to use one of the officially supported curves.
 	 * <p>See <a href=https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names>
 	 * https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names<a> 

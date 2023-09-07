@@ -18,8 +18,17 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 
+/**
+ * A password key material generates key with given password.
+ * Length of the password is irrelevant from generated key size, but since it's the only secret data used in key generation,
+ * it is recommended to use long password.
+ * <p>
+ * The given password is not used directly as a secret key; it's salted and hashed multiple times via {@code PBKDF2WithHmacSHA512} algorithm.
+ * Every data except for the password is non-secret({@code salt}, {@code iteration count}) data, and received via parameters of 
+ * {@code PasswordKeyMaterial#genKey(String, int, byte[], int)} method.
+ * */
 public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 
 	private final char[] password;
@@ -42,7 +51,7 @@ public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 	@Override
 	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
 	    SecretKey pbeKey;
-		try {
+		try { //maybe PBEKeySpec.clearPassword must be called
 			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, Arrays.copyOf(salt, salt.length), iterationCount, keySize));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);

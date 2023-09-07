@@ -9,6 +9,15 @@
 
 package io.github.awidesky.jCipherUtil.properties;
 
+/**
+ * Stores necessarily properties of the Cipher process.
+ * This includes name of algorithm for <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-names">cipher</a>
+ * or <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms">key</a>,
+ * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-paddings">padding scheme</a>,
+ * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-paddings">mode of operation</a>.
+ * Every concrete subclass of {@code AbstractCipherUtil} must provide a {@code CipherProperty} object that explains the cipher scheme via
+ * protected {@code AbstractCipherUtil#getCipherProperty} method.
+ * */
 public class CipherProperty {
 	/**
 	 * Name of the cipher algorithm, like <code>AES</code> or <code>ChaCha20-Poly1305</code>
@@ -18,7 +27,7 @@ public class CipherProperty {
 	public final String ALGORITMH_NAME;
 	
 	/**
-	 * Mode of the cipher algorithm, like <code>CBC</code> or <code>GCM</code>
+	 * Mode of operation for the cipher algorithm, like <code>CBC</code> or <code>GCM</code>
 	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-modes">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#cipher-algorithm-modes</a>
 	 * */
 	public final String ALGORITMH_MODE;
@@ -30,7 +39,7 @@ public class CipherProperty {
 	public final String ALGORITMH_PADDING;
 	
 	/**
-	 * Name of the key algorithm, like <code>AES</code> or <code>ChaCha20</code>
+	 * Name of the key algorithm, like <code>AES</code>, <code>ChaCha20</code> or <code>RSA</code>
 	 * <a href="https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms">https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#secretkeyfactory-algorithms</a>
 	 * */
 	public final String KEY_ALGORITMH_NAME;
@@ -50,11 +59,17 @@ public class CipherProperty {
 		this.KEY_ALGORITMH_NAME = keyAlgorithmName;
 	}
 	
+	/**
+	 * @return String contains all properties this object have.
+	 */
 	protected String fields() {
 		return "ALGORITMH_NAME=" + ALGORITMH_NAME + ", ALGORITMH_MODE=" + ALGORITMH_MODE
 				+ ", ALGORITMH_PADDING=" + ALGORITMH_PADDING + ", KEY_ALGORITMH_NAME=" + KEY_ALGORITMH_NAME;
 	}
 	
+	/**
+	 * Returns a String contains all data this object have.
+	 * */
 	@Override
 	public String toString() {
 		return "CipherProperty [" + fields() + "]";

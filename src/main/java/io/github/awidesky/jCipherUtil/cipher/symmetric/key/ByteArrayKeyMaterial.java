@@ -15,15 +15,24 @@ import java.util.Arrays;
 
 import javax.crypto.spec.SecretKeySpec;
 
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 
+/**
+ * A byte array key material generates key with given byte array.
+ * Length of the array is irrelevant from generated key size, but since it's the only secret data used in key generation,
+ * it is recommended to use long data.
+ * <p>
+ * The given byte array is not used directly as a secret key; it's salted and hashed multiple({@code iteration count}) times.
+ * Every data except for the byte array is non-secret({@code salt}, {@code iteration count}) data, and received via parameters of 
+ * {@code ByteArrayKeyMaterial#genKey(String, int, byte[], int)} method.
+ * */
 public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 
 	private final byte[] key;
 	
 	/**
 	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
-	 * is not generated because other necessary metadata(salt, iteration count) is unknown.
+	 * is not generated now, because other necessary metadata(salt, iteration count) is unknown.
 	 * <p>The <code>key</code> is stretched via <code>SHA-512</code> algorithm.
 	 * <p>This process is needed for consistency of key generating algorithm and metadata layout. 
 	 * Since password salt and iteration count is included in cipherText header metadata,
@@ -39,10 +48,10 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
+	 * 
 	 * @param algorithm metadata of the Cipher. used to find key algorithm and key size.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
-	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} is thrown
 	 */
 	@Override
 	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
@@ -60,7 +69,7 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 			digest.update(Arrays.copyOf(salt, salt.length));
 			result = digest.digest();
 		}
-
+		//TODO : make use result is longer than requested key size?
 		return new SecretKeySpec(result, 0, keySize / 8, algorithm);
 	}
 }

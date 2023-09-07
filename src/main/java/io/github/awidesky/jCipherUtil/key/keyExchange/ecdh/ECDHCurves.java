@@ -1,9 +1,9 @@
 package io.github.awidesky.jCipherUtil.key.keyExchange.ecdh;
 
 /**
- * Available Elliptic curves for ECDH Key exchange algorithm.
- * <a href=https://download.java.net/java/early_access/panama/docs/specs/security/standard-names.html#parameterspec-names>
- * https://download.java.net/java/early_access/panama/docs/specs/security/standard-names.html#parameterspec-names<a>
+ * Available Elliptic curves for ECDH Key exchange algorithm.<p>
+ * <a href=https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names>
+ * https://docs.oracle.com/en/java/javase/17/docs/specs/security/standard-names.html#parameterspec-names<a>
  */
 public enum ECDHCurves {
 

@@ -1,5 +1,11 @@
 package io.github.awidesky.jCipherUtil.properties;
 
+/**
+ * Stores necessarily properties of the Cipher process.
+ * This includes all inherited fields from {@code CipherProperty}, and size of initial vector(or nonce).
+ * Every concrete subclass of {@code SymmetricNonceCipherUtil} must provide a {@code IVCipherProperty} object that explains the cipher scheme via
+ * protected {@code SymmetricNonceCipherUtil#getCipherProperty} method.
+ * */
 public class IVCipherProperty extends CipherProperty {
 	
 	/**

@@ -17,17 +17,17 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.WritableByteChannel;
 
-import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
+import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 
 
 /**
- * An Interface that abstracts consuming cipher result and send to various destinations(e.g. byte array, a file, base64 encoded text, an <code>OutputStrea</code> etc.).
- * <p>This interface does not care if the data is encryped, decrypted, or not.
+ * An Interface that abstracts consuming data and sending it to various destinations(e.g. a file, an <code>OutputStream</code> etc.).
+ * <p>This interface does not care if the data is encrypted or not. It only generates thin abstraction among various source types.
  * */
 public interface OutPut extends AutoCloseable {
 
 	/**
-	 * Consume data(may be a plainText or cipherText) and writes to the destination(may be a <code>String</code>, <code>File</code>, <code>OutPutStream</code> etc.)
+	 * Writes the data(may be a plainText or cipherText) to the destination(may be a <code>String</code>, <code>File</code>, <code>OutPutStream</code> etc.)
 	 * 
 	 * @param buffer the data
 	 * @throws NestedIOException 
@@ -36,16 +36,17 @@ public interface OutPut extends AutoCloseable {
 	/**
 	 * Close attached resource if needed.
 	 * */
-	public void closeResource() throws NestedIOException;
+	public void closeResource() throws NestedIOException; //TODO : is this necessarily?
 	/**
 	 * Close attached resource if needed.
+	 * <p>This method just calls {@code OutPut#closeResource()}
 	 * */
 	@Override
 	public default void close() throws NestedIOException { closeResource(); }
 	
 	
 	/**
-	 * Consume data and writes to a <code>File</code>
+	 * Returns a {@code OutPut} that writes data to given <code>File</code>
 	 * 
 	 * @param f <code>File</code> to write the data
 	 * */
@@ -53,7 +54,7 @@ public interface OutPut extends AutoCloseable {
 		return to(new FileOutputStream(f));
 	}
 	/**
-	 * Consume data and writes to a <code>OutputStream</code>.<p>
+	 * Returns a {@code OutPut} that writes data to given <code>OutputStream</code>.<p>
 	 * This method closes <code>OutputStream</code> after the Cipher process is finished
 	 * 
 	 * @see OutPut#to(OutputStream, boolean)
@@ -63,10 +64,10 @@ public interface OutPut extends AutoCloseable {
 		return to(os, true);
 	}
 	/**
-	 * Consume data and writes to a <code>OutputStream</code>
+	 * Returns a {@code OutPut} that writes data to given <code>OutputStream</code>
 	 * 
 	 * @param os <code>OutputStream</code> to write the data
-	 * @param close whether or not close <code>OutputStream</code> after the Cipher process is finished
+	 * @param close whether close <code>OutputStream</code> after the Cipher process is finished
 	 * */
 	public static OutPut to(OutputStream os, boolean close) {
 		return new OutPut() {
@@ -88,7 +89,7 @@ public interface OutPut extends AutoCloseable {
 		};
 	}
 	/**
-	 * Consume data and writes to a <code>WritableByteChannel</code>
+	 * Returns a {@code OutPut} that writes data to given <code>WritableByteChannel</code>
 	 * This method closes <code>WritableByteChannel</code> after the Cipher process is finished
 	 * 
 	 * @see OutPut#to(WritableByteChannel, boolean)
@@ -98,10 +99,10 @@ public interface OutPut extends AutoCloseable {
 		return to(ch, true);
 	}
 	/**
-	 * Consume data and writes to a <code>WritableByteChannel</code>
+	 * Returns a {@code OutPut} that writes data to given <code>WritableByteChannel</code>
 	 * 
 	 * @param ch <code>WritableByteChannel</code> to write the data
-	 * @param close whether or not close <code>WritableByteChannel</code> after the Cipher process is finished
+	 * @param close whether close <code>WritableByteChannel</code> after the Cipher process is finished
 	 * */
 	public static OutPut to(WritableByteChannel ch, boolean close) {
 		return new OutPut() {

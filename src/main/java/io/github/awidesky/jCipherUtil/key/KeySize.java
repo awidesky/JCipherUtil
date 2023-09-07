@@ -1,11 +1,11 @@
 package io.github.awidesky.jCipherUtil.key;
 
 /**
- * Simple class with single field represents key size for Cipher Algorithms.
+ * Base class for all subclass represent key size for Cipher algorithms.
  * */
 public class KeySize {
 
-	public final int size;
+	public final int size;//TODO : Value
 	
 	/**
 	 * Constructs the instance with given key size.

@@ -14,10 +14,13 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMaterial;
-import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.KeyPairKeyMaterial;
-import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.PrivateKeyOnlyKeyMaterial;
-import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.PublicKeyOnlyKeyMaterial;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.KeyPairMaterial;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.PrivateKeyMaterial;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.PublicKeyMaterial;
 
+/**
+ * Builder for {@code AsymmetricCipherUtil}.
+ * */
 public abstract class AsymmetricCipherUtilBuilder <T extends AsymmetricCipherUtil> {
 
 	protected AsymmetricKeyMaterial keyMet;
@@ -27,29 +30,32 @@ public abstract class AsymmetricCipherUtilBuilder <T extends AsymmetricCipherUti
 	 * Initialize this {@code AsymmetricCipherUtil} with given {@code PublicKey}.
 	 * */
 	public AsymmetricCipherUtilBuilder(PublicKey key) {
-		keyMet = new PublicKeyOnlyKeyMaterial(key);
+		keyMet = new PublicKeyMaterial(key);
 	}
 	/**
-	 * Initialize this {@code AsymmetricCipherUtil} with given {@code PrivateKey}.
+	 * Initialize this {@code AsymmetricCipherUtil} with {@code PrivateKey} only.
 	 * */
 	public AsymmetricCipherUtilBuilder(PrivateKey key) {
-		keyMet = new PrivateKeyOnlyKeyMaterial(key);
+		keyMet = new PrivateKeyMaterial(key);
 	}
 	/**
-	 * Initialize this {@code AsymmetricCipherUtil} with given {@code KeyPair}.
+	 * Initialize this {@code AsymmetricCipherUtil} with {@code KeyPair} only.
 	 * */
 	public AsymmetricCipherUtilBuilder(KeyPair keyPair) {
-		keyMet = new KeyPairKeyMaterial(keyPair);
+		keyMet = new KeyPairMaterial(keyPair);
 	}
 	
-
+	/**
+	 * Determine buffer size. Default is 8KB.
+	 * <p>This method is optional operation. 
+	 * */
 	public AsymmetricCipherUtilBuilder<T> bufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 		return this;
 	}
 	
-	
 	/**
+	 * Returns generated {@code AsymmetricCipherUtil}.
 	 * */
 	public abstract T build();
 }

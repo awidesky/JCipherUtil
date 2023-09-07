@@ -19,17 +19,36 @@ import javax.crypto.spec.SecretKeySpec;
 import io.github.awidesky.jCipherUtil.AbstractCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
+import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
+import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
-import io.github.awidesky.jCipherUtil.properties.CipherProperty;
-import io.github.awidesky.jCipherUtil.util.exceptions.IllegalMetadataException;
-import io.github.awidesky.jCipherUtil.util.exceptions.NestedIOException;
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
 /**
- * Abstract <code>CipherUtil</code> class that uses salt and iteration count for key derivation.
+ * Base class of all CipherUtil that uses symmetric cipher algorithm and salt, iteration count.
+ * <p>
+ * This class has a set of protected/private method implementations for common behavior among symmetric cipherUtil classes.
+ * That includes initiating encryption/decryption, generating/reading salt/iteration count.
+ * <p>
+ * Necessary parameters for symmetric cipher are salt and iteration count.
+ * In encryption mode, random salt of given size and random iteration count between given range is generated.
+ * Those values are stored very first of the output. Iteration count is stored in first to prevent reading illegal value
+ * (unlike salt, abnormal value of iteration count can lead to various fatal problems. See {@link KeyMetadata}).
+ * The length of the salt is not saved; it must be known in advance.
+ * <p>
+ * In decryption mode, first 4 bytes are read and interpreted to a {@code int} as big endian.
+ * If the value is not in the range specified in {@code KeyMetadata}, {@code IllegalMetadataException} is thrown.
+ * After that, salt is read(Length of the salt must provided via {@code KeyMetadata}).
+ * The program cannot tell if salt length specified in {@code KeyMetadata} is differ from that used in encryption.
+ * If value of the salt is abnormal, decryption process will fail or produce wrong plaintext.
+ * <p>
+ * Every subclass of {@code SymmetricCipherUtil} follows same metadata structure - first 4 bytes(in big endian) are iteration count, then salt.
+ * Additional metadata may be followed if a subclass overrides(for example, {@link SymmetricNonceCipherUtil}).
+ * 
  * @see SymmetricKeyMaterial
+ * @see KeyMetadata
  * */
 public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 
@@ -38,11 +57,10 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	protected final KeySize keySize;
 
 	/**
-	 * Construct this {@code SymmetricCipherUtil} with given {@code CipherProperty}, {@code SymmetricKeyMetadata} and buffer size.
-	 * Subclasses should call this constructor with appropriate {@code CipherProperty} object(mostly static final field).
+	 * Construct this {@code SymmetricCipherUtil} with given parameters.
 	 * */
-	protected SymmetricCipherUtil(CipherProperty cipherMetadata, KeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
-		super(cipherMetadata, bufferSize);
+	protected SymmetricCipherUtil(KeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
+		super(bufferSize);
 		this.keyMetadata = keyMetadata;
 		this.keySize = keySize;
 		this.key = key;
@@ -58,8 +76,13 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	}
 	
 
+	/**
+	 * Generates random salt and iteration count, initiate the <code>Cipher</code> instance, and write iteration count and salt
+	 * to {@code OutPut}.
+	 * This method can be override to generate and write additional metadata(like Initial Vector).
+	 * */
 	@Override
-	protected Cipher initEncrypt(OutPut mc) throws NestedIOException {
+	protected Cipher initEncrypt(OutPut out) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
 		byte[] salt = new byte[keyMetadata.saltLen]; 
 		sr.nextBytes(salt);
@@ -71,15 +94,19 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}
-		mc.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
-		mc.consumeResult(salt);
+		out.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
+		out.consumeResult(salt);
 		return c;
 	}
 
+	/**
+	 * Reads iteration count and salt from {@code InPut}, and initiate the <code>Cipher</code> instance.
+	 * This method can be override to read additional metadata(like Initial Vector) from {@code OutPut} 
+	 * */
 	@Override
-	protected Cipher initDecrypt(InPut mp) throws NestedIOException {
-		int iterationCount = readIterationCount(mp);
-		byte[] salt = readSalt(mp);
+	protected Cipher initDecrypt(InPut in) throws NestedIOException {
+		int iterationCount = readIterationCount(in);
+		byte[] salt = readSalt(in);
 		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
 		}
@@ -110,10 +137,10 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * 
 	 * @see KeyMetadata#saltLen
 	 * */
-	protected byte[] readSalt(InPut mp) {
+	protected byte[] readSalt(InPut in) {
 		byte[] salt = new byte[keyMetadata.saltLen]; 
 		int read = 0;
-		while ((read += mp.getSrc(salt, read)) != salt.length);
+		while ((read += in.getSrc(salt, read)) != salt.length);
 		return salt;
 	}
 	/**
@@ -123,16 +150,19 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * 
 	 * @see KeyMetadata#iterationRange
 	 * */
-	protected int readIterationCount(InPut mp) {
+	protected int readIterationCount(InPut in) {
 		byte[] iterationByte = new byte[4];
 		int read = 0;
-		while ((read += mp.getSrc(iterationByte, read)) != iterationByte.length);
+		while ((read += in.getSrc(iterationByte, read)) != iterationByte.length);
 		return ByteBuffer.wrap(iterationByte).getInt();
 	}
 
+	/**
+	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by size of the key and salt, iteration count range.
+	 * */
 	@Override
 	protected String fields() {
-		return super.fields() + ", key size : " + keySize.size + "bit, salt size : "
+		return super.fields() + ", key size : " + keySize.size + "bit, salt size : " //TODO : inclusive exclusive
 				+ keyMetadata.saltLen + "byte, iteration count between : " + keyMetadata.iterationRange[0] + " / " + keyMetadata.iterationRange[1];
 	}
 	

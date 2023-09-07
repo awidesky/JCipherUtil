@@ -13,15 +13,18 @@ import javax.crypto.NoSuchPaddingException;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMaterial;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
 
+/**
+ * A RSA/ECB/PKCS1Padding {@code CipherUtil}.
+ * */
 public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 
 	public final static CipherProperty METADATA = new CipherProperty("RSA", "ECB", "PKCS1Padding", "RSA");
 	
-	public RSA_ECBCipherUtil(CipherProperty cipherMetadata, AsymmetricKeyMaterial keyMet, int bufferSize) {
-		super(METADATA, keyMet, bufferSize);
+	private RSA_ECBCipherUtil(AsymmetricKeyMaterial keyMet, int bufferSize) {
+		super(keyMet, bufferSize);
 	}
 
 	@Override
@@ -32,6 +35,11 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 		return super.fields() + ", key size : " + getKeyLength() + "bit";
 	}
 	
+	/**
+	 * Returns estimated length of current key.
+	 * 
+	 * @return key size of current {@code AsymmetricKeyMaterial}. Value may not be precise.
+	 * */
 	public int getKeyLength() {
 		try {
 			Cipher rsa = Cipher.getInstance(METADATA.ALGORITMH_NAME + "/" + METADATA.ALGORITMH_MODE + "/" + METADATA.ALGORITMH_PADDING);
@@ -48,6 +56,11 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 		}
 	}
 
+	/**
+	 * Returns new key pair of this RSA algorithm.
+	 * 
+	 * @param keySize Required size of key
+	 */
 	public static KeyPair generateKeyPair(RSAKeySize keySize) {
 		try {
 			KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(METADATA.KEY_ALGORITMH_NAME);
@@ -61,11 +74,20 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 	public static class Builder extends AsymmetricCipherUtilBuilder<RSA_ECBCipherUtil> {
 
 		public Builder(KeyPair keyPair) { super(keyPair); }
+		/**
+		 * Build {@code RSA_ECBCipherUtil} with {@code PrivateKey} only.
+		 * */
 		public Builder(PrivateKey key) { super(key); }
-		public Builder(PublicKey key) { super(key);}
+		/**
+		 * Build {@code RSA_ECBCipherUtil} with {@code PublicKey} only.
+		 * */
+		public Builder(PublicKey key) { super(key); }
 
+		/**
+		 * Returns generated {@code RSA_ECBCipherUtil}.
+		 * */
 		@Override
-		public RSA_ECBCipherUtil build() { return new RSA_ECBCipherUtil(METADATA, keyMet, bufferSize); }
+		public RSA_ECBCipherUtil build() { return new RSA_ECBCipherUtil(keyMet, bufferSize); }
 		
 	}
 }

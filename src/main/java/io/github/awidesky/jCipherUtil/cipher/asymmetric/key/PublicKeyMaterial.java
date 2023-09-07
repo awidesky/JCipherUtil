@@ -18,22 +18,28 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 
-public class PublicKeyOnlyKeyMaterial extends AsymmetricKeyMaterial {
+public class PublicKeyMaterial extends AsymmetricKeyMaterial {
 
 	private final byte[] x509EncodedPublicKey;
 	
-	public PublicKeyOnlyKeyMaterial(PublicKey publicKey) {
+	public PublicKeyMaterial(PublicKey publicKey) {
 		this(publicKey.getEncoded());
 	}
-	public PublicKeyOnlyKeyMaterial(byte[] publicKey) {
+	public PublicKeyMaterial(byte[] publicKey) {
 		x509EncodedPublicKey = Arrays.copyOf(publicKey, publicKey.length);
 	}
-	public PublicKeyOnlyKeyMaterial(String publicKey) {
+	public PublicKeyMaterial(String publicKey) {
 		x509EncodedPublicKey = Base64.getDecoder().decode(publicKey);
 	}
 	
+	/** 
+	 * Return {@code KeyPair} as given {@code algorithm}.
+	 * 
+	 * @see CipherProperty#KEY_ALGORITMH_NAME
+	 * */
 	@Override
 	public KeyPair getKey(String algorithm) {
 		try {

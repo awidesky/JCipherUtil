@@ -15,6 +15,14 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 
+/**
+ * A builder class for symmetric cipherUtil.
+ * Necessary data are {@code SymmetricKeyMaterial} and {@code KeySize}. These values must be provided to constructor.
+ * Optional data is {@code KeyMetadata} and buffer size. These values are each default initialized to {@code KeyMetadata#DEFAULT}
+ * and 8KB, but custom value can configured by {@code SymmetricCipherUtilBuilder#keyMetadata(KeyMetadata)} and
+ * {@code SymmetricCipherUtilBuilder#bufferSize(int)}
+ * @param <T>
+ */
 public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil> {
 
 	protected SymmetricKeyMaterial keyMet;
@@ -42,11 +50,18 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 		this.keySize = keySize;
 	}
 	
+	/**
+	 * Configure {@code KeyMetadata}. original default value is {@code KeyMetadata#DEFAULT}.
+	 * This is optional operation.
+	 * */
 	public SymmetricCipherUtilBuilder<T> keyMetadata(KeyMetadata keyMetadata) {
 		this.keyMetadata = keyMetadata;
 		return this;
 	}
-	
+	/**
+	 * Configure buffer size. original default value is 8KB.
+	 * This is optional operation.
+	 * */
 	public SymmetricCipherUtilBuilder<T> bufferSize(int bufferSize) {
 		this.bufferSize = bufferSize;
 		return this;
@@ -54,6 +69,7 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 	
 	
 	/**
+	 * Builds and returns a new {@code SymmetricCipherUtil} configured with specified parameters.
 	 * */
 	public abstract T build();
 }

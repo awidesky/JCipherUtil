@@ -7,7 +7,7 @@
  * Please refer to LICENSE
  * */
 
-package io.github.awidesky.jCipherUtil.util.exceptions;
+package io.github.awidesky.jCipherUtil.exceptions;
 
 import java.io.IOException;
 
@@ -24,35 +24,56 @@ import java.io.IOException;
 public class NestedIOException extends RuntimeException {
 	
 	private static final long serialVersionUID = 1670078192706028987L;
+	/** Nested {@code IOException} which is the cause of this {@code NestedIOException} */
 	private final IOException nested;
 	
+	/**
+	 * Constructs a new NestedIOException with given cause(nested {@code IOException})
+	 */
 	public NestedIOException(IOException nested) {
 		super(nested);
 		this.nested = nested;
 	}
 	
+	/**
+	 * @return nested {@code IOException}
+	 */
 	public Exception getNested() {
 		return nested;
 	}
 	
+	/**
+	 * Returns the detail message string of nested {@code IOException}.
+	 * @return {@code IOException#getMessage()} of nested {@code IOException}
+	 */
 	@Override
 	public String getMessage() {
 		return nested.getMessage();
 	}
 
+	/**
+	 * Returns the localized description of nested {@code IOException}.
+	 * @return {@code IOException#getLocalizedMessage()} of nested {@code IOException}
+	 */
 	@Override
 	public String getLocalizedMessage() {
 		return nested.getLocalizedMessage();
 	}
 
+	/**
+	 * Returns the cause of this {@code NestedIOException}, which is the nested {@code IOException}
+	 */
 	@Override
 	public synchronized Throwable getCause() {
 		return nested;
 	}
 
+	/**
+	 * Returns a short description of this {@code NestedIOException} and the nested {@code IOException}
+	 * */
 	@Override
 	public String toString() {
-		return "NestedIOException with nested " + nested.toString();
+		return getClass().getSimpleName() + " with nested " + nested.toString();
 	}
 
 }

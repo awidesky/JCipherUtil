@@ -2,13 +2,17 @@ package io.github.awidesky.jCipherUtil.cipher.asymmetric.key;
 
 import java.security.KeyPair;
 
+import io.github.awidesky.jCipherUtil.properties.CipherProperty;
+
+/**
+ * Base class of asymmetric key pair.
+ * */
 public abstract class AsymmetricKeyMaterial {
 
 	/**
-	 * Generate {@link KeyPair}.
-	 * If there's already a {@code KeyPair} previously generated, or this {@code AsymmetricKeyMaterial} is constructed with a {@code PublicKey},
-	 * {@code PrivateKey} or {@code KeyPair}, return it.
-	 * Else, new {@code KeyPair} will be generated.
+	 * Returns a new {@link KeyPair}.
+	 * 
+	 * @see CipherProperty#KEY_ALGORITMH_NAME
 	 */
 	public abstract KeyPair getKey(String algorithm);
 	

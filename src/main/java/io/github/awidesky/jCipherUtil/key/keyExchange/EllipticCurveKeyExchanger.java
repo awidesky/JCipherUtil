@@ -10,11 +10,11 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.properties.EllipticCurveKeyExchangeProperty;
-import io.github.awidesky.jCipherUtil.util.exceptions.OmittedCipherException;
 
 /**
- * An abstract class for Key exchange process via Elliptic curve key agreement(key exchange) protocol like DiffieHellman algorithm.
+ * An abstract base class for Key exchange process via Elliptic curve key agreement(key exchange) protocol like Diffie-Hellman algorithm.
  * @see KeyAgreement
  * @see EllipticCurveKeyExchangeProperty
  * */
@@ -26,8 +26,8 @@ public abstract class EllipticCurveKeyExchanger {
 	protected final EllipticCurveKeyExchangeProperty property; 
 	
 	/** 
-	 * Creates this {@code EllipticCurveKeyExchanger} whit given {@code EllipticCurveKeyExchangeProperty}.
-	 * Subclasses should call this constructor with appropriate {@code EllipticCurveKeyExchangeProperty} object(mostly static final field).
+	 * initiate with given {@code EllipticCurveKeyExchangeProperty}.
+	 * Subclasses should call this constructor with appropriate {@code EllipticCurveKeyExchangeProperty} object(mostly a {@code static final} field).
 	 * */
 	protected EllipticCurveKeyExchanger(EllipticCurveKeyExchangeProperty property) {
 		this.property = property;
@@ -50,7 +50,7 @@ public abstract class EllipticCurveKeyExchanger {
 	public abstract String getCurve();
 	
 	/**
-	 * Initiate this {@code EllipticCurveKeyExchanger} and generate new {@code KeyPair}.
+	 * Generate and return new {@code KeyPair}.
 	 * 
 	 * @return {@code PublicKey} of generated {@code KeyPair}
 	 * */
@@ -65,7 +65,9 @@ public abstract class EllipticCurveKeyExchanger {
 	}
 	
 	/**
-	 * Initiate this {@code EllipticCurveKeyExchanger} and return new {@code PublicKey}.
+	 * Initiate the key exchange protocol and return new {@code PublicKey}. Returned {@code PublicKey} must be
+	 * transfered to the peer, and peer's {@code PublicKey} must be received and passed to {@code EllipticCurveKeyExchanger#exchangeKey(PublicKey)}
+	 * to finish the key exchange protocol.
 	 * 
 	 * @return {@code PublicKey} of generated {@code KeyPair}
 	 * */
@@ -74,7 +76,7 @@ public abstract class EllipticCurveKeyExchanger {
 	}
 	
 	/**
-	 * Do Key agreement process and generate shared secret.
+	 * Finish the key agreement process with given {@code PublicKey} of the peer and generate shared secret.
 	 * 
 	 * @param other {@code PublicKey} obtained from peer
 	 * @return byte array contains generated shared secret(can be used as a secret key for {@code SymmetricCipherUtil}
@@ -92,7 +94,7 @@ public abstract class EllipticCurveKeyExchanger {
 	
 	/**
 	 * Returns a {@code String} that represents this {@code EllipticCurveKeyExchanger} object.
-	 * Result {@code String} contains simple class name, and algorithm/provider name of the {@code KeyPairGenerator} and {@code KeyAgreement}
+	 * @return {@code String} contains simple class name, and algorithm/provider name of the {@code KeyPairGenerator} and {@code KeyAgreement}
 	 * used in this {@code EllipticCurveKeyExchanger} object.
 	 * */
 	@Override
