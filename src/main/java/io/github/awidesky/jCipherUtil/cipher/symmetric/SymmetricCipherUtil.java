@@ -107,8 +107,8 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	protected Cipher initDecrypt(InPut in) throws NestedIOException {
 		int iterationCount = readIterationCount(in);
 		byte[] salt = readSalt(in);
-		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
-			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
+		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
+			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
 		}
 		try {
 			Cipher c = getCipherInstance();
@@ -127,7 +127,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * @see KeyMetadata#iterationRange
 	 * */
 	protected int generateIterationCount(SecureRandom sr) {
-		return sr.nextInt(keyMetadata.iterationRange[0], keyMetadata.iterationRange[1]);
+		return sr.nextInt(keyMetadata.iterationRangeStart, keyMetadata.iterationRangeEnd);
 	}
 
 
@@ -163,7 +163,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	@Override
 	protected String fields() {
 		return super.fields() + ", key size : " + keySize.size + "bit, salt size : " //TODO : inclusive exclusive
-				+ keyMetadata.saltLen + "byte, iteration count between : " + keyMetadata.iterationRange[0] + " / " + keyMetadata.iterationRange[1];
+				+ keyMetadata.saltLen + "byte, iteration count : [" + keyMetadata.iterationRangeStart + ", " + keyMetadata.iterationRangeEnd + ")";
 	}
 	
 	

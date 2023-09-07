@@ -53,8 +53,8 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 		byte[] salt = readSalt(in);
 		byte[] nonce = readNonce(in);
 		
-		if (!(keyMetadata.iterationRange[0] <= iterationCount && iterationCount < keyMetadata.iterationRange[1])) {
-			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRange[0] + " and " + keyMetadata.iterationRange[1]);
+		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
+			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
 		}
 		Cipher c = getCipherInstance();
 		try {

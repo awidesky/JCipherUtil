@@ -44,18 +44,19 @@ public class KeyMetadata {
 	/** Length of salt */
 	public final int saltLen;
 	/** Range of salting iteration count */
-	public final int[] iterationRange = new int[2]; //TODO : 바꿀 수도 있으니까 배열 말고 두 변수로 나누
+	public final int iterationRangeStart;
+	public final int iterationRangeEnd;
 	
 	/**
 	 * @param saltLen length of the salt.
-	 * @param iterationRangeStart the least salting iteration count.
+	 * @param iterationRangeStart the least salting iteration count(inclusive).
 	 * @param iterationRangeEnd the upper bound (exclusive) for salting iteration count.
 	 * Iteration count bigger than this value will not be accepted.
 	 * */
 	public KeyMetadata(int saltLen, int iterationRangeStart, int iterationRangeEnd) {
 		this.saltLen = saltLen;
-		iterationRange[0] = iterationRangeStart;
-		iterationRange[1] = iterationRangeEnd;
+		this.iterationRangeStart = iterationRangeStart;
+		this.iterationRangeEnd = iterationRangeEnd;
 	}
 	
 }
