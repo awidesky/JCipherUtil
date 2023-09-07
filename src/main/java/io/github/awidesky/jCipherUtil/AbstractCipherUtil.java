@@ -132,11 +132,15 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @return amount of data read and processed. Size of the output may be different.
 	 */
 	protected int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) {
-		int read = in.getSrc(buf);
-		if(read == -1) return -1;
-		byte[] result = c.update(buf, 0, read);//TODO : IllegalStateException catch
-		if(result != null) out.consumeResult(result);
-		return read;
+		try {
+			int read = in.getSrc(buf);
+			if(read == -1) return -1;
+			byte[] result = c.update(buf, 0, read);
+			if(result != null) out.consumeResult(result);
+			return read;
+		} catch (IllegalStateException e) {
+			throw new OmittedCipherException(e);
+		}
 	}
 	/**
 	 * Does not read any more data from the input. Instead, finalize the cipher process and write
