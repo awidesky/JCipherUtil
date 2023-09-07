@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import javax.crypto.SecretKey;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
@@ -59,6 +61,7 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_GCMCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20KeySize;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20_Poly1305CipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.key.keyExchange.EllipticCurveKeyExchanger;
 import io.github.awidesky.jCipherUtil.key.keyExchange.ecdh.ECDHKeyExchanger;
@@ -169,7 +172,13 @@ class Test {
 			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
-		}));	
+		}));
+		list.add(dynamicTest("large key size test", () -> {
+			int largeKeySize = 5207;
+			ByteArrayKeyMaterial bk = new ByteArrayKeyMaterial(new byte[] { 1, 2, 3, 4, 5 });
+			SecretKey key =  bk.genKey("AES", largeKeySize * 8, new byte[] { 6, 7, 8, 9, 10 }, 1000);
+			assertEquals(largeKeySize, key.getEncoded().length);
+		}));
 	}
 	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, AsymmetricSupplier cipherSuppl) {
 		AsymmetricCipherUtil bothKey = cipherSuppl.withBothKey();

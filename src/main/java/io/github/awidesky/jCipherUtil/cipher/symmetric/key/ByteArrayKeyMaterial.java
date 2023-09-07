@@ -69,7 +69,15 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 			digest.update(Arrays.copyOf(salt, salt.length));
 			result = digest.digest();
 		}
-		//TODO : make use result is longer than requested key size?
+		while(result.length < keySize) {
+			digest.reset();
+			byte[] hashed = digest.digest(result);
+	        byte[] result1 = new byte[result.length + hashed.length];
+	        System.arraycopy(result, 0, result1, 0, result.length);
+	        System.arraycopy(hashed, 0, result1, result.length, hashed.length);
+	        result = result1;
+	        //TODO : close method & operations?
+		}
 		return new SecretKeySpec(result, 0, keySize / 8, algorithm);
 	}
 }
