@@ -10,6 +10,7 @@
 package io.github.awidesky.jCipherUtil.util;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Optional;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -65,7 +66,7 @@ public class UpdatableDecrypter {
 	public byte[] update() {
 		int read = in.getSrc(buf);
 		if(read == -1) return null;
-		return c.update(buf, 0, read); //TODO : null means output is ended. empty array should returned!
+		return Optional.ofNullable(c.update(buf, 0, read)).orElse(new byte[0]);
 	}
 	
 	/**
