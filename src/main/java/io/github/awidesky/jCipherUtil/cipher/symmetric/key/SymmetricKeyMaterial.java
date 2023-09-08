@@ -15,6 +15,7 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.key.KeyMaterial;
 
 /**
  * A {@code SymmetricKeyMaterial} is a symmetric key <i>material</i> - a mandatory secret data used in
@@ -25,7 +26,9 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
  * Also, one {@code SymmetricKeyMaterial} object will produce same {@code SecretKeySpec} in {@code SymmetricKeyMaterial#genKey(String, int, byte[], int)}
  * call if additional parameters(cipher algorithm, key value, salt, iteration count) are all the same.
  * */
-public abstract class SymmetricKeyMaterial {
+public abstract class SymmetricKeyMaterial extends KeyMaterial {
+	
+	protected boolean destroyed = false;
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
@@ -38,6 +41,10 @@ public abstract class SymmetricKeyMaterial {
 	 * @throws OmittedCipherException if an {@link RuntimeException}(like {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException}) is thrown
 	 */
 	public abstract SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException;
-	
 
+	@Override
+	public boolean isDestroyed() {
+		return destroyed;
+	}
+	
 }

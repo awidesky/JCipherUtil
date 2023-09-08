@@ -51,10 +51,20 @@ public class KeyPairMaterial extends AsymmetricKeyMaterial {
 	 * Return {@code KeyPair} as given {@code algorithm}.
 	 * 
 	 * @see CipherProperty#KEY_ALGORITMH_NAME
+	 * 
+	 * @throws IllegalStateException if this object is destroyed
 	 * */
 	@Override
 	public KeyPair getKey(String algorithm) {
+		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
 		return new KeyPair(publicKey.getKey(algorithm).getPublic(), privateKey.getKey(algorithm).getPrivate());
+	}
+	
+	@Override
+	public void destroy() {
+		publicKey.destroy();
+		privateKey.destroy();
+		destroyed = true;
 	}
 
 }

@@ -62,6 +62,10 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 			throw new OmittedCipherException(e);
 		}
 	}
-	
 
+	@Override
+	public void destroyKey() {
+		key.destroy();
+	}
+	
 }

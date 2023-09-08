@@ -12,6 +12,7 @@ package io.github.awidesky.jCipherUtil.cipher.symmetric.key;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Random;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -46,17 +47,32 @@ public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 	 * @param algorithm metadata of the Cipher. used to find key algorithm and key value.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
+	 * 
 	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} or {@link InvalidKeySpecException} is thrown
+	 * @throws IllegalStateException if this object is destroyed
 	 */
 	@Override
-	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
-	    SecretKey pbeKey;
+	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException, IllegalStateException{
+	    if(destroyed) throw new IllegalStateException("The key material is destroyed!");
+		SecretKey pbeKey;
 		try { //maybe PBEKeySpec.clearPassword must be called
 			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, Arrays.copyOf(salt, salt.length), iterationCount, keySize));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}
-	    return new SecretKeySpec(pbeKey.getEncoded(), algorithm);
+		byte[] key = pbeKey.getEncoded();
+		SecretKeySpec ret = new SecretKeySpec(key, algorithm);
+		clearArray(key);
+		return ret;
+	}
+
+	@Override
+	public void destroy() {
+		Random r = new Random();
+		for(int i = 0; i < password.length; i++) {
+			password[i] = (char)r.nextInt();
+		}
+		destroyed = true;
 	}
 	
 }

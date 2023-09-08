@@ -235,4 +235,8 @@ public interface CipherUtil {
 	 */
 	public UpdatableDecrypter UpdatableDecryptCipher(InPut in);
 	
+	/**
+	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 
+	 * */
+	public void destroyKey();
 }

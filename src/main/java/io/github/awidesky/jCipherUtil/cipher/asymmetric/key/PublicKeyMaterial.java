@@ -39,14 +39,24 @@ public class PublicKeyMaterial extends AsymmetricKeyMaterial {
 	 * Return {@code KeyPair} as given {@code algorithm}.
 	 * 
 	 * @see CipherProperty#KEY_ALGORITMH_NAME
+	 * 
+	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} or {@code InvalidKeySpecException} is thrown
+	 * @throws IllegalStateException if this object is destroyed
 	 * */
 	@Override
 	public KeyPair getKey(String algorithm) {
+		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
 		try {
 			return new KeyPair(KeyFactory.getInstance(algorithm).generatePublic(new X509EncodedKeySpec(x509EncodedPublicKey)), null);
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}
+	}
+	
+	@Override
+	public void destroy() {
+		clearArray(x509EncodedPublicKey);
+		destroyed = true;
 	}
 
 }

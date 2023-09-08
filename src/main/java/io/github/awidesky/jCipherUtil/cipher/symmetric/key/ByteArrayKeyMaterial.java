@@ -52,9 +52,13 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	 * @param algorithm metadata of the Cipher. used to find key algorithm and key value.
 	 * @param salt the salt. The contents of the buffer are copied to protect against subsequent modification.
 	 * @param iterationCount the iteration count.
+	 * 
+	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} is thrown
+	 * @throws IllegalStateException if this object is destroyed
 	 */
 	@Override
-	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException {
+	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException, IllegalStateException {
+		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-512");
@@ -75,9 +79,18 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	        byte[] result1 = new byte[result.length + hashed.length];
 	        System.arraycopy(result, 0, result1, 0, result.length);
 	        System.arraycopy(hashed, 0, result1, result.length, hashed.length);
+	        clearArray(result); clearArray(hashed);
 	        result = result1;
-	        //TODO : close method & operations?
 		}
-		return new SecretKeySpec(result, 0, keySize / 8, algorithm);
+		SecretKeySpec ret = new SecretKeySpec(result, 0, keySize / 8, algorithm);
+		clearArray(result);
+		return ret;
 	}
+
+	@Override
+	public void destroy() {
+		clearArray(key);
+		destroyed = true;
+	}
+	
 }

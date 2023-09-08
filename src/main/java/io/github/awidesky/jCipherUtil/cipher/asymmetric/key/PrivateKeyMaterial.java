@@ -23,30 +23,39 @@ import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 
 public class PrivateKeyMaterial extends AsymmetricKeyMaterial {
 
-	private final byte[] pkcs8EncodedprivateKey;
+	private final byte[] pkcs8EncodedPrivateKey;
 	
 	public PrivateKeyMaterial(PrivateKey privateKey) {
 		this(privateKey.getEncoded());
 	}
 	public PrivateKeyMaterial(byte[] privateKey) {
-		pkcs8EncodedprivateKey = Arrays.copyOf(privateKey, privateKey.length);
+		pkcs8EncodedPrivateKey = Arrays.copyOf(privateKey, privateKey.length);
 	}
 	public PrivateKeyMaterial(String privateKey) {
-		pkcs8EncodedprivateKey = Base64.getDecoder().decode(privateKey);
+		pkcs8EncodedPrivateKey = Base64.getDecoder().decode(privateKey);
 	}
 	
 	/** 
 	 * Return {@code KeyPair} as given {@code algorithm}.
 	 * 
 	 * @see CipherProperty#KEY_ALGORITMH_NAME
+	 * 
+	 * @throws OmittedCipherException if {@link NoSuchAlgorithmException} or {@code InvalidKeySpecException} is thrown
+	 * @throws IllegalStateException if this object is destroyed
 	 * */
 	@Override
 	public KeyPair getKey(String algorithm) {
+		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
 		try {
-			return new KeyPair(null, KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedprivateKey)));
+			return new KeyPair(null, KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedPrivateKey)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}
 	}
 
+	@Override
+	public void destroy() {
+		clearArray(pkcs8EncodedPrivateKey);
+		destroyed = true;
+	}
 }

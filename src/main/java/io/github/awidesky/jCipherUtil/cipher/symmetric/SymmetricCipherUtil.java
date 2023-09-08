@@ -166,5 +166,9 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 				+ keyMetadata.saltLen + "byte, iteration count : [" + keyMetadata.iterationRangeStart + ", " + keyMetadata.iterationRangeEnd + ")";
 	}
 	
+	@Override
+	public void destroyKey() {
+		key.destroy();
+	}
 	
 }
