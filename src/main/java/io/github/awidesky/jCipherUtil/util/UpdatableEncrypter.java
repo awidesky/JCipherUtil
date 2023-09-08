@@ -20,12 +20,12 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
 
 /**
- * This class allows user to manually input the buffer to encrypt continuously.
- * In contrast to {@code CipherUtil#encrypt(InPut, OutPut)},
+ * An {@code UpdatableEncrypter} allows user to continuously input data to encrypt.
+ * In contrast to {@code CipherUtil#encrypt(MessageProvider, OutPut)},
  * {@code UpdatableEncryptera} can continue a multiple-part encryption with {@code UpdatableEncrypter#update(byte[])} method.
- *  
- * <p>The instance of this class provided via {@code CipherUtil#UpdatableEncryptCipher(OutPut)} is irrelevant from {@code CipherUtil} instance who returned it.
- * Every metadata(key, salt, etc...) and cipher/key algorithms are same with those of the {@code CipherUtil} instance, but those two each has totally separated cipher process.   
+ * <p>
+ * The instance of this class is irrelevant from {@code CipherUtil} instance that provided it via {@code CipherUtil#UpdatableEncryptCipher(OutPut)}.
+ * Every metadata and cipher algorithm follows those of the {@code CipherUtil} instance, but calling {@code update(byte[])} and {@code doFinal(byte[] buf)} will not affect it.   
  * @see CipherUtil#UpdatableEncryptCipher(OutPut)
  * */
 public class UpdatableEncrypter {
@@ -34,46 +34,74 @@ public class UpdatableEncrypter {
 	private final OutPut out;
 	
 	/**
-	 * Instantiate a new updatable encrypter that uses given {@code javax.crypto.Cipher} and writes to given output.
-	 * Given {@code javax.crypto.Cipher} instant must be initiated with proper metadata and key before passed.
+	 * Creates updatable encrypter with given {@code javax.crypto.Cipher} and {@code OutPut}.
 	 * <p>
-	 * This constructor is not intended to be called directly on user's side. Using
-	 * {@code AbstractCipherUtil#UpdatableEncryptCipher(OutPut)} is recommended.
+	 * Even though this constructor is a valid way, {@code CipherUtil#UpdatableEncryptCipher(OutPut)} is recommended 
+	 * way to create {@code UpdatableEncrypter},
 	 * 
-	 * @param c a {@code javax.crypto.Cipher} that is already initiated({@code Cipher.init} method must be called before passing it) as encryption mode.
-	 * @param out output destination to store encrypted data.
-	 */
+	 * @see CipherUtil#UpdatableEncryptCipher(OutPut)
+	 * */
 	public UpdatableEncrypter(Cipher c, OutPut out) {
 		this.c = c;
 		this.out = out;
 	}
 	
 	/**
-	 * Encrypt given buffer and write to the output.
-	 * 
-	 * @param buf data to be encrypted.
-	 * @return amount of encrypted data written to the output. May different from value of the input buffer.
-	 */
+	 * Continues the multiple-part encryption operation.
+	 * The bytes in the input buffer are processed, and the result is transferred into destination. 
+	 * If input has a length of zero, this method returns {@code -1}.
+	 * */
 	public int update(byte[] buf) {
-		byte[] result = c.update(buf);
-		if(result != null) out.consumeResult(result);
-		return result.length;
+		return update(buf, 0, buf.length);
 	}
 	/**
-	 * Finish the cipher process and writes final output.
-	 * If given buffer is not a {@code null}, process it. After that, finish the cipher process and writes
-	 * final result to the output.
-	 *  
-	 * @param buf last part of data to be encrypted. <code>null</code> is permitted if there's no data to encrypt at the moment.
-	 * @return amount of encrypted data written to the output. May different from value of the input buffer.
+	 * Continues the multiple-part encryption operation.
+	 * The first len bytes in the input buffer, starting at off inclusive, are processed,
+	 * and the result is transferred into destination. 
+	 * If input has a length of zero, this method returns {@code -1}.
+	 * */
+	public int update(byte[] buf, int off, int len) {
+		byte[] result = c.update(buf, off, len);
+		if(result != null) {
+			out.consumeResult(result);
+			return result.length;
+		} else return -1;
+	
+	}
+	
+	/**
+	 * Finishes a multiple-part encryption operation.
+	 * You can also call {@code doFinal(null)} to do the same job.
+	 */
+	public int doFinal() {
+		return doFinal(null);
+	}
+	/**
+	 * Processes given buffer, and finishes a multiple-part encryption operation.
 	 */
 	public int doFinal(byte[] buf) {
+		return doFinal(buf, 0, (buf == null) ? 0 : buf.length);
+	}
+	/**
+	 * Processes given buffer, and finishes a multiple-part encryption operation.
+	 * The first len bytes in the input buffer, starting at off inclusive, are processed,
+	 * and the result is transferred into destination. 
+	 */
+	public int doFinal(byte[] buf, int off, int len) {
 		try {
-			byte[] result = (buf == null) ? c.doFinal() : c.doFinal(buf); 
+			byte[] result = (buf == null) ? c.doFinal() : c.doFinal(buf, off, len); 
 			out.consumeResult(result);
 			return result.length;
 		} catch (IllegalBlockSizeException | BadPaddingException | NestedIOException e) {
 			throw new OmittedCipherException(e);
 		}
+	}
+	
+	/**
+	 * Finish the encryption operation and releases any resources associated with the encrypter. 
+	 * */
+	public void close() {
+		doFinal(null);
+		out.close();
 	}
 }
