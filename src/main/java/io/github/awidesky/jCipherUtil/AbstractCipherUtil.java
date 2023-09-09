@@ -54,7 +54,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	/**
 	 * @return {@code CipherProperty} object of the subclass.
 	 * */
-	protected abstract CipherProperty getCipherProperty();
+	public abstract CipherProperty getCipherProperty();
 
 	/**
 	 * Initialize {@code Cipher} in encrypt mode so that it can be usable(be able to call {@code Cipher#update(byte[])}, {@code Cipher#doFinal()}.

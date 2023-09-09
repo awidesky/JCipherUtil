@@ -33,8 +33,7 @@ public class KeyPairMaterial extends AsymmetricKeyMaterial {
 	}
 	/** Creates with given {@code base64} encoded {@code String}s. */
 	public KeyPairMaterial(String publicKey, String privateKey) {
-		this.publicKey = new PublicKeyMaterial(publicKey);
-		this.privateKey = new PrivateKeyMaterial(privateKey);
+		this(new PublicKeyMaterial(publicKey), new PrivateKeyMaterial(privateKey));
 	}
 	/** Creates with given key binaries. */
 	public KeyPairMaterial(byte[] publicKey, byte[] privateKey) {
@@ -59,6 +58,22 @@ public class KeyPairMaterial extends AsymmetricKeyMaterial {
 		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
 		return new KeyPair(publicKey.getKey(algorithm).getPublic(), privateKey.getKey(algorithm).getPrivate());
 	}
+
+	/**
+	 * Returns a copy of pkcs8 encoded private key.
+	 * @return a copy of pkcs8 encoded private key.
+	 */
+	public byte[] getEncodedPrivate() {
+		return privateKey.getEncoded();
+	}
+	/**
+	 * Returns a copy of x509 encoded public key.
+	 * @return a copy of x509 encoded public key.
+	 */
+	public byte[] getEncodedPublic() {
+		return publicKey.getEncoded();
+	}
+	
 	
 	@Override
 	public void destroy() {

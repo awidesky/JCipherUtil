@@ -35,8 +35,7 @@ public class XDHKeyExchanger extends EllipticCurveKeyExchanger {
 	 * @param curve An elliptic curve for XDH key exchange.
 	 * */
 	public XDHKeyExchanger(XDHCurves curve) {
-		super(new EllipticCurveKeyExchangeProperty("XDH", "XDH"));
-		this.curve = curve.name();
+		this(curve.name());
 	}
 	/**
 	 * Creates the object with given name of the curve.

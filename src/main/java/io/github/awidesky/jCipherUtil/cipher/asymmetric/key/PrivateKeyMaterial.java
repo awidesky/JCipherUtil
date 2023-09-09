@@ -53,6 +53,13 @@ public class PrivateKeyMaterial extends AsymmetricKeyMaterial {
 		}
 	}
 
+	/**
+	 * Returns a copy of pkcs8 encoded private key.
+	 * @return a copy of pkcs8 encoded private key.
+	 */
+	public byte[] getEncoded() {
+		return Arrays.copyOf(pkcs8EncodedPrivateKey, pkcs8EncodedPrivateKey.length);
+	}
 	@Override
 	public void destroy() {
 		clearArray(pkcs8EncodedPrivateKey);

@@ -10,5 +10,5 @@ public class KeySize {
 	/**
 	 * Constructs the instance with given key size value.
 	 * */
-	protected KeySize(int value) { this.value = value; }
+	public KeySize(int value) { this.value = value; }
 }

@@ -156,6 +156,14 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		while ((read += in.getSrc(iterationByte, read)) != iterationByte.length);
 		return ByteBuffer.wrap(iterationByte).getInt();
 	}
+	
+	/**
+	 * Returns the size of the key
+	 * @return the size of the key
+	 */
+	public int keySize() {
+		return keySize.value;
+	}
 
 	/**
 	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by value of the key and salt, iteration count range.

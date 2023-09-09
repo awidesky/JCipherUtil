@@ -53,6 +53,15 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 		this.bufferSize = bufferSize;
 		return this;
 	}
+	/**
+	 * Configure key size. original default value is given at the constructor.
+	 * This is optional operation.
+	 * */
+	public SymmetricCipherUtilBuilder<T> keySize(KeySize keySize) {
+		this.keySize = keySize;
+		return this;
+	}
+	
 	
 	protected abstract T generate();
 

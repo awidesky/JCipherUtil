@@ -39,7 +39,7 @@ public class AES_GCMCipherUtil extends SymmetricNonceCipherUtil {
 	 * @return <code>CipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	@Override
-	protected IVCipherProperty getCipherProperty() { return METADATA; }
+	public IVCipherProperty getCipherProperty() { return METADATA; }
 
 
 	@Override

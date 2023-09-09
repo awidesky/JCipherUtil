@@ -65,6 +65,14 @@ public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 		clearArray(key);
 		return ret;
 	}
+	
+	/***
+	 * Returns a copy of the password.
+	 * @return a copy of the password.
+	 */
+	public char[] getPassword() {
+		return Arrays.copyOf(password, password.length);
+	}
 
 	@Override
 	public void destroy() {

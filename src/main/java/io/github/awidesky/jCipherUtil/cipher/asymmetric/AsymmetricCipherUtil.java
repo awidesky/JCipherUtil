@@ -1,6 +1,7 @@
 package io.github.awidesky.jCipherUtil.cipher.asymmetric;
 
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.util.Optional;
 
 import javax.crypto.Cipher;
@@ -10,6 +11,7 @@ import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMateria
 import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
@@ -62,7 +64,35 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 			throw new OmittedCipherException(e);
 		}
 	}
-
+	
+	/**
+	 * Generate a key pair of given size
+	 * @param keySize size of the key
+	 * @return newly generated key pair
+	 */
+	public abstract KeyPair generateKeyPair(KeySize keySize);
+	
+	/**
+	 * Returns size of the public key.
+	 * @return size of the public key.
+	 */
+	public abstract int publicKeyLength();
+	/**
+	 * Returns size of the private key.
+	 * @return size of the private key.
+	 */
+	public abstract int privateKeyLength();
+	
+	/***
+	 * Add length of public/private key of this instance to the return value of {@code AbstractCipherUtil#toString()}
+	 * 
+	 * @see AbstractCipherUtil#toString()
+	 */
+	@Override
+	protected String fields() {
+		return super.fields() + ", public key : " + publicKeyLength() + "bits, private key : " + privateKeyLength() + "bits";
+	}
+	
 	@Override
 	public void destroyKey() {
 		key.destroy();

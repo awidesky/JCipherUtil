@@ -86,6 +86,14 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 		clearArray(result);
 		return ret;
 	}
+	
+	/***
+	 * Returns a copy of the key source data.
+	 * @return a copy of the key source data.
+	 */
+	public byte[] getKeySource() {
+		return Arrays.copyOf(key, key.length);
+	}
 
 	@Override
 	public void destroy() {

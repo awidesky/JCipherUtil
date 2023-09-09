@@ -14,6 +14,7 @@ import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 
 /**
@@ -28,19 +29,15 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 	}
 
 	@Override
-	protected CipherProperty getCipherProperty() { return METADATA; }
+	public CipherProperty getCipherProperty() { return METADATA; }
 
-	@Override
-	protected String fields() {
-		return super.fields() + ", key value : " + getKeyLength() + "bit";
-	}
-	
 	/**
-	 * Returns estimated length of current key.
+	 * Returns estimated length of current public key.
 	 * 
-	 * @return key value of current {@code AsymmetricKeyMaterial}. Value may not be precise.
+	 * @return key length of current {@code AsymmetricKeyMaterial}, -1 if there is no public key. Value may not be precise.
 	 * */
-	public int getKeyLength() {
+	@Override
+	public int publicKeyLength() {
 		try {
 			Cipher rsa = Cipher.getInstance(METADATA.ALGORITMH_NAME + "/" + METADATA.ALGORITMH_MODE + "/" + METADATA.ALGORITMH_PADDING);
 			KeyPair kp = key.getKey(METADATA.KEY_ALGORITMH_NAME);
@@ -48,7 +45,7 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 			if(kp.getPublic() != null) {
 				rsa.init(Cipher.ENCRYPT_MODE, kp.getPublic());
 			} else {
-				rsa.init(Cipher.ENCRYPT_MODE, kp.getPrivate());
+				return -1;
 			}
 			return rsa.getOutputSize(0) * Byte.SIZE;
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -56,6 +53,28 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 		}
 	}
 
+	/**
+	 * Returns estimated length of current private key.
+	 * 
+	 * @return key length of current {@code AsymmetricKeyMaterial}, -1 if there is no private key. Value may not be precise.
+	 * */
+	@Override
+	public int privateKeyLength() {
+		try {
+			Cipher rsa = Cipher.getInstance(METADATA.ALGORITMH_NAME + "/" + METADATA.ALGORITMH_MODE + "/" + METADATA.ALGORITMH_PADDING);
+			KeyPair kp = key.getKey(METADATA.KEY_ALGORITMH_NAME);
+			if(kp == null) return -1;
+			if(kp.getPrivate() != null) {
+				rsa.init(Cipher.ENCRYPT_MODE, kp.getPrivate());
+			} else {
+				return -1;
+			}
+			return rsa.getOutputSize(0) * Byte.SIZE;
+		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
+			throw new OmittedCipherException(e);
+		}
+	}
+	
 	/**
 	 * Returns new key pair of this RSA algorithm.
 	 * 
@@ -71,6 +90,12 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 		}
 	}
 	
+	@Override
+	public KeyPair generateKeyPair(KeySize keySize) {
+		return generateKeyPair(new RSAKeySize(keySize.value));
+	}
+
+
 	public static class Builder extends AsymmetricCipherUtilBuilder<RSA_ECBCipherUtil> {
 
 		public Builder(KeyPair keyPair) { super(keyPair); }

@@ -24,10 +24,6 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 	 * 4 byte of counter will handle at least 68GB of data without reusing the counter.
 	 * */
 	public final int counterLen;
-	
-	private AES_CTRCipherUtil(KeyMetadata keyMetadata, KeySize keySize, SymmetricKeyMaterial key, int bufferSize) {
-		this(keyMetadata, keySize, key, bufferSize, 4);
-	}
 
 	/**
 	 * Initiate this object with given <code>counterLength</code>.
@@ -52,10 +48,12 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 	}
 	
 	@Override
-	protected IVCipherProperty getCipherProperty() { return METADATA; }
+	public IVCipherProperty getCipherProperty() { return METADATA; }
 
 
 	public static class Builder extends SymmetricCipherUtilBuilder<AES_CTRCipherUtil> {
+		
+		private int counter = 4;
 		
 		/**
 		 * Initialize the builder with given key size.
@@ -63,12 +61,21 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 		public Builder(AESKeySize keySize) {
 			super(keySize);
 		}
+		
+		/**
+		 * Configure length of the counter for CTR mode. original default value is 4.
+		 * This is optional operation.
+		 * */
+		public AES_CTRCipherUtil.Builder counterLen(int counterLen) {
+			this.counter = counterLen;
+			return this;
+		}
 				
 		/**
 		 * Returns generated {@code AES_CTRCipherUtil}.
 		 * */
 		@Override
-		public AES_CTRCipherUtil generate() { return new AES_CTRCipherUtil(keyMetadata, keySize, keyMet, bufferSize); }
+		public AES_CTRCipherUtil generate() { return new AES_CTRCipherUtil(keyMetadata, keySize, keyMet, bufferSize, counter); }
 		
 	}
 }

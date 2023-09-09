@@ -22,7 +22,7 @@ public class AES_ECBCipherUtil extends SymmetricCipherUtil {
 	}
 	
 	@Override
-	protected CipherProperty getCipherProperty() { return METADATA; }
+	public CipherProperty getCipherProperty() { return METADATA; }
 
 	public static class Builder extends SymmetricCipherUtilBuilder<AES_ECBCipherUtil> {
 		

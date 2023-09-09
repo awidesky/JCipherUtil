@@ -83,7 +83,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	 * @return <code>IVCipherProperty</code> of this <code>CipherUtil</code>
 	 * */
 	@Override
-	protected abstract IVCipherProperty getCipherProperty();
+	public abstract IVCipherProperty getCipherProperty();
 
 	/**
 	 * Generate iteration count, salt and nonce, init the cipher, write the metadata. 

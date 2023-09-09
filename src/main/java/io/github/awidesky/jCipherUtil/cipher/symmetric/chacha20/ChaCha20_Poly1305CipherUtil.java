@@ -21,7 +21,7 @@ public class ChaCha20_Poly1305CipherUtil extends AbstractChaCha20CipherUtil {
 	}
 
 	@Override
-	protected IVCipherProperty getCipherProperty() { return METADATA; }
+	public IVCipherProperty getCipherProperty() { return METADATA; }
 
 
 	public static class Builder extends SymmetricCipherUtilBuilder<ChaCha20_Poly1305CipherUtil> {

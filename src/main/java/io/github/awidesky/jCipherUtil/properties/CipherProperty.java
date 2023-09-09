@@ -59,19 +59,4 @@ public class CipherProperty {
 		this.KEY_ALGORITMH_NAME = keyAlgorithmName;
 	}
 	
-	/**
-	 * @return String contains all properties this object have.
-	 */
-	protected String fields() {
-		return "ALGORITMH_NAME=" + ALGORITMH_NAME + ", ALGORITMH_MODE=" + ALGORITMH_MODE
-				+ ", ALGORITMH_PADDING=" + ALGORITMH_PADDING + ", KEY_ALGORITMH_NAME=" + KEY_ALGORITMH_NAME;
-	}
-	
-	/**
-	 * Returns a String contains all data this object have.
-	 * */
-	@Override
-	public String toString() {
-		return "CipherProperty [" + fields() + "]";
-	}
 }

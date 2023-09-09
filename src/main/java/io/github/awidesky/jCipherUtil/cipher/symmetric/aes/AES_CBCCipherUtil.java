@@ -34,7 +34,7 @@ public class AES_CBCCipherUtil extends SymmetricNonceCipherUtil {
 	 * @return <code>CipherProperty</code> of this <code>AES_CBCCipherUtil</code>
 	 * */
 	@Override
-	protected IVCipherProperty getCipherProperty() { return METADATA; }
+	public IVCipherProperty getCipherProperty() { return METADATA; }
 
 
 	public static class Builder extends SymmetricCipherUtilBuilder<AES_CBCCipherUtil> {

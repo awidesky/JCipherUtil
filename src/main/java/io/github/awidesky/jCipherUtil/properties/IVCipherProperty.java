@@ -26,10 +26,5 @@ public class IVCipherProperty extends CipherProperty {
 		super(algorithmName, algorithmMode, algorithmPadding, keyAlgorithmName);
 		NONCESIZE = nonceSize;
 	}
-
-	@Override
-	protected String fields() {
-		return super.fields() + ", NONCESIZE=" + NONCESIZE + "byte";
-	}
 	
 }

@@ -53,6 +53,14 @@ public class PublicKeyMaterial extends AsymmetricKeyMaterial {
 		}
 	}
 	
+	/**
+	 * Returns a copy of x509 encoded public key.
+	 * @return a copy of x509 encoded public key.
+	 */
+	public byte[] getEncoded() {
+		return Arrays.copyOf(x509EncodedPublicKey, x509EncodedPublicKey.length);
+	}
+	
 	@Override
 	public void destroy() {
 		clearArray(x509EncodedPublicKey);

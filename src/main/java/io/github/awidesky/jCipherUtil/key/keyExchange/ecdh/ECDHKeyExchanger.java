@@ -39,8 +39,7 @@ public class ECDHKeyExchanger extends EllipticCurveKeyExchanger {
 	 * @param curve An elliptic curve for ECDH key exchange.
 	 * */
 	public ECDHKeyExchanger(ECDHCurves curve) {
-		super(new EllipticCurveKeyExchangeProperty("EC", "ECDH"));
-		this.curve = curve.name();
+		this(curve.name());
 	}
 	/**
 	 * Creates the object with given name of the curve.

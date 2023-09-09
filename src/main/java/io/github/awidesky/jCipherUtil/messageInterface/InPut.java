@@ -51,7 +51,7 @@ public interface InPut extends AutoCloseable {
 	/**
 	 * Close attached resource if needed.
 	 * */
-	public void closeResource() throws NestedIOException;
+	public void closeResource() throws NestedIOException; //TODO : fix this
 	/**
 	 * Close attached resource if needed.
 	 * <p>This method just calls {@code InPut#closeResource()}

@@ -10,6 +10,8 @@
 package io.github.awidesky.jCipher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -31,6 +33,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.HexFormat;
 import java.util.List;
@@ -52,6 +55,7 @@ import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
 import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.KeyPairMaterial;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa.RSAKeySize;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtilBuilder;
@@ -65,11 +69,16 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20KeySize;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20_Poly1305CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
+import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.key.keyExchange.EllipticCurveKeyExchanger;
+import io.github.awidesky.jCipherUtil.key.keyExchange.ecdh.ECDHCurves;
 import io.github.awidesky.jCipherUtil.key.keyExchange.ecdh.ECDHKeyExchanger;
+import io.github.awidesky.jCipherUtil.key.keyExchange.xdh.XDHCurves;
 import io.github.awidesky.jCipherUtil.key.keyExchange.xdh.XDHKeyExchanger;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
@@ -99,8 +108,8 @@ class Test {
 				))
 			);
 	static final Map<String, Stream<EllipticCurveKeyExchanger[]>> keyExchangers = Map.ofEntries(
-			Map.entry("ECDH", Stream.of(ECDHKeyExchanger.getAvailableCurves()).map(c -> new ECDHKeyExchanger[] {new ECDHKeyExchanger(c), new ECDHKeyExchanger(c)})),
-			Map.entry("XDH", Stream.of(XDHKeyExchanger.getAvailableCurves()).map(c -> new XDHKeyExchanger[] {new XDHKeyExchanger(c), new XDHKeyExchanger(c)}))
+			Map.entry("ECDH", Stream.of(ECDHKeyExchanger.getAvailableCurves()).map(ECDHCurves::valueOf).map(c -> new ECDHKeyExchanger[] {new ECDHKeyExchanger(c), new ECDHKeyExchanger(c)})),
+			Map.entry("XDH", Stream.of(XDHKeyExchanger.getAvailableCurves()).map(XDHCurves::valueOf).map(c -> new XDHKeyExchanger[] {new XDHKeyExchanger(c), new XDHKeyExchanger(c)}))
 			);
 			
 
@@ -114,17 +123,31 @@ class Test {
 	
 	@TestFactory
 	@DisplayName("Test all")
-	Collection<DynamicNode> testSymmetric() throws NoSuchAlgorithmException, DigestException, IOException {//TODO : rename
+	Collection<DynamicNode> testAll() throws NoSuchAlgorithmException, DigestException, IOException {
 		List<DynamicNode> l = new ArrayList<>(3);
 		
-		l.add(dynamicContainer("KeyExchangers", keyExchangers.entrySet().stream().map(entry ->  //per ECDH...
+		List<DynamicNode> keyExList = new ArrayList<DynamicNode>();
+		keyExList.add(dynamicTest("default curves", () -> {
+			assertEquals(new ECDHKeyExchanger().getCurve(), ECDHCurves.secp521r1.name(), "ECDH key exchanger default curve test : ");
+			assertEquals(new XDHKeyExchanger().getCurve(), XDHCurves.X25519.name(), "XDH key exchanger default curve test : ");
+		}));
+		keyExList.addAll(keyExchangers.entrySet().stream().map(entry ->  //per ECDH...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::keyExchangerTests))
-		)));
+		).toList());
+		l.add(dynamicContainer("KeyExchangers", keyExList));
 		
 		
 		List<DynamicNode> symmetricList = new ArrayList<>();
+		symmetricList.add(dynamicTest("large key size test", () -> {
+			int largeKeySize = 5207;
+			ByteArrayKeyMaterial bk = new ByteArrayKeyMaterial(new byte[] { 1, 2, 3, 4, 5 });
+			SecretKey key =  bk.genKey("AES", largeKeySize * 8, new byte[] { 6, 7, 8, 9, 10 }, 1000);
+			assertEquals(largeKeySize, key.getEncoded().length);
+		}));
 		symmetricList.addAll(symmetricCiphers.entrySet().stream().map(entry -> // per AES, ChaCha20...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))).toList());
+		symmetricList.add(symmetricAdditionalTests());
+		
 		
 		l.add(dynamicContainer("Symmetric ciphers", symmetricList));
 		l.add(dynamicContainer("Asymmetric ciphers", asymmetricCiphers.entrySet().stream().map(entry -> // per RSA...
@@ -134,7 +157,7 @@ class Test {
 	
 
 	private static DynamicNode keyExchangerTests(EllipticCurveKeyExchanger[] keyExchArr) {
-		return dynamicTest(keyExchArr[0].getCurve(), () -> {
+		return dynamicTest(keyExchArr[0].toString(), () -> {
 			EllipticCurveKeyExchanger k1 = keyExchArr[0]; 
 			EllipticCurveKeyExchanger k2 = keyExchArr[1];
 				
@@ -164,6 +187,17 @@ class Test {
 		return dynamicContainer(cipherSuppl.withBothKey().toString(), tests);
 	}
 	
+
+	private DynamicContainer symmetricAdditionalTests() {
+		return dynamicContainer("additional tests", Stream.of(
+				dynamicTest("AES_CTR counter bound", () -> {
+					assertThrows(IllegalArgumentException.class,
+							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).counterLen(256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
+					assertThrows(IllegalArgumentException.class,
+							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).counterLen(-256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
+				})));
+	}
+
 	
 	private static void addSymmetricCipherKeyTests(List<DynamicNode> list, SymmetricCipherUtilBuilder<? extends SymmetricCipherUtil> cipherBuilder) {
 		list.add(dynamicTest("byte[] key test", () -> {
@@ -180,11 +214,36 @@ class Test {
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));
-		list.add(dynamicTest("large key value test", () -> {
-			int largeKeySize = 5207;
-			ByteArrayKeyMaterial bk = new ByteArrayKeyMaterial(new byte[] { 1, 2, 3, 4, 5 });
-			SecretKey key =  bk.genKey("AES", largeKeySize * 8, new byte[] { 6, 7, 8, 9, 10 }, 1000);
-			assertEquals(largeKeySize, key.getEncoded().length);
+		list.add(dynamicTest("invalid key size test", () -> {
+			int smallKeySize = 12;
+			int largeKeySize = 264;
+			int originalKeySize = cipherBuilder.build(Hash.password).keySize();
+			SymmetricCipherUtil c1 = cipherBuilder.keySize(new KeySize(smallKeySize)).build(Hash.password);
+			SymmetricCipherUtil c2 = cipherBuilder.keySize(new KeySize(largeKeySize)).build(Hash.password);
+			cipherBuilder.keySize(new KeySize(originalKeySize));
+			assertThrows(OmittedCipherException.class,
+					() -> c1.encryptToSingleBuffer(InPut.from(src)));
+			assertThrows(OmittedCipherException.class,
+					() -> c2.encryptToSingleBuffer(InPut.from(src)));
+		}));
+		list.add(dynamicTest("key material destroy test", () -> {
+			PasswordKeyMaterial p = new PasswordKeyMaterial(Hash.password);
+			ByteArrayKeyMaterial b = new ByteArrayKeyMaterial(src);
+			char[] prev1 = p.getPassword();
+			byte[] prev2 = b.getKeySource();
+			p.destroy(); b.destroy();
+			assertEquals(true, p.isDestroyed(), "PasswordKeyMaterial is not destroyed");
+			assertEquals(true, b.isDestroyed(), "ByteArrayKeyMaterial is not destroyed");
+			assertNotEquals(prev1, p.getPassword(), "PasswordKeyMaterial data is not deleted");
+			assertNotEquals(prev2, b.getKeySource(), "ByteArrayKeyMaterial data is not deleted");
+			String keyAlgo = cipherBuilder.build(Hash.password).getCipherProperty().KEY_ALGORITMH_NAME;
+			assertThrows(IllegalStateException.class, () -> p.genKey(keyAlgo, 256, src, 100));
+			assertThrows(IllegalStateException.class, () -> b.genKey(keyAlgo, 256, src, 100));
+			SymmetricCipherUtil c1 = cipherBuilder.build(Hash.password);
+			c1.destroyKey();
+			assertThrows(IllegalStateException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
+			SymmetricCipherUtil c2 = cipherBuilder.build(src); c2.destroyKey();
+			assertThrows(IllegalStateException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
 		}));
 	}
 	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, AsymmetricSupplier cipherSuppl) {
@@ -194,15 +253,33 @@ class Test {
 		list.add(dynamicTest("Encrypt with PublicKey only instance", () -> {
 			assertEquals(Hash.hashPlain(src), Hash.hashPlain(bothKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
 		}));
-		list.add(dynamicTest("Deccrypt with PrivateKey only instance", () -> {
+		list.add(dynamicTest("Decrypt with PrivateKey only instance", () -> {
 			assertEquals(Hash.hashPlain(src), Hash.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src))))));
 		}));
-		list.add(dynamicTest("Encrypt/Deccrypt with PublicKey/PrivateKey instance", () -> {
+		list.add(dynamicTest("Encrypt/Decrypt with PublicKey/PrivateKey instance", () -> {
 			assertEquals(Hash.hashPlain(src), Hash.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
+		}));
+		list.add(dynamicTest("public/private key size", () -> {
+			assertEquals(publicKey.publicKeyLength(), privateKey.privateKeyLength());
+			assertEquals(-1, publicKey.privateKeyLength());
+			assertEquals(-1, privateKey.publicKeyLength());
+		}));
+		list.add(dynamicTest("key material destroy test", () -> {
+			KeyPairMaterial kp = new KeyPairMaterial(cipherSuppl.withBothKey().generateKeyPair(new KeySize(2048)));
+			Encoder base64Encoder = Base64.getEncoder();
+			KeyPairMaterial kp2 = new KeyPairMaterial(base64Encoder .encodeToString(kp.getEncodedPublic()), base64Encoder.encodeToString(kp.getEncodedPrivate()));
+			kp.destroy();
+			assertEquals(true, kp.isDestroyed(), "KeyPairMaterial is not destroyed");
+			assertNotEquals(kp2.getEncodedPublic(), kp.getEncodedPublic(), "PublicKeyMaterial data is not deleted");
+			assertNotEquals(kp2.getEncodedPrivate(), kp.getEncodedPrivate(), "PrivateKeyMaterial data is not deleted");
+			AsymmetricCipherUtil c1 = cipherSuppl.withBothKey(); c1.destroyKey();
+			assertThrows(IllegalStateException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
+			AsymmetricCipherUtil c2 = cipherSuppl.withBothKey(); c2.destroyKey();
+			assertThrows(IllegalStateException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
 		}));
 	}
 	
-	private static void addCommonCipherTests(List<DynamicNode> list, CipherUtil cipher) { //TODO : various IOtest
+	private static void addCommonCipherTests(List<DynamicNode> list, CipherUtil cipher) {
 		Stream.of(
 				dynamicTest("CipherTunnel", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
@@ -246,6 +323,7 @@ class Test {
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					ci.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(-1, ci.read(), "CipherUtilInputStream.read() does not return -1 after closed!");
 				}),	
 				dynamicTest("byte[] <-> byte[]", () -> {
 					assertEquals(Hash.hashPlain(src),
@@ -272,8 +350,21 @@ class Test {
 				dynamicTest("String <-> String", () -> {
 					assertEquals(randomStr, cipher.decryptToString(InPut.from(
 							cipher.encryptToSingleBuffer(InPut.from(randomStr, TESTCHARSET))), TESTCHARSET));
+					assertEquals(randomStr, cipher.decryptToString(InPut.from(
+							cipher.encryptToSingleBuffer(InPut.from(randomStr))), Charset.defaultCharset()),
+							"Default charset in InPut.from(String) is not " + Charset.defaultCharset().name());
 				}),
 				dynamicTest("Inputstream <-> Outputstream", () -> {
+					File fsrc = mkTempPlainFile();
+					File encDest = mkEmptyTempFile();
+					File decDest = mkEmptyTempFile();
+					cipher.encrypt(new BufferedInputStream(new FileInputStream(fsrc)),
+							new BufferedOutputStream(new FileOutputStream(encDest)));
+					cipher.decrypt(new BufferedInputStream(new FileInputStream(encDest)),
+							new BufferedOutputStream(new FileOutputStream(decDest)));
+					assertEquals(Hash.hashPlain(new FileInputStream(fsrc)), Hash.hashPlain(new FileInputStream(decDest)));
+				}),
+				dynamicTest("Inputstream <-> Outputstream through InPut/Output", () -> {
 					File fsrc = mkTempPlainFile();
 					File encDest = mkEmptyTempFile();
 					File decDest = mkEmptyTempFile();
