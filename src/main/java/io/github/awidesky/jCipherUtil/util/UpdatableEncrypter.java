@@ -32,6 +32,8 @@ public class UpdatableEncrypter {
 
 	private final Cipher c;
 	private final OutPut out;
+	private boolean finished = false;
+	private boolean closed = false;
 	
 	/**
 	 * Creates updatable encrypter with given {@code javax.crypto.Cipher} and {@code OutPut}.
@@ -48,8 +50,9 @@ public class UpdatableEncrypter {
 	
 	/**
 	 * Continues the multiple-part encryption operation.
-	 * The bytes in the input buffer are processed, and the result is transferred into destination. 
-	 * If input has a length of zero, this method returns {@code -1}.
+	 * The bytes in the input buffer are processed, and the result is transferred into destination.
+	 * 
+	 * @return length of the output(possibly 0), -1 if the encrypter is closed.
 	 * */
 	public int update(byte[] buf) {
 		return update(buf, 0, buf.length);
@@ -57,27 +60,33 @@ public class UpdatableEncrypter {
 	/**
 	 * Continues the multiple-part encryption operation.
 	 * The first len bytes in the input buffer, starting at off inclusive, are processed,
-	 * and the result is transferred into destination. 
-	 * If input has a length of zero, this method returns {@code -1}.
+	 * and the result is transferred into destination.
+	 * 
+	 * @return length of the output(possibly 0), -1 if the encrypter is closed.
 	 * */
 	public int update(byte[] buf, int off, int len) {
+		if(finished || closed) return -1;
 		byte[] result = c.update(buf, off, len);
 		if(result != null) {
 			out.consumeResult(result);
 			return result.length;
-		} else return -1;
+		} else return 0;
 	
 	}
 	
 	/**
 	 * Finishes a multiple-part encryption operation.
 	 * You can also call {@code doFinal(null)} to do the same job.
+	 * 
+	 * @return length of the output(possibly 0), -1 if the encrypter is closed.
 	 */
 	public int doFinal() {
 		return doFinal(null);
 	}
 	/**
 	 * Processes given buffer, and finishes a multiple-part encryption operation.
+	 * 
+	 * @return length of the output(possibly 0), -1 if the encrypter is closed.
 	 */
 	public int doFinal(byte[] buf) {
 		return doFinal(buf, 0, (buf == null) ? 0 : buf.length);
@@ -86,11 +95,15 @@ public class UpdatableEncrypter {
 	 * Processes given buffer, and finishes a multiple-part encryption operation.
 	 * The first len bytes in the input buffer, starting at off inclusive, are processed,
 	 * and the result is transferred into destination. 
+	 * 
+	 * @return length of the output(possibly 0), -1 if the encrypter is closed.
 	 */
 	public int doFinal(byte[] buf, int off, int len) {
+		if(closed) return -1;
 		try {
 			byte[] result = (buf == null) ? c.doFinal() : c.doFinal(buf, off, len); 
 			out.consumeResult(result);
+			finished = true;
 			return result.length;
 		} catch (IllegalBlockSizeException | BadPaddingException | NestedIOException e) {
 			throw new OmittedCipherException(e);
@@ -102,5 +115,6 @@ public class UpdatableEncrypter {
 	 * */
 	public void close() {
 		out.close();
+		closed = finished = true;
 	}
 }

@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -227,7 +228,7 @@ class Test {
 					dec.write(ud.update());
 					byte[] b = ud.doFinal();
 					ud.close();
-					if(b != null) dec.write(b);
+					dec.write(Optional.ofNullable(b).orElse(new byte[0]));
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
 				dynamicTest("CipherUtilOutputStream <-> CipherUtilInputStream", () -> {
@@ -237,11 +238,13 @@ class Test {
 					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher);
 					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher);
 
-					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
+					co.write(src[0]); co.write(src, 1, src.length - 1);
+					co.close();
 					
 					dec.write(ci.read());
 					int n = 0;
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
+					ci.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
 				dynamicTest("byte[] <-> byte[]", () -> {

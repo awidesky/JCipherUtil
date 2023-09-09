@@ -37,6 +37,7 @@ public class UpdatableDecrypter {
 	final private InPut in;
 	final private byte[] buf;
 	private boolean finished = false;
+	private boolean closed = false;
 	
 	/**
 	 * Creates updatable decrypter with given {@code javax.crypto.Cipher} and {@code InPut}.
@@ -60,7 +61,7 @@ public class UpdatableDecrypter {
 	 * If decryption process is finished, this method returns {@code null}.
 	 * */
 	public byte[] update() {
-		if(finished) return null;
+		if(finished || closed) return null;
 		
 		int read = in.getSrc(buf);
 		if(read == -1) {
@@ -83,7 +84,7 @@ public class UpdatableDecrypter {
 	 * @return If there's remaining decrypted data, else {@code null}.
 	 */
 	public byte[] doFinal() {
-		if(finished) return null;
+		if(finished || closed) return null;
 		ByteArrayOutputStream bao = new ByteArrayOutputStream();
 		while(true) {
 			byte[] b = update();
@@ -104,5 +105,6 @@ public class UpdatableDecrypter {
 	 * */
 	public void close() {
 		in.close();
+		closed = finished = true;
 	}
 }
