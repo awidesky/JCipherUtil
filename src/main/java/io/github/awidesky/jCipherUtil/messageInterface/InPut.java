@@ -50,14 +50,10 @@ public interface InPut extends AutoCloseable {
 	public int getSrc(byte[] buffer, int off) throws NestedIOException;
 	/**
 	 * Close attached resource if needed.
-	 * */
-	public void closeResource() throws NestedIOException; //TODO : fix this
-	/**
-	 * Close attached resource if needed.
 	 * <p>This method just calls {@code InPut#closeResource()}
 	 * */
 	@Override
-	public default void close() throws NestedIOException { closeResource(); }
+	public void close() throws NestedIOException;
 	
 	/**
 	 * Returns a {@code InPut} that reads data from given byte array.
@@ -135,12 +131,12 @@ public interface InPut extends AutoCloseable {
 				try {
 					return in.read(buffer, off, buffer.length - off);
 				} catch (IOException e) {
-					closeResource();
+					close();
 					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws NestedIOException {
+			public void close() throws NestedIOException {
 				try { if(close) in.close(); }
 				catch (IOException e) { throw new NestedIOException(e);	}
 			}
@@ -179,12 +175,12 @@ public interface InPut extends AutoCloseable {
 					
 					return read;
 				} catch (IOException e) {
-					closeResource();
+					close();
 					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws NestedIOException {
+			public void close() throws NestedIOException {
 				try { if(close) in.close(); }
 				catch (IOException e) { throw new NestedIOException(e);	}
 			}
@@ -214,15 +210,15 @@ public interface InPut extends AutoCloseable {
 				try {
 					ByteBuffer buf = ByteBuffer.wrap(buffer).position(off);
 					int read = in.read(buf);
-					if(read == -1) closeResource();
+					if(read == -1) close();
 					return read;
 				} catch (IOException e) {
-					closeResource();
+					close();
 					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws NestedIOException {
+			public void close() throws NestedIOException {
 				try { if(close) in.close(); }
 				catch (IOException e) { throw new NestedIOException(e);	}
 			}
@@ -262,12 +258,12 @@ public interface InPut extends AutoCloseable {
 
 					return read;
 				} catch (IOException e) {
-					closeResource();
+					close();
 					throw new NestedIOException(e);
 				}
 			}
 			@Override
-			public void closeResource() throws NestedIOException {
+			public void close() throws NestedIOException {
 				try { if(close) in.close(); }
 				catch (IOException e) { throw new NestedIOException(e);	}
 			}
