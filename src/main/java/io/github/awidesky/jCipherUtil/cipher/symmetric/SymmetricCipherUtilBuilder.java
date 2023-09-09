@@ -31,22 +31,9 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 	protected int bufferSize = 8 * 1024;
 	
 	/**
-	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given password and key value.
-	 * 
-	 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
+	 * Initialize the builder with given key size.
 	 * */
-	public SymmetricCipherUtilBuilder(char[] password, KeySize keySize) {
-		keyMet = new PasswordKeyMaterial(password);
-		this.keySize = keySize;
-	}
-	/**
-	 * Initialize <code>AsymmetricCipherUtilBuilder</code> with given <code>byte[]</code> key and key value.
-	 * <p><i><b>The argument byte array is directly used as <code>SecretKey</code>(after key stretching)</b></i>
-	 * 
-	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
-	 * */
-	public SymmetricCipherUtilBuilder(byte[] key, KeySize keySize) {
-		keyMet = new ByteArrayKeyMaterial(key);;
+	public SymmetricCipherUtilBuilder(KeySize keySize) {
 		this.keySize = keySize;
 	}
 	
@@ -67,9 +54,26 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 		return this;
 	}
 	
-	
+	protected abstract T generate();
+
 	/**
-	 * Builds and returns a new {@code SymmetricCipherUtil} configured with specified parameters.
+	 * Returns a new {@code CipherUtil} instance configured with specified parameters and given password.
+	 * 
+	 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
+	 * @param password password for the secret key
 	 * */
-	public abstract T build();
+	public T build(char[] password) {
+		keyMet = new PasswordKeyMaterial(password);
+		return generate();
+	}
+	/**
+	 * Returns a new {@code CipherUtil} instance configured with specified parameters and given <code>byte[]</code> key.
+	 * 
+	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
+	 * @param key the secret key data which used as <code>SecretKey</code>(after key stretching)
+	 * */
+	public T build(byte[] key) {
+		keyMet = new ByteArrayKeyMaterial(key);
+		return generate();
+	}
 }

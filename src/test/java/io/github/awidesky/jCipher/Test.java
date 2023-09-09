@@ -53,6 +53,7 @@ import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa.RSAKeySize;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AESKeySize;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_CBCCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AES_CTRCipherUtil;
@@ -79,16 +80,16 @@ import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
 class Test {
 
 	static final int CIPHERUTILBUFFERSIZE = 31; //odd number for test
-	static final Map<String, Stream<SymmetricCipherUtil>> symmetricCiphers = Map.ofEntries(
+	static final Map<String, Stream<SymmetricCipherUtilBuilder<? extends SymmetricCipherUtil>>> symmetricCiphers = Map.ofEntries(
 			Map.entry("AES", Stream.of(
-					new AES_GCMCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
-					new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
-					new AES_CTRCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
-					new AES_CBCCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build()
+					new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT),
+					new AES_ECBCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT),
+					new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT),
+					new AES_CBCCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT)
 				)),
 			Map.entry("ChaCha20", Stream.of(
-					new ChaCha20_Poly1305CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(),
-					new ChaCha20CipherUtil.Builder(Hash.password, ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build()
+					new ChaCha20_Poly1305CipherUtil.Builder(ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT),
+					new ChaCha20CipherUtil.Builder(ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT)
 				))
 			);
 	static final Map<String, Stream<AsymmetricSupplier>> asymmetricCiphers = Map.ofEntries(
@@ -112,7 +113,7 @@ class Test {
 	
 	@TestFactory
 	@DisplayName("Test all")
-	Collection<DynamicNode> testSymmetric() throws NoSuchAlgorithmException, DigestException, IOException {
+	Collection<DynamicNode> testSymmetric() throws NoSuchAlgorithmException, DigestException, IOException {//TODO : rename
 		List<DynamicNode> l = new ArrayList<>(3);
 		
 		l.add(dynamicContainer("KeyExchangers", keyExchangers.entrySet().stream().map(entry ->  //per ECDH...
@@ -121,7 +122,6 @@ class Test {
 		
 		
 		List<DynamicNode> symmetricList = new ArrayList<>();
-		addSymmetricCipherKeyTests(symmetricList);
 		symmetricList.addAll(symmetricCiphers.entrySet().stream().map(entry -> // per AES, ChaCha20...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))).toList());
 		
@@ -131,9 +131,28 @@ class Test {
 		return l;
 	}
 	
+
+	private static DynamicNode keyExchangerTests(EllipticCurveKeyExchanger[] keyExchArr) {
+		return dynamicTest(keyExchArr[0].getCurve(), () -> {
+			EllipticCurveKeyExchanger k1 = keyExchArr[0]; 
+			EllipticCurveKeyExchanger k2 = keyExchArr[1];
+				
+			PublicKey p1 = k1.init();
+			PublicKey p2 = k2.init();
+					
+			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(k1.exchangeKey(p2)); 
+			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(k2.exchangeKey(p1));
+					
+			assertEquals(Hash.hashPlain(src),
+					Hash.hashPlain(c2.decryptToSingleBuffer(InPut.from(c1.encryptToSingleBuffer(InPut.from(src))))));
+		});
+	}
 	
-	private static DynamicContainer symmetricCipherTests(SymmetricCipherUtil cipher) {
+	
+	private static DynamicContainer symmetricCipherTests(SymmetricCipherUtilBuilder<? extends SymmetricCipherUtil> cipherBuilder) {
 		List<DynamicNode> tests = new ArrayList<>();
+		addSymmetricCipherKeyTests(tests, cipherBuilder);
+		SymmetricCipherUtil cipher = cipherBuilder.build(Hash.password);
 		addCommonCipherTests(tests, cipher);
 		return dynamicContainer(cipher.toString(), tests);
 	}
@@ -143,35 +162,20 @@ class Test {
 		addCommonCipherTests(tests, cipherSuppl.withBothKey());
 		return dynamicContainer(cipherSuppl.withBothKey().toString(), tests);
 	}
-	private static DynamicNode keyExchangerTests(EllipticCurveKeyExchanger[] keyExchArr) {
-		return dynamicTest(keyExchArr[0].getCurve(), () -> {
-			EllipticCurveKeyExchanger k1 = keyExchArr[0]; 
-			EllipticCurveKeyExchanger k2 = keyExchArr[1];
-				
-			PublicKey p1 = k1.init();
-			PublicKey p2 = k2.init();
-					
-			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(k1.exchangeKey(p2), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(); 
-			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(k2.exchangeKey(p1), AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
-					
-			assertEquals(Hash.hashPlain(src),
-					Hash.hashPlain(c2.decryptToSingleBuffer(InPut.from(c1.encryptToSingleBuffer(InPut.from(src))))));
-		});
-	}
 	
 	
-	private static void addSymmetricCipherKeyTests(List<DynamicNode> list) {
+	private static void addSymmetricCipherKeyTests(List<DynamicNode> list, SymmetricCipherUtilBuilder<? extends SymmetricCipherUtil> cipherBuilder) {
 		list.add(dynamicTest("byte[] key test", () -> {
 			byte[] key = new byte[1024];
 			new Random().nextBytes(key);
-			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
-			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(key, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
+			CipherUtil ci1 = cipherBuilder.build(key);
+			CipherUtil ci2 = cipherBuilder.build(key);
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));	
 		list.add(dynamicTest("password test", () -> {
-			CipherUtil ci1 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
-			CipherUtil ci2 = new AES_ECBCipherUtil.Builder(Hash.password, AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build();
+			CipherUtil ci1 = cipherBuilder.build(Hash.password);
+			CipherUtil ci2 = cipherBuilder.build(Hash.password);
 			assertEquals(Hash.hashPlain(src),
 					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));
@@ -197,7 +201,7 @@ class Test {
 		}));
 	}
 	
-	private static void addCommonCipherTests(List<DynamicNode> list, CipherUtil cipher) {
+	private static void addCommonCipherTests(List<DynamicNode> list, CipherUtil cipher) { //TODO : various IOtest
 		Stream.of(
 				dynamicTest("CipherTunnel", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
@@ -217,10 +221,12 @@ class Test {
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					UpdatableEncrypter ue = cipher.UpdatableEncryptCipher(OutPut.to(enc));
 					ue.update(src);
-					ue.doFinal(null);
+					ue.doFinal();
+					ue.close();
 					UpdatableDecrypter ud = cipher.UpdatableDecryptCipher(InPut.from(enc.toByteArray()));
 					dec.write(ud.update());
 					byte[] b = ud.doFinal();
+					ud.close();
 					if(b != null) dec.write(b);
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	

@@ -5,9 +5,7 @@ import java.util.Arrays;
 
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricNonceCipherUtil;
-import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
-import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.properties.IVCipherProperty;
@@ -60,25 +58,17 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 	public static class Builder extends SymmetricCipherUtilBuilder<AES_CTRCipherUtil> {
 		
 		/**
-		 * Specify binary private key data and AES key value.
-		 * <p>The private key data is <b>not</b> directly used as an AES key. Instead it will salted and hashed
-		 * multiple times.
-		 * 
-		 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
+		 * Initialize the builder with given key size.
 		 * */
-		public Builder(byte[] key, AESKeySize keySize) { super(key, keySize); }
-		/**
-		 * Specify password and AES key value.
-		 * 
-		 * @see PasswordKeyMaterial#PasswordKeyMaterial(char[])
-		 * */
-		public Builder(char[] password, AESKeySize keySize) { super(password, keySize); }
-		
+		public Builder(AESKeySize keySize) {
+			super(keySize);
+		}
+				
 		/**
 		 * Returns generated {@code AES_CTRCipherUtil}.
 		 * */
 		@Override
-		public AES_CTRCipherUtil build() { return new AES_CTRCipherUtil(keyMetadata, keySize, keyMet, bufferSize); }
+		public AES_CTRCipherUtil generate() { return new AES_CTRCipherUtil(keyMetadata, keySize, keyMet, bufferSize); }
 		
 	}
 }

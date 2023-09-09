@@ -98,10 +98,9 @@ public class UpdatableEncrypter {
 	}
 	
 	/**
-	 * Finish the encryption operation and releases any resources associated with the encrypter. 
+	 * Closes the encryption operation and releases any resources associated with the encrypter. 
 	 * */
 	public void close() {
-		doFinal(null);
 		out.close();
 	}
 }
