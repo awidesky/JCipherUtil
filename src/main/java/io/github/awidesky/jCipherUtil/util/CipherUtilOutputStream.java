@@ -9,7 +9,7 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
 public class CipherUtilOutputStream extends FilterOutputStream {
 
-	private final UpdatableEncrypter cipher;
+	private final UpdatableCipherInput cipher;
 	
 	public CipherUtilOutputStream(OutputStream out, CipherUtil cipher) {
 		super(out);

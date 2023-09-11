@@ -8,9 +8,12 @@ import java.nio.ByteBuffer;
 import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
+/**
+ * {@code Cipher}
+ */
 public class CipherUtilInputStream extends FilterInputStream {
 
-	private final UpdatableDecrypter cipher;
+	private final UpdatableCipherOutput cipher;
 	private ByteBuffer buffer;
 	private boolean finished = false;
 	private boolean bufStoreMode = true;
@@ -57,17 +60,6 @@ public class CipherUtilInputStream extends FilterInputStream {
 					break;
 				}
 			}
-			
-			/*while(len > 0) {
-				int left = Math.min(buffer.remaining(), len);
-				buffer.get(b, off, left);
-				totalread += left; off += left; len -= left;
-				if(readMore() == -1) {
-					totalread -= len;
-					break;
-				}
-				resetBuffer(false);
-			}*/
 		}
 		return totalread;
 	}
@@ -92,7 +84,7 @@ public class CipherUtilInputStream extends FilterInputStream {
 		return true;
 	}
 
-	private void resetBuffer(boolean storeMode) { //맨 마지막 바이트만 못 읽어옴!!!!
+	private void resetBuffer(boolean storeMode) {
 		
 		if(storeMode == bufStoreMode) return;
 		if(storeMode) { //Buffer was get mode, now change to put
@@ -101,16 +93,7 @@ public class CipherUtilInputStream extends FilterInputStream {
 			buffer.flip();
 		}
 		bufStoreMode = !bufStoreMode;
-		/*
-		if(!bufStoreMode) {
-			buffer.compact().flip();
-		}
-		if(storeMode != bufStoreMode) {
-			if(buffer.position() == 0) buffer.clear(); // 버퍼가 초기화 상태일 때 flip하면 limit과 position이 모두 0이 된다.
-			else buffer.flip();
-			bufStoreMode = !bufStoreMode;
-		}
-		*/
+
 	}
 
 	

@@ -20,15 +20,15 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
 
 /**
- * An {@code UpdatableEncrypter} allows user to continuously input data to encrypt.
+ * An {@code UpdatableCipherInput} allows user to continuously input data to encrypt.
  * In contrast to {@code CipherUtil#encrypt(MessageProvider, OutPut)},
- * {@code UpdatableEncryptera} can continue a multiple-part encryption with {@code UpdatableEncrypter#update(byte[])} method.
+ * {@code UpdatableEncryptera} can continue a multiple-part encryption with {@code UpdatableCipherInput#update(byte[])} method.
  * <p>
  * The instance of this class is irrelevant from {@code CipherUtil} instance that provided it via {@code CipherUtil#UpdatableEncryptCipher(OutPut)}.
  * Every metadata and cipher algorithm follows those of the {@code CipherUtil} instance, but calling {@code update(byte[])} and {@code doFinal(byte[] buf)} will not affect it.   
  * @see CipherUtil#UpdatableEncryptCipher(OutPut)
  * */
-public class UpdatableEncrypter {
+public class UpdatableCipherInput {
 
 	private final Cipher c;
 	private final OutPut out;
@@ -37,11 +37,11 @@ public class UpdatableEncrypter {
 	 * Creates updatable encrypter with given {@code javax.crypto.Cipher} and {@code OutPut}.
 	 * <p>
 	 * Even though this constructor is a valid way, {@code CipherUtil#UpdatableEncryptCipher(OutPut)} is recommended 
-	 * way to create {@code UpdatableEncrypter},
+	 * way to create {@code UpdatableCipherInput},
 	 * 
 	 * @see CipherUtil#UpdatableEncryptCipher(OutPut)
 	 * */
-	public UpdatableEncrypter(Cipher c, OutPut out) {
+	public UpdatableCipherInput(Cipher c, OutPut out) {
 		this.c = c;
 		this.out = out;
 	}

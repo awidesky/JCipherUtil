@@ -16,8 +16,8 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
-import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
 
 /**
  * An abstract subclass of {@code CipherUtil} that provides a few utility methods,
@@ -187,13 +187,13 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	@Override
-	public UpdatableEncrypter UpdatableEncryptCipher(OutPut out) {
-		return new UpdatableEncrypter(initEncrypt(out), out);
+	public UpdatableCipherInput UpdatableEncryptCipher(OutPut out) {
+		return new UpdatableCipherInput(initEncrypt(out), out);
 	}
 
 	@Override
-	public UpdatableDecrypter UpdatableDecryptCipher(InPut in) {
-		return new UpdatableDecrypter(initDecrypt(in), in, BUFFER_SIZE);
+	public UpdatableCipherOutput UpdatableDecryptCipher(InPut in) {
+		return new UpdatableCipherOutput(initDecrypt(in), in, BUFFER_SIZE);
 	}
 	
 	/**

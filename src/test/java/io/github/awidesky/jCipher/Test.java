@@ -71,8 +71,8 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
-import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
-import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
 
 @DisplayName("ALL Cipher Tests")
 @Execution(ExecutionMode.CONCURRENT)
@@ -215,10 +215,10 @@ class Test {
 				dynamicTest("Updatable encrypter/decrypter", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					UpdatableEncrypter ue = cipher.UpdatableEncryptCipher(OutPut.to(enc));
+					UpdatableCipherInput ue = cipher.UpdatableEncryptCipher(OutPut.to(enc));
 					ue.update(src);
 					ue.doFinal(null);
-					UpdatableDecrypter ud = cipher.UpdatableDecryptCipher(InPut.from(enc.toByteArray()));
+					UpdatableCipherOutput ud = cipher.UpdatableDecryptCipher(InPut.from(enc.toByteArray()));
 					dec.write(ud.update());
 					byte[] b = ud.doFinal();
 					if(b != null) dec.write(b);

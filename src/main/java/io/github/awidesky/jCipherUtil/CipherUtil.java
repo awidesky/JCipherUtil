@@ -23,8 +23,8 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
-import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
 
 
 /**
@@ -37,8 +37,8 @@ import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
  * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
  * single {@code byte[]} buffer, etc)
  * <p>Every methods in this interface is thread-safe. Each call is run with new {@code Cipher} instance, and does not effect anything to the {@code CipherUtil} instance.
- * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableEncrypter} 
- * and {@link UpdatableDecrypter}
+ * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableCipherInput} 
+ * and {@link UpdatableCipherOutput}
  * 
  * 
  * @see InPut
@@ -217,23 +217,23 @@ public interface CipherUtil {
 	 */
 	public CipherTunnel cipherDecryptTunnel(InPut in, OutPut out);
 	/**
-	 * Return an {@code UpdatableEncrypter} that receives input
+	 * Return an {@code UpdatableCipherInput} that receives input
 	 * from user and writes encrypted data to the given output.
-	 * @see UpdatableEncrypter
+	 * @see UpdatableCipherInput
 	 * 
 	 * @param out output destination that encrypted data will be saved.
-	 * @return an {@code UpdatableEncrypter} that encrypts data and write the result in the output
+	 * @return an {@code UpdatableCipherInput} that encrypts data and write the result in the output
 	 */
-	public UpdatableEncrypter UpdatableEncryptCipher(OutPut out);
+	public UpdatableCipherInput UpdatableEncryptCipher(OutPut out);
 	/**
-	 * Return an {@code UpdatableDecrypter} that reads encrypted data
+	 * Return an {@code UpdatableCipherOutput} that reads encrypted data
 	 * from the given input and returns the decrypted result to user.
-	 * @see UpdatableDecrypter
+	 * @see UpdatableCipherOutput
 	 * 
 	 * @param in the input where the encrypted source data resides
-	 * @return an {@code UpdatableDecrypter} that decrypts data from the given input.
+	 * @return an {@code UpdatableCipherOutput} that decrypts data from the given input.
 	 */
-	public UpdatableDecrypter UpdatableDecryptCipher(InPut in);
+	public UpdatableCipherOutput UpdatableDecryptCipher(InPut in);
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 
