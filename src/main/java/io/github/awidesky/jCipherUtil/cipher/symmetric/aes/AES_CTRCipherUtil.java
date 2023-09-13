@@ -63,6 +63,14 @@ public class AES_CTRCipherUtil extends SymmetricNonceCipherUtil {
 		}
 		
 		/**
+		 * Initialize the builder with given key size and counter length.
+		 * */
+		public Builder(AESKeySize keySize, int counterLen) {
+			super(keySize);
+			counterLen(counterLen);
+		}
+		
+		/**
 		 * Configure length of the counter for CTR mode. original default value is 4.
 		 * This is optional operation.
 		 * */
