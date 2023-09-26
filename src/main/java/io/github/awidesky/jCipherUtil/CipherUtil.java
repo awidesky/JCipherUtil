@@ -198,45 +198,52 @@ public interface CipherUtil {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(in));
 	}
 	
+
 	/**
-	 * Return a {@code CipherTunnel} that reads data from input, and write the encrypted data to the output.
+	 * Cipher operation mode for {@code CipherUtil#cipherTunnel(InPut, OutPut, CipherMode)}, {@code CipherUtil#updatableInput(OutPut, CipherMode)}
+	 * and {@code CipherUtil#updatableInput(OutPut, CipherMode)}.
+	 * */
+	static enum CipherMode { ENCRYPT_MODE, DECRYPT_MODE; }
+	
+	public static final CipherMode ENCRYPT_MODE = CipherMode.ENCRYPT_MODE;
+	public static final CipherMode DECRYPT_MODE = CipherMode.DECRYPT_MODE;
+	
+	/**
+	 * Return a {@code CipherTunnel} that reads data from input, and write the encrypted/decrypted data to the output.
 	 * @see CipherTunnel
 	 * 
 	 * @param in the input where the plain source data resides
-	 * @param out the output destination for the encrypted data to be written
+	 * @param out the output destination for the encrypted/decrypted data to be written
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
 	 * @return a {@code CipherTunnel} in encrypt mode connected between given input and output
 	 */
-	public CipherTunnel cipherEncryptTunnel(InPut in, OutPut out);
-	/**
-	 * Return a {@code CipherTunnel} that reads data from input, and write the decrypted data to the output.
-	 * @see CipherTunnel
-	 * 
-	 * @param in the input where the encrypted source data resides
-	 * @param out the output destination for the decrypted data to be written
-	 * @return a {@code CipherTunnel} in decrypt mode connected between given input and output
-	 */
-	public CipherTunnel cipherDecryptTunnel(InPut in, OutPut out);
+	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode);
+	
 	/**
 	 * Return an {@code UpdatableCipherInput} that receives input
-	 * from user and writes encrypted data to the given output.
+	 * from user, encrypt/decrypt it, and write the result data to the given output.
 	 * @see UpdatableCipherInput
 	 * 
-	 * @param out output destination that encrypted data will be saved.
+	 * @param out output destination that result data will be saved.
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
 	 * @return an {@code UpdatableCipherInput} that encrypts data and write the result in the output
 	 */
-	public UpdatableCipherInput UpdatableEncryptCipher(OutPut out);
+	public UpdatableCipherInput updatableInput(OutPut out, CipherMode mode);  //TODO : updatable classes 주석 고치고, 바꿀 이름도 생각해 보고, 오류 고치기
 	/**
 	 * Return an {@code UpdatableCipherOutput} that reads encrypted data
 	 * from the given input and returns the decrypted result to user.
 	 * @see UpdatableCipherOutput
 	 * 
 	 * @param in the input where the encrypted source data resides
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
 	 * @return an {@code UpdatableCipherOutput} that decrypts data from the given input.
 	 */
-	public UpdatableCipherOutput UpdatableDecryptCipher(InPut in);
+	public UpdatableCipherOutput updatableOutput(InPut in, CipherMode mode);
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 
 	 * */
 	public void destroyKey();
+	
+	
 }

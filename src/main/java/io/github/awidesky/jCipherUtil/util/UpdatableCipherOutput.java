@@ -22,14 +22,15 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
 
 /**
- * An {@code UpdatableCipherOutput} allows user to continuously receive fractions of decrypted data.
- * In contrast to {@code CipherUtil#decrypt(InPut, MessageConsumer)},
- * {@code UpdatableCipherOutput} can continue a multiple-part decryption with {@code UpdatableCipherOutput#update()} method.
+ * An {@code UpdatableCipherOutput} allows user to continuously receive fractions of data.
+ * In contrast to encrypt/decrypt methods in {@code CipherUtil},
+ * {@code UpdatableCipherOutput} can continue a multiple-part encryption/decryption with {@code UpdatableCipherOutput#update()} method.
  * <p>
- * The instance of this class is irrelevant from {@code CipherUtil} instance that provided it via {@code CipherUtil#UpdatableDecryptCipher(InPut)}.
+ * {@code UpdatableCipherOutput} instance has separated cipher process from the {@code CipherUtil} instance that generated it.
+ * (e.g. via {@code CipherUtil#UpdatableDecryptCipher(InPut)}) 
  * Every metadata and cipher algorithm follows those of the {@code CipherUtil} instance, but calling {@code update()} and {@code doFinal()} will not affect it.
  *    
- * @see CipherUtil#UpdatableDecryptCipher(InPut)
+ * @see CipherUtil#updatableOutput(InPut, boolean)
  * */
 public class UpdatableCipherOutput {
 	
@@ -44,7 +45,7 @@ public class UpdatableCipherOutput {
 	 * Even though this constructor is a valid way, {@code CipherUtil#UpdatableDecryptCipher(InPut)} is recommended 
 	 * way to create {@code UpdatableCipherOutput},
 	 * 
-	 * @see CipherUtil#UpdatableDecryptCipher(InPut)
+	 * @see CipherUtil#updatableOutput(InPut, boolean)
 	 * */
 	public UpdatableCipherOutput(Cipher c, InPut in, int bufferSize) {
 		this.c = c;

@@ -13,7 +13,7 @@ public class CipherUtilOutputStream extends FilterOutputStream {
 	
 	public CipherUtilOutputStream(OutputStream out, CipherUtil cipher) {
 		super(out);
-		this.cipher = cipher.UpdatableEncryptCipher(OutPut.to(out));
+		this.cipher = cipher.updatableInput(OutPut.to(out), CipherUtil.);
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import io.github.awidesky.jCipherUtil.CipherUtil.CipherMode;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
@@ -157,10 +158,24 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			throw new OmittedCipherException(e);
 		}
 	}
+
+	
 	
 	@Override
-	public CipherTunnel cipherEncryptTunnel(InPut in, OutPut out) {
-		return new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) {
+	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) {
+		return mode == CipherMode.ENCRYPT_MODE ?
+		new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) {
+			@Override
+			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
+				return updateCipher(cipher, buffer, msgp, msgc);
+			}
+			@Override
+			protected int doFinal(Cipher cipher, OutPut msgc) {
+				return doFinalCipher(cipher, out);
+			}
+		}
+		:
+		new CipherTunnel(initDecrypt(in), in, out, BUFFER_SIZE) {
 			@Override
 			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
 				return updateCipher(cipher, buffer, msgp, msgc);
@@ -173,29 +188,16 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	@Override
-	public CipherTunnel cipherDecryptTunnel(InPut in, OutPut out) {
-		return new CipherTunnel(initDecrypt(in), in, out, BUFFER_SIZE) {
-			@Override
-			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
-				return updateCipher(cipher, buffer, msgp, msgc);
-			}
-			@Override
-			protected int doFinal(Cipher cipher, OutPut msgc) {
-				return doFinalCipher(cipher, out);
-			}
-		};
+	public UpdatableCipherInput updatableInput(OutPut out, CipherMode mode) {
+		return new UpdatableCipherInput(mode == ENCRYPT_MODE ? initEncrypt(out) : null, out); //TODO : initDecrypt(out)
 	}
 
 	@Override
-	public UpdatableCipherInput UpdatableEncryptCipher(OutPut out) {
-		return new UpdatableCipherInput(initEncrypt(out), out);
-	}
-
-	@Override
-	public UpdatableCipherOutput UpdatableDecryptCipher(InPut in) {
+	public UpdatableCipherOutput updatableOutput(InPut in, CipherMode mode) {
+		// TODO Auto-generated method stub
 		return new UpdatableCipherOutput(initDecrypt(in), in, BUFFER_SIZE);
 	}
-	
+
 	/**
 	 * Get algorithm name, transformation property and provider of this {@code CipherUtil}.
 	 * */

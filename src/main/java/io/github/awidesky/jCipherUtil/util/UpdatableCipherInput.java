@@ -26,7 +26,7 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
  * <p>
  * The instance of this class is irrelevant from {@code CipherUtil} instance that provided it via {@code CipherUtil#UpdatableEncryptCipher(OutPut)}.
  * Every metadata and cipher algorithm follows those of the {@code CipherUtil} instance, but calling {@code update(byte[])} and {@code doFinal(byte[] buf)} will not affect it.   
- * @see CipherUtil#UpdatableEncryptCipher(OutPut)
+ * @see CipherUtil#updatableInput(OutPut, boolean)
  * */
 public class UpdatableCipherInput {
 
@@ -34,12 +34,13 @@ public class UpdatableCipherInput {
 	private final OutPut out;
 	
 	/**
-	 * Creates updatable encrypter with given {@code javax.crypto.Cipher} and {@code OutPut}.
+	 * Creates cipher consumer that allows multiple-part encryption or decryption operation 
+	 * with given {@code javax.crypto.Cipher} and {@code OutPut}.
 	 * <p>
-	 * Even though this constructor is a valid way, {@code CipherUtil#UpdatableEncryptCipher(OutPut)} is recommended 
+	 * Even though this constructor is a valid way to instantiate a {@code UpdatableCipherInput}, {@code CipherUtil#UpdatableEncryptCipher(OutPut)} is recommended 
 	 * way to create {@code UpdatableCipherInput},
 	 * 
-	 * @see CipherUtil#UpdatableEncryptCipher(OutPut)
+	 * @see CipherUtil#updatableInput(OutPut, boolean)
 	 * */
 	public UpdatableCipherInput(Cipher c, OutPut out) {
 		this.c = c;
@@ -47,7 +48,7 @@ public class UpdatableCipherInput {
 	}
 	
 	/**
-	 * Continues the multiple-part encryption operation.
+	 * Continues the multiple-part encryption or decryption operation.
 	 * The bytes in the input buffer are processed, and the result is transferred into destination. 
 	 * If input has a length of zero, this method returns {@code -1}.
 	 * */

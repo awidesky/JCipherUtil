@@ -119,7 +119,6 @@ class Test {
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::keyExchangerTests))
 		)));
 		
-		
 		List<DynamicNode> symmetricList = new ArrayList<>();
 		addSymmetricCipherKeyTests(symmetricList);
 		symmetricList.addAll(symmetricCiphers.entrySet().stream().map(entry -> // per AES, ChaCha20...
@@ -215,10 +214,10 @@ class Test {
 				dynamicTest("Updatable encrypter/decrypter", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					UpdatableCipherInput ue = cipher.UpdatableEncryptCipher(OutPut.to(enc));
+					UpdatableCipherInput ue = cipher.updatableInput(OutPut.to(enc), true);
 					ue.update(src);
 					ue.doFinal(null);
-					UpdatableCipherOutput ud = cipher.UpdatableDecryptCipher(InPut.from(enc.toByteArray()));
+					UpdatableCipherOutput ud = cipher.updatableOutput(InPut.from(enc.toByteArray()), null);
 					dec.write(ud.update());
 					byte[] b = ud.doFinal();
 					if(b != null) dec.write(b);

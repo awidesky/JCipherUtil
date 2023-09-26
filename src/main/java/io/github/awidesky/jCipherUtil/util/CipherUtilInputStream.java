@@ -20,7 +20,7 @@ public class CipherUtilInputStream extends FilterInputStream {
 	
 	public CipherUtilInputStream(InputStream in, CipherUtil cipher) {
 		super(in);
-		this.cipher = cipher.UpdatableDecryptCipher(InPut.from(in));
+		this.cipher = cipher.updatableOutput(InPut.from(in), null);
 		buffer = ByteBuffer.allocate(this.cipher.getBufferSize());
 	}
 
