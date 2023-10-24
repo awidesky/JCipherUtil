@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import io.github.awidesky.jCipherUtil.CipherUtil;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
 public class CipherUtilOutputStream extends FilterOutputStream {
 
@@ -13,7 +12,8 @@ public class CipherUtilOutputStream extends FilterOutputStream {
 	
 	public CipherUtilOutputStream(OutputStream out, CipherUtil cipher) {
 		super(out);
-		this.cipher = cipher.updatableInput(OutPut.to(out), CipherUtil.);
+		this.cipher = cipher.updatableInput(null, null);
+		//this.cipher = cipher.updatableInput(OutPut.to(out), CipherUtil.);
 	}
 
 	@Override

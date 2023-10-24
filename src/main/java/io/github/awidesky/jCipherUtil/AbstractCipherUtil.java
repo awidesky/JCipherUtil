@@ -10,15 +10,14 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-import io.github.awidesky.jCipherUtil.CipherUtil.CipherMode;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
 import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
 
 /**
  * An abstract subclass of {@code CipherUtil} that provides a few utility methods,
@@ -71,6 +70,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * */
 	protected abstract Cipher initDecrypt(InPut in) throws NestedIOException;
 
+	//TODO : delete?
+	//protected abstract ByteBuffer generateMetadata();
+	//protected abstract ByteBuffer readMetadata(InPut in);
 
 	
 	/**
