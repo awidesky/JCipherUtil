@@ -6,22 +6,26 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 
 import io.github.awidesky.jCipherUtil.CipherUtil;
-import io.github.awidesky.jCipherUtil.messageInterface.InPut;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * {@code Cipher}
  */
 public class CipherUtilInputStream extends FilterInputStream {
 
-	private final UpdatableCipherOutput cipher;
-	private ByteBuffer buffer;
+	public static int DEFAULT_BUFFER_SIZE = 8 * 1024;
+	
+	private final CipherEngine cipher;
+	private ByteBuffer outputBuffer;
+	private byte[] inputBuffer;
 	private boolean finished = false;
 	private boolean bufStoreMode = true;
 	
-	public CipherUtilInputStream(InputStream in, CipherUtil cipher) {
+	public CipherUtilInputStream(InputStream in, CipherUtil cipher, CipherUtil.CipherMode mode) {
 		super(in);
-		this.cipher = cipher.updatableOutput(InPut.from(in), null);
-		buffer = ByteBuffer.allocate(this.cipher.getBufferSize());
+		this.cipher = cipher.cipherEngine(mode);
+		outputBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
+		inputBuffer = new byte[DEFAULT_BUFFER_SIZE];
 	}
 
 	@Override
@@ -41,17 +45,17 @@ public class CipherUtilInputStream extends FilterInputStream {
 		if(finished) return -1;
 		resetBuffer(false);
 		int totalread = 0;
-		if(buffer.remaining() >= len) {
-			buffer.get(b, off, len);
+		if(outputBuffer.remaining() >= len) {
+			outputBuffer.get(b, off, len);
 			totalread = len;
 		} else {
 			int read = 0;
 			while(totalread != len) {
 				resetBuffer(false);
-				int remaining = buffer.remaining();
+				int remaining = outputBuffer.remaining();
 				if (remaining != 0) {
 					read = Math.min(remaining, len - totalread);
-					buffer.get(b, off, read);
+					outputBuffer.get(b, off, read);
 					totalread += read;
 					off += read;
 				}
@@ -64,41 +68,41 @@ public class CipherUtilInputStream extends FilterInputStream {
 		return totalread;
 	}
 
-	private boolean readMore() {
-		byte[] arr = cipher.update();
-		if(arr == null && (cipher.doFinal()) == null) {
+	private boolean readMore() throws IOException {
+		int read = in.read(inputBuffer);
+		byte[] arr = read != -1 ? cipher.update(inputBuffer, 0, read) : null;
+		if(arr == null && (arr = cipher.doFinal()) == null) {
 			resetBuffer(false);
-			if(buffer.remaining() == 0) {
+			if(outputBuffer.remaining() == 0) {
 				finished  = true;
 				return false;
 			} else { return true; }
 		}
 		resetBuffer(true);
 		//if remaining capacity is not enough
-		if(buffer.remaining() < arr.length) {
-			buffer = ByteBuffer.allocate(buffer.capacity() + arr.length).put(buffer.flip());
+		if(outputBuffer.remaining() < arr.length) {
+			outputBuffer = ByteBuffer.allocate(outputBuffer.capacity() + arr.length).put(outputBuffer.flip());
 			bufStoreMode = true;
 		}
 		
-		buffer.put(arr);
+		outputBuffer.put(arr);
 		return true;
 	}
 
 	private void resetBuffer(boolean storeMode) {
-		
 		if(storeMode == bufStoreMode) return;
 		if(storeMode) { //Buffer was get mode, now change to put
-			buffer.compact();
+			outputBuffer.compact();
 		} else { //Buffer was put mode, now change to get
-			buffer.flip();
+			outputBuffer.flip();
 		}
 		bufStoreMode = !bufStoreMode;
-
 	}
 
 	
 	@Override
 	public void close() throws IOException {
+		cipher.doFinal();
 		super.close();
 	}
 }

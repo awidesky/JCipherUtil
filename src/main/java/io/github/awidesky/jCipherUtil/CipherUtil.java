@@ -20,11 +20,12 @@ import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
 import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
+import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 
 /**
@@ -209,36 +210,24 @@ public interface CipherUtil {
 	public static final CipherMode DECRYPT_MODE = CipherMode.DECRYPT_MODE;
 	
 	/**
-	 * Return a {@code CipherTunnel} that reads data from input, and write the encrypted/decrypted data to the output.
+	 * Return a {@code CipherTunnel} that transfer data from input to output, while encrypting/decrypting the data.
 	 * @see CipherTunnel
 	 * 
 	 * @param in the input where the plain source data resides
 	 * @param out the output destination for the encrypted/decrypted data to be written
 	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
-	 * @return a {@code CipherTunnel} in encrypt mode connected between given input and output
+	 * @return a {@code CipherTunnel} as given mode.
 	 */
 	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode);
 	
 	/**
-	 * Return an {@code UpdatableCipherInput} that receives input
-	 * from user, encrypt/decrypt it, and write the result data to the given output.
-	 * @see UpdatableCipherInput
+	 * Returns a {@code CipherEngine} with given mode.
+	 * @see CipherEngine
 	 * 
-	 * @param out output destination that result data will be saved.
 	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
-	 * @return an {@code UpdatableCipherInput} that encrypts data and write the result in the output
+	 * @return a {@code CipherEngine} as given mode.
 	 */
-	public UpdatableCipherInput updatableInput(OutPut out, CipherMode mode);  //TODO : updatable classes 주석 고치고, 바꿀 이름도 생각해 보고, 오류 고치기
-	/**
-	 * Return an {@code UpdatableCipherOutput} that reads encrypted data
-	 * from the given input and returns the decrypted result to user.
-	 * @see UpdatableCipherOutput
-	 * 
-	 * @param in the input where the encrypted source data resides
-	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
-	 * @return an {@code UpdatableCipherOutput} that decrypts data from the given input.
-	 */
-	public UpdatableCipherOutput updatableOutput(InPut in, CipherMode mode);
+	public CipherEngine cipherEngine(CipherMode mode);
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 

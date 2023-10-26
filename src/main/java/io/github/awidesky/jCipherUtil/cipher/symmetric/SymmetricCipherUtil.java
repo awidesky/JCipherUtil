@@ -9,18 +9,14 @@
 
 package io.github.awidesky.jCipherUtil.cipher.symmetric;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.SecureRandom;
-import java.util.function.Function;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import io.github.awidesky.jCipherUtil.AbstractCipherUtil;
-import io.github.awidesky.jCipherUtil.CipherUtil.CipherMode;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
@@ -29,7 +25,6 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
-import io.github.awidesky.jCipherUtil.util.CipherEngine;
 
 /**
  * Base class of all CipherUtil that uses symmetric cipher algorithm and salt, iteration count.
@@ -123,116 +118,9 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 			throw new OmittedCipherException(e);
 		}	
 	}
-	
-	public CipherEngine getCipherEngineIF(CipherMode mode) {
-		if(mode == CipherMode.ENCRYPT_MODE) {
-			return new CipherEngine(mode) {
-				private byte[] metadata = null;
-				{ init(); }
-				@Override
-				public void init() {
-					ByteArrayOutputStream o = new ByteArrayOutputStream();
-					this.c = initEncrypt(OutPut.to(o));
-					metadata = o.toByteArray(); //TODO : write
-				}
-				@Override
-				public byte[] update(byte[] buf) {
-					if(metadata == null) {
-						return c.update(buf);
-					} else {
-						ByteArrayOutputStream o = new ByteArrayOutputStream();
-						try {
-							o.write(metadata);
-							metadata = null;
-							o.write(c.update(buf));
-							return o.toByteArray();
-						} catch (IOException e) {
-							e.printStackTrace();
-							return null;
-						}
-					}
-				}
-			};
-		} else {
-			return new CipherDecryptEngine(mode) { //TODO: decrypt만 일단 bechmark해보
-				{
-					metadata = ByteBuffer.allocate(4 + keyMetadata.saltLen);
-				}
-				@Override
-				public void init() {
-					this.c = initDecrypt(InPut.from(metadata.array()));
-				}
-				@Override
-				public byte[] update(byte[] buf) {
-					if(metadata == null) {
-						return c.update(buf);
-					} else {
-						return prepareMetadata(buf);
-					}
-				}
-			};
-		}
-	}
+
 	
 
-	public CipherEngine getCipherEngineFUNC(CipherMode mode) {
-
-		if(mode == CipherMode.ENCRYPT_MODE) {
-			return new CipherEngine(mode) {
-				private byte[] metadata = null;
-				{ 
-					init();
-					process = (buf) -> {
-						ByteArrayOutputStream o = new ByteArrayOutputStream();
-						try {
-							o.write(metadata);
-							metadata = null;
-							o.write(c.update(buf));
-							process = c::update;
-							return o.toByteArray();
-						} catch (IOException e) {
-							e.printStackTrace();
-							return null;
-						}
-					};
-				} // TODO : 이거 리턴값 queue에 넣어야해!!
-				private Function<byte[], byte[]> process;
-				@Override
-				public void init() {
-					ByteArrayOutputStream o = new ByteArrayOutputStream();
-					this.c = initEncrypt(OutPut.to(o));
-					metadata = o.toByteArray();
-				}
-				@Override
-				public byte[] update(byte[] buf) {
-					return process.apply(buf);
-				}
-			};
-		} else {
-			return new CipherDecryptEngine(mode) {
-				{
-					metadata = ByteBuffer.allocate(4 + keyMetadata.saltLen);
-				}
-				private Function<byte[], byte[]> process = (buf) -> {
-					byte[] ret = prepareMetadata(buf);
-					if(metadata == null) {
-						process = c::update;
-					}
-					return ret;
-				};
-				@Override
-				public void init() {
-					this.c = initDecrypt(InPut.from(metadata.array()));
-				}
-				@Override
-				public byte[] update(byte[] buf) {
-					return process.apply(buf);
-				}
-				
-			};
-		}
-			
-	}
 	/* TODO
 	 * encryption은 out, decryption은 in만 가능.
 	 * 암호화는 initEncrypt에서 생성한 metadata를 바로 output해야 되고,
@@ -249,6 +137,13 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 *   
 	 *   
 	 * */
+
+	@Override
+	protected int getMetadataLength() {
+		return 4 + keyMetadata.saltLen;
+	}
+
+
 
 	/**
 	 * Generate random iteration count with given {@code SecureRandom} instance.
@@ -300,30 +195,6 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	@Override
 	public void destroyKey() {
 		key.destroy();
-	}
-	
-}
-
-
-abstract class CipherDecryptEngine extends CipherEngine {
-
-	protected ByteBuffer metadata;
-	
-	public CipherDecryptEngine(CipherMode mode) {
-		super(mode);
-	}
-	
-	protected byte[] prepareMetadata(byte[] buf) {
-		if(metadata.remaining() < buf.length) {
-			int remaining = metadata.remaining();
-			metadata.put(buf, 0, remaining);
-			init();
-			metadata = null;
-			return c.update(buf, remaining, buf.length - remaining);
-		} else {
-			metadata.put(buf);
-			return new byte[0];
-		}
 	}
 	
 }

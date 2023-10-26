@@ -71,6 +71,7 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 @DisplayName("ALL Cipher Tests")
 @Execution(ExecutionMode.CONCURRENT)
@@ -196,7 +197,6 @@ class Test {
 	
 	private static void addCommonCipherTests(List<DynamicNode> list, CipherUtil cipher) {
 		Stream.of(
-				/* TODO
 				dynamicTest("CipherTunnel", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
@@ -204,30 +204,26 @@ class Test {
 					ct.transfer();
 					ct.transfer();
 					ct.transferFinal();
-					ct = cipher.cipherTunnel(InPut.from(enc.toByteArray()), OutPut.to(dec), CipherUtil.CipherMode.ENCRYPT_MODE);
+					ct = cipher.cipherTunnel(InPut.from(enc.toByteArray()), OutPut.to(dec), CipherUtil.CipherMode.DECRYPT_MODE);
 					ct.transfer();
 					ct.transfer();
 					ct.transferFinal();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),
-				dynamicTest("Updatable encrypter/decrypter", () -> {
-					ByteArrayOutputStream enc = new ByteArrayOutputStream();
+				dynamicTest("CipherEngine", () -> {
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					UpdatableCipherInput ue = cipher.updatableInput(OutPut.to(enc), null);
-					ue.update(src);
-					ue.doFinal(null);
-					UpdatableCipherOutput ud = cipher.updatableOutput(InPut.from(enc.toByteArray()), null);
-					dec.write(ud.update());
-					byte[] b = ud.doFinal();
-					if(b != null) dec.write(b);
+					CipherEngine ue = cipher.cipherEngine(CipherUtil.CipherMode.ENCRYPT_MODE);//(OutPut.to(enc), null);
+					CipherEngine ud = cipher.cipherEngine(CipherUtil.CipherMode.DECRYPT_MODE);//(InPut.from(enc.toByteArray()), null);
+					dec.write(ud.update(ue.update(src)));
+					dec.write(ud.doFinal(ue.doFinal()));
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),
-				dynamicTest("CipherUtilOutputStream <-> CipherUtilInputStream", () -> {
+				dynamicTest("CipherUtilOutputStream -> CipherUtilInputStream", () -> {
 					File encDest = mkEmptyTempFile();
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					byte[] buf = new byte[src.length / 2];
-					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher);
-					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher);
+					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher, CipherUtil.CipherMode.ENCRYPT_MODE);
+					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher, CipherUtil.CipherMode.DECRYPT_MODE);
 
 					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
 					
@@ -236,7 +232,19 @@ class Test {
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
-				*/	
+				dynamicTest("CipherUtilInputStream -> CipherUtilOutputStream", () -> {
+					File plain = mkTempPlainFile();
+					
+					ByteArrayOutputStream dec = new ByteArrayOutputStream();
+					byte[] buf = new byte[src.length / 2];
+					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(plain), cipher, CipherUtil.CipherMode.ENCRYPT_MODE);
+					CipherUtilOutputStream co = new CipherUtilOutputStream(dec, cipher, CipherUtil.CipherMode.DECRYPT_MODE);
+					
+					int n = 0;
+					while((n = ci.read(buf)) != -1) co.write(buf, 0, n);
+					co.close();
+					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+				}),	
 				dynamicTest("byte[] <-> byte[]", () -> {
 					assertEquals(Hash.hashPlain(src),
 							Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(cipher.encryptToSingleBuffer(InPut.from(src))))));

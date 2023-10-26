@@ -16,8 +16,9 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
-import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherDecryptEngine;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEncryptEngine;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * An abstract subclass of {@code CipherUtil} that provides a few utility methods,
@@ -190,15 +191,20 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	@Override
-	public UpdatableCipherInput updatableInput(OutPut out, CipherMode mode) {
-		return new UpdatableCipherInput(mode == ENCRYPT_MODE ? initEncrypt(out) : null, out); //TODO : initDecrypt(out)
+	public CipherEngine cipherEngine(CipherMode mode) {
+		if(mode == CipherMode.ENCRYPT_MODE) {
+			return new CipherEncryptEngine(mode, this::initEncrypt);
+		} else {
+			return new CipherDecryptEngine(mode, this::initDecrypt, getMetadataLength());
+		}
 	}
 
-	@Override
-	public UpdatableCipherOutput updatableOutput(InPut in, CipherMode mode) {
-		// TODO Auto-generated method stub
-		return new UpdatableCipherOutput(initDecrypt(in), in, BUFFER_SIZE);
-	}
+	/**
+	 * Returns the total length of the all metadata(iteration count, salt, nonce, etc.).<br>
+	 * This method is used in {@code AbstractCipherUtil#cipherEngine(io.github.awidesky.jCipherUtil.CipherUtil.CipherMode)}
+	 * @return
+	 */
+	protected abstract int getMetadataLength();
 
 	/**
 	 * Get algorithm name, transformation property and provider of this {@code CipherUtil}.

@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import io.github.awidesky.jCipherUtil.CipherUtil;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 public class CipherUtilOutputStream extends FilterOutputStream {
 
-	private final UpdatableCipherInput cipher;
+	private final CipherEngine cipher;
 	
-	public CipherUtilOutputStream(OutputStream out, CipherUtil cipher) {
+	public CipherUtilOutputStream(OutputStream out, CipherUtil cipher, CipherUtil.CipherMode mode) {
 		super(out);
-		this.cipher = cipher.updatableInput(null, null);
-		//this.cipher = cipher.updatableInput(OutPut.to(out), CipherUtil.);
+		this.cipher = cipher.cipherEngine(mode);
 	}
 
 	@Override
@@ -23,12 +23,12 @@ public class CipherUtilOutputStream extends FilterOutputStream {
 
 	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
-		cipher.update(b, off, len);
+		out.write(cipher.update(b, off, len));
 	}
 
 	@Override
 	public void close() throws IOException {
-		cipher.doFinal(null);
+		cipher.doFinal();
 		flush();
 		super.close();
 	}
