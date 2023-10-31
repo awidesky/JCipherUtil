@@ -1,7 +1,6 @@
 package io.github.awidesky.jCipherUtil.util.cipherEngine;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -30,19 +29,16 @@ public class CipherEncryptEngine extends CipherEngine {
 	
 	@Override
 	public byte[] update(byte[] buf, int off, int len) {
+		if(finished) return null;
 		if(metadata == null) {
 			return Optional.ofNullable(c.update(buf, off, len)).orElse(new byte[0]);
 		} else {
 			ByteArrayOutputStream o = new ByteArrayOutputStream();
-			try {
-				o.write(metadata);
-				metadata = null;
-				o.write(Optional.ofNullable(c.update(buf, off, len)).orElse(new byte[0]));
-				return o.toByteArray();
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
+			o.write(metadata, 0, metadata.length);
+			metadata = null;
+			byte[] extra = Optional.ofNullable(c.update(buf, off, len)).orElse(new byte[0]);
+			o.write(extra, 0, extra.length);
+			return o.toByteArray();
 		}
 	}
 }

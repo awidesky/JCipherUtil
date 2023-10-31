@@ -40,6 +40,7 @@ public class CipherDecryptEngine extends CipherEngine {
 	}
 	@Override
 	public byte[] update(byte[] buf, int off, int len) {
+		if(finished) return null;
 		if(metadata == null) {
 			return Optional.ofNullable(c.update(buf, off, len)).orElse(new byte[0]);
 		} else {

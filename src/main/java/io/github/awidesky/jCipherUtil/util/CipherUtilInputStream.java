@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
@@ -20,10 +19,12 @@ public class CipherUtilInputStream extends FilterInputStream {
 	private byte[] inputBuffer;
 	private boolean finished = false;
 	private boolean bufStoreMode = true;
+	private InputStream is;
 	
-	public CipherUtilInputStream(InputStream in, CipherUtil cipher, CipherUtil.CipherMode mode) {
+	public CipherUtilInputStream(InputStream in, CipherEngine cipher) {
 		super(in);
-		this.cipher = cipher.cipherEngine(mode);
+		is = in;
+		this.cipher = cipher;
 		outputBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
 		inputBuffer = new byte[DEFAULT_BUFFER_SIZE];
 	}
@@ -69,12 +70,12 @@ public class CipherUtilInputStream extends FilterInputStream {
 	}
 
 	private boolean readMore() throws IOException {
-		int read = in.read(inputBuffer);
-		byte[] arr = read != -1 ? cipher.update(inputBuffer, 0, read) : null;
-		if(arr == null && (arr = cipher.doFinal()) == null) {
+		int read = is.read(inputBuffer);
+		byte[] arr = read != -1 ? cipher.update(inputBuffer, 0, read) : cipher.doFinal();
+		if(arr == null) {
 			resetBuffer(false);
 			if(outputBuffer.remaining() == 0) {
-				finished  = true;
+				finished = true;
 				return false;
 			} else { return true; }
 		}
@@ -99,10 +100,13 @@ public class CipherUtilInputStream extends FilterInputStream {
 		bufStoreMode = !bufStoreMode;
 	}
 
+	public void abort() {
+		cipher.doFinal();
+	}
 	
 	@Override
 	public void close() throws IOException {
-		cipher.doFinal();
+		if(cipher.doFinal() != null) throw new IOException("Cipher process has not done yet");
 		super.close();
 	}
 }

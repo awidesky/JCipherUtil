@@ -1,5 +1,7 @@
 package io.github.awidesky.jCipherUtil;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,6 +18,8 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
+import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
+import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
 import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherDecryptEngine;
 import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEncryptEngine;
 import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
@@ -197,6 +201,17 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		} else {
 			return new CipherDecryptEngine(mode, this::initDecrypt, getMetadataLength());
 		}
+	}
+
+	@Override
+	public CipherUtilOutputStream outputStream(OutputStream out, CipherMode mode) {
+		return new CipherUtilOutputStream(out, cipherEngine(mode));
+	}
+
+	@Override
+	public CipherUtilInputStream inputStream(InputStream in, CipherMode mode) {
+		// TODO Auto-generated method stub
+		return new CipherUtilInputStream(in, cipherEngine(mode));
 	}
 
 	/**

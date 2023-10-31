@@ -14,7 +14,7 @@ public abstract class CipherEngine {
 
 	protected Cipher c;
 	protected CipherUtil.CipherMode mode;
-	private boolean finished = false;
+	protected boolean finished = false;
 	
 	public CipherEngine(CipherUtil.CipherMode mode) {
 		this.mode = mode;
@@ -48,6 +48,7 @@ public abstract class CipherEngine {
 		return o.toByteArray();
 	}
 
+	public boolean isFinished() { return finished; }
 }
 
 

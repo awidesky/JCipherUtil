@@ -212,24 +212,32 @@ class Test {
 				}),
 				dynamicTest("CipherEngine", () -> {
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					CipherEngine ue = cipher.cipherEngine(CipherUtil.CipherMode.ENCRYPT_MODE);//(OutPut.to(enc), null);
-					CipherEngine ud = cipher.cipherEngine(CipherUtil.CipherMode.DECRYPT_MODE);//(InPut.from(enc.toByteArray()), null);
+					CipherEngine ue = cipher.cipherEngine(CipherUtil.CipherMode.ENCRYPT_MODE);
+					CipherEngine ud = cipher.cipherEngine(CipherUtil.CipherMode.DECRYPT_MODE);
 					dec.write(ud.update(ue.update(src)));
 					dec.write(ud.doFinal(ue.doFinal()));
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),
 				dynamicTest("CipherUtilOutputStream -> CipherUtilInputStream", () -> {
-					File encDest = mkEmptyTempFile();
-					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					byte[] buf = new byte[src.length / 2];
-					CipherUtilOutputStream co = new CipherUtilOutputStream(new FileOutputStream(encDest), cipher, CipherUtil.CipherMode.ENCRYPT_MODE);
-					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(encDest), cipher, CipherUtil.CipherMode.DECRYPT_MODE);
-
-					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
+					File encDest = new File("./hello" + Hash.hashPlain(cipher.toString().getBytes()));//mkEmptyTempFile();
+					if(encDest.exists()) encDest.delete();
+					encDest.createNewFile(); encDest.deleteOnExit();
 					
-					dec.write(ci.read());
+					ByteArrayOutputStream enc = new ByteArrayOutputStream();
+					
+					CipherUtilOutputStream co = cipher.outputStream(enc, CipherUtil.CipherMode.ENCRYPT_MODE);
+					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
+
+					CipherUtilInputStream ci = cipher.inputStream(new ByteArrayInputStream(enc.toByteArray()), CipherUtil.CipherMode.DECRYPT_MODE);
+					ByteArrayOutputStream dec = new ByteArrayOutputStream();
+					
+					// TODO System.out.println(cipher.toString() + "\t" + encDest.length());
+					
+					//dec.write(ci.read());
 					int n = 0;
+					byte[] buf = new byte[src.length / 2];
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
+					ci.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	
 				dynamicTest("CipherUtilInputStream -> CipherUtilOutputStream", () -> {
@@ -237,11 +245,13 @@ class Test {
 					
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					byte[] buf = new byte[src.length / 2];
-					CipherUtilInputStream ci = new CipherUtilInputStream(new FileInputStream(plain), cipher, CipherUtil.CipherMode.ENCRYPT_MODE);
-					CipherUtilOutputStream co = new CipherUtilOutputStream(dec, cipher, CipherUtil.CipherMode.DECRYPT_MODE);
+					CipherUtilInputStream ci = cipher.inputStream(new FileInputStream(plain), CipherUtil.CipherMode.ENCRYPT_MODE);
+					CipherUtilOutputStream co = cipher.outputStream(dec, CipherUtil.CipherMode.DECRYPT_MODE);
 					
 					int n = 0;
+					co.write(ci.read());
 					while((n = ci.read(buf)) != -1) co.write(buf, 0, n);
+					ci.close();
 					co.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),	

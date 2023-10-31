@@ -23,6 +23,8 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
+import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
+import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
 import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
 import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
 import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
@@ -228,6 +230,10 @@ public interface CipherUtil {
 	 * @return a {@code CipherEngine} as given mode.
 	 */
 	public CipherEngine cipherEngine(CipherMode mode);
+	
+	
+	public CipherUtilOutputStream outputStream(OutputStream out, CipherUtil.CipherMode mode);
+	public CipherUtilInputStream inputStream(InputStream in, CipherUtil.CipherMode mode);
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 
