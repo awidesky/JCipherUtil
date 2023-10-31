@@ -59,7 +59,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	 * @return generated nonce
 	 * @see IVCipherProperty#NONCESIZE
 	 * */
-	protected byte[] generateNonce(SecureRandom sr) { //TODO : nonce도 해야함..!! getMetadataSize 메소드를 abstract로 하나 만들기...
+	protected byte[] generateNonce(SecureRandom sr) {
 		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
 		sr.nextBytes(nonce);
 		return nonce;

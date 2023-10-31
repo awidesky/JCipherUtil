@@ -28,7 +28,7 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
  * Every metadata and cipher algorithm follows those of the {@code CipherUtil} instance, but calling {@code update(byte[])} and {@code doFinal(byte[] buf)} will not affect it.   
  * @see CipherUtil#updatableInput(OutPut, boolean)
  * */
-public class UpdatableCipherInput {
+public class UpdatableCipherInput { //TODO : delete after comment
 
 	private final Cipher c;
 	private final OutPut out;

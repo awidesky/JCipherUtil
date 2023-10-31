@@ -74,11 +74,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
 	protected abstract Cipher initDecrypt(InPut in) throws NestedIOException;
-
-	//TODO : delete?
-	//protected abstract ByteBuffer generateMetadata();
-	//protected abstract ByteBuffer readMetadata(InPut in);
-
 	
 	/**
 	 * Encrypt from source(designated as <code>InPut</code>)
@@ -210,7 +205,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 
 	@Override
 	public CipherUtilInputStream inputStream(InputStream in, CipherMode mode) {
-		// TODO Auto-generated method stub
+		// TODO add comments
 		return new CipherUtilInputStream(in, cipherEngine(mode));
 	}
 

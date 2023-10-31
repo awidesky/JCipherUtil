@@ -19,6 +19,7 @@ public class CipherUtilInputStream extends FilterInputStream {
 	private byte[] inputBuffer;
 	private boolean finished = false;
 	private boolean bufStoreMode = true;
+	private boolean closed = false;
 	
 	public CipherUtilInputStream(InputStream in, CipherEngine cipher) {
 		super(in);
@@ -98,13 +99,15 @@ public class CipherUtilInputStream extends FilterInputStream {
 		bufStoreMode = !bufStoreMode;
 	}
 
-	public void abort() {
-		cipher.doFinal();
+	public void abort() throws IOException {
+		super.close();
+		closed = true;
 	}
 	
 	@Override
 	public void close() throws IOException {
-		if(cipher.doFinal() != null) throw new IOException("Cipher process has not done yet");
+		if(!closed && !cipher.isFinished()) throw new IOException("Cipher process has not done yet");
 		super.close();
+		closed = true;
 	}
 }

@@ -10,6 +10,7 @@
 package io.github.awidesky.jCipher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -133,6 +134,29 @@ class Test {
 	private static DynamicContainer symmetricCipherTests(SymmetricCipherUtil cipher) {
 		List<DynamicNode> tests = new ArrayList<>();
 		addCommonCipherTests(tests, cipher);
+		tests.add(dynamicTest("CipherUtilInputStream large input test", () -> {
+			/*
+			 * Test if inner buffer (outputBuffer) of CipherUtilInputStream works well with large inputs,
+			 * where the output of inner CipherEngine is larger than remaining of outputBuffer.
+			 * */
+			byte[] hugeData = new byte[CipherUtilInputStream.DEFAULT_BUFFER_SIZE + 1024];
+			new Random().nextBytes(hugeData);
+			
+			CipherUtilInputStream ciEnc = cipher.inputStream(new ByteArrayInputStream(hugeData), CipherUtil.CipherMode.ENCRYPT_MODE);
+			ByteArrayOutputStream enc = new ByteArrayOutputStream();
+			enc.write(ciEnc.read());
+			int n = 0;
+			byte[] buf = new byte[CipherUtilInputStream.DEFAULT_BUFFER_SIZE];
+			while((n = ciEnc.read(buf)) != -1) enc.write(buf, 0, n);
+			ciEnc.close();
+			CipherUtilInputStream ciDec = cipher.inputStream(new ByteArrayInputStream(enc.toByteArray()), CipherUtil.CipherMode.DECRYPT_MODE);
+			ByteArrayOutputStream dec = new ByteArrayOutputStream();
+			dec.write(ciDec.read());
+			n = 0;
+			while((n = ciDec.read(buf)) != -1) dec.write(buf, 0, n);
+			ciDec.close();
+			assertEquals(Hash.hashPlain(hugeData), Hash.hashPlain(dec.toByteArray()));
+		}));
 		return dynamicContainer(cipher.toString(), tests);
 	}
 	private static DynamicContainer asymmetricCipherTests(AsymmetricSupplier cipherSuppl) {
@@ -217,50 +241,13 @@ class Test {
 					dec.write(ud.update(ue.update(src)));
 					dec.write(ud.doFinal(ue.doFinal()));
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(ud.isFinished(), true); assertEquals(ue.isFinished(), true);
+					assertEquals(null, ud.update(new byte[4])); assertEquals(null, ud.doFinal()); assertEquals(null, ud.doFinal(new byte[4]));
+					assertEquals(null, ue.update(new byte[4])); assertEquals(null, ue.doFinal()); assertEquals(null, ue.doFinal(new byte[4]));
 				}),
-				/*
-				dynamicTest("CipherUtilOutputStream -> CipherUtilInputStream", () -> {
-					File encDest = new File("./hello" + Hash.hashPlain(cipher.toString().getBytes()));//mkEmptyTempFile();
-					if(encDest.exists()) encDest.delete();
-					encDest.createNewFile(); encDest.deleteOnExit();
-					
-					ByteArrayOutputStream enc = new ByteArrayOutputStream();
-					
-					CipherUtilOutputStream co = cipher.outputStream(enc, CipherUtil.CipherMode.ENCRYPT_MODE);
-					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
-
-					CipherUtilInputStream ci = cipher.inputStream(new ByteArrayInputStream(enc.toByteArray()), CipherUtil.CipherMode.DECRYPT_MODE);
-					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					
-					// TODO System.out.println(cipher.toString() + "\t" + encDest.length());
-					
-					//dec.write(ci.read());
-					int n = 0;
-					byte[] buf = new byte[src.length / 2];
-					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
-					ci.close();
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
-				}),	
-				dynamicTest("CipherUtilInputStream -> CipherUtilOutputStream", () -> {
-					File plain = mkTempPlainFile();
-					
-					ByteArrayOutputStream dec = new ByteArrayOutputStream();
-					byte[] buf = new byte[src.length / 2];
-					CipherUtilInputStream ci = cipher.inputStream(new FileInputStream(plain), CipherUtil.CipherMode.ENCRYPT_MODE);
-					CipherUtilOutputStream co = cipher.outputStream(dec, CipherUtil.CipherMode.DECRYPT_MODE);
-					
-					int n = 0;
-					co.write(ci.read());
-					while((n = ci.read(buf)) != -1) co.write(buf, 0, n);
-					ci.close();
-					co.close();
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
-				}),
-				*/
 				dynamicTest("CipherUtilInputStream(Encryption)", () -> {
 					File plain = mkTempPlainFile();
 					CipherUtilInputStream ci = cipher.inputStream(new FileInputStream(plain), CipherUtil.CipherMode.ENCRYPT_MODE);
-					
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					dec.write(ci.read());
 					int n = 0;
@@ -268,11 +255,15 @@ class Test {
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					ci.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(dec.toByteArray()))));
+					assertEquals(-1, ci.read());
+					/* CipherUtilInputStream Exception test */
+					CipherUtilInputStream temp = cipher.inputStream(new FileInputStream(plain), CipherUtil.CipherMode.ENCRYPT_MODE);
+					assertThrows(IOException.class, () -> { temp.close(); } );
+					temp.abort();
 				}),
 				dynamicTest("CipherUtilInputStream(Decryption)", () -> {
 					File enc = mkTempFile(cipher.encryptToSingleBuffer(InPut.from(src)));
 					CipherUtilInputStream ci = cipher.inputStream(new FileInputStream(enc), CipherUtil.CipherMode.DECRYPT_MODE);
-					
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					dec.write(ci.read());
 					int n = 0;
@@ -280,12 +271,18 @@ class Test {
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					ci.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(-1, ci.read());
+					/* CipherUtilInputStream Exception test */
+					CipherUtilInputStream temp = cipher.inputStream(new FileInputStream(enc), CipherUtil.CipherMode.DECRYPT_MODE);
+					assertThrows(IOException.class, () -> { temp.close(); } );
+					temp.abort();
 				}),	
 				dynamicTest("CipherUtilOutputStream(Encryption)", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
 					CipherUtilOutputStream co = cipher.outputStream(enc, CipherUtil.CipherMode.ENCRYPT_MODE);
 					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(enc.toByteArray()))));
+					co.close(); assertThrows(IOException.class, () -> { co.write(new byte[4]); } );
 				}),
 				dynamicTest("CipherUtilOutputStream(Decryption)", () -> {
 					byte[] enc = cipher.encryptToSingleBuffer(InPut.from(src));
@@ -293,6 +290,7 @@ class Test {
 					CipherUtilOutputStream co = cipher.outputStream(dec, CipherUtil.CipherMode.DECRYPT_MODE);
 					co.write(enc[0]); co.write(enc, 1, enc.length - 1); co.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					co.close(); assertThrows(IOException.class, () -> { co.write(new byte[4]); } );
 				}),
 				dynamicTest("byte[] <-> byte[]", () -> {
 					assertEquals(Hash.hashPlain(src),
