@@ -19,11 +19,9 @@ public class CipherUtilInputStream extends FilterInputStream {
 	private byte[] inputBuffer;
 	private boolean finished = false;
 	private boolean bufStoreMode = true;
-	private InputStream is;
 	
 	public CipherUtilInputStream(InputStream in, CipherEngine cipher) {
 		super(in);
-		is = in;
 		this.cipher = cipher;
 		outputBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
 		inputBuffer = new byte[DEFAULT_BUFFER_SIZE];
@@ -70,7 +68,7 @@ public class CipherUtilInputStream extends FilterInputStream {
 	}
 
 	private boolean readMore() throws IOException {
-		int read = is.read(inputBuffer);
+		int read = in.read(inputBuffer);
 		byte[] arr = read != -1 ? cipher.update(inputBuffer, 0, read) : cipher.doFinal();
 		if(arr == null) {
 			resetBuffer(false);

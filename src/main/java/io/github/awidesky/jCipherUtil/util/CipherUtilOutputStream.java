@@ -23,6 +23,11 @@ public class CipherUtilOutputStream extends FilterOutputStream {
 	}
 
 	@Override
+	public void write(byte[] b) throws IOException {
+		write(b, 0, b.length);
+	}
+
+	@Override
 	public void write(byte[] b, int off, int len) throws IOException {
 		if(closed) throw new IOException("stream closed");
 		out.write(Optional.ofNullable(cipher.update(b, off, len)).orElse(new byte[0]));
@@ -30,13 +35,13 @@ public class CipherUtilOutputStream extends FilterOutputStream {
 
 	@Override
 	public void close() throws IOException {
-		 if (closed) {
-             return;
-         }
-         closed = true;
-		write(Optional.ofNullable(cipher.doFinal()).orElse(new byte[0]));
-		flush();
+		if (closed) {
+			return;
+		}
+		out.write(Optional.ofNullable(cipher.doFinal()).orElse(new byte[0]));
+		super.flush();
 		super.close();
+		closed = true;
 	}
 
 }
