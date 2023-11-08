@@ -17,6 +17,7 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
+import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
@@ -211,7 +212,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 
 	/**
 	 * Returns the total length of the all metadata(iteration count, salt, nonce, etc.).<br>
-	 * This method is used in {@code AbstractCipherUtil#cipherEngine(io.github.awidesky.jCipherUtil.CipherUtil.CipherMode)}
+	 * This method is used in {@code AbstractCipherUtil#cipherEngine(io.github.awidesky.jCipherUtil.CipherMode)}
 	 * @return
 	 */
 	protected abstract int getMetadataLength();

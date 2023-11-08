@@ -6,8 +6,8 @@ import java.util.function.Function;
 
 import javax.crypto.Cipher;
 
-import io.github.awidesky.jCipherUtil.CipherUtil.CipherMode;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.util.CipherMode;
 
 /**
  * A {@code CipherEncryptEngine} is a {@code CipherEngine} subclass that used for encryption.

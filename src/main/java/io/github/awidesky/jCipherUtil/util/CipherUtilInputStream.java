@@ -13,7 +13,7 @@ import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
  * to provide additional encryption/decryption process.<p>
  * In other words, {@code CipherUtilInputStream} reads from the underlying {@code InputStream},
  * encrypts/decrypts data (with a {@code CipherEngine} which is initiated earlier with
- * proper {@code CipherUtil.CipherMode}), and returns the result.<p>
+ * proper {@code CipherMode}), and returns the result.<p>
  * 
  * While reading from underlying {@code InputStream} and doing cipher process, {@code CipherUtilInputStream}
  * uses two buffer. One reads data from underlying {@code InputStream}, and
@@ -23,12 +23,12 @@ import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
  * to hold the cipher output.<p>
  * 
  * It is recommended to generating {@code CipherUtilInputStream} by
- * {@code CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherUtil.CipherMode)}.<p>
+ * {@code CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherMode)}.<p>
  * 
  * Note : this inputStream is NOT thread safe - attempt to read with one instance in multiple threads
  * (in my opinion you shouldn't, by the way), may produce unexpected behavior.
  * 
- * @see CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherUtil.CipherMode)
+ * @see CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherMode)
  */
 public class CipherUtilInputStream extends FilterInputStream {
 
@@ -47,10 +47,10 @@ public class CipherUtilInputStream extends FilterInputStream {
 	 * {@code CipherEngine}.
 	 * <p>
 	 * Even though using this constructor is a valid way to construct a {@code CipherUtilInputStream},
-	 * {@code CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherUtil.CipherMode)}
+	 * {@code CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherMode)}
 	 * is the recommended way to create {@code CipherUtilInputStream},
 	 * 
-	 * @see CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherUtil.CipherMode) 
+	 * @see CipherUtil#inputStream(InputStream, io.github.awidesky.jCipherUtil.CipherMode) 
 	 * @param in the to-be-processed {@code InputStream}
 	 * @param cipher a {@code CipherEngine} to do the cipher process
 	 */
@@ -206,7 +206,7 @@ public class CipherUtilInputStream extends FilterInputStream {
 	 * 
 	 * @return the cipher mode of the {@code CipherUtilInputStream}
 	 */
-	public CipherUtil.CipherMode mode() { return cipher.mode(); }
+	public CipherMode mode() { return cipher.mode(); }
 	
 	/**
 	 * Closes the underlying InputStream, and mark this Stream as finished and closed.

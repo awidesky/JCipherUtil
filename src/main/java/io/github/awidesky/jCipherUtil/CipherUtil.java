@@ -22,6 +22,7 @@ import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
@@ -210,15 +211,6 @@ public interface CipherUtil {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(in));
 	}
 	
-
-	/**
-	 * Cipher operation mode for {@code CipherUtil#cipherTunnel(InPut, OutPut, CipherMode)}, {@code CipherUtil#updatableInput(OutPut, CipherMode)}
-	 * and {@code CipherUtil#updatableInput(OutPut, CipherMode)}.
-	 * */
-	static enum CipherMode { ENCRYPT_MODE, DECRYPT_MODE; } // TODO : just make as a separate Enum
-	
-	public static final CipherMode ENCRYPT_MODE = CipherMode.ENCRYPT_MODE;
-	public static final CipherMode DECRYPT_MODE = CipherMode.DECRYPT_MODE;
 	
 	/**
 	 * Return a new {@code CipherTunnel} that transfer data from input to output,
@@ -273,7 +265,7 @@ public interface CipherUtil {
 	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
 	 * @return a new {@code CipherUtilOutputStream} ad given mode.
 	 */
-	public CipherUtilOutputStream outputStream(OutputStream out, CipherUtil.CipherMode mode);
+	public CipherUtilOutputStream outputStream(OutputStream out, CipherMode mode);
 	/**
 	 * Returns a new {@code CipherUtilInputStream} connected with given {@code InputStream}.
 	 * <p>
@@ -288,7 +280,7 @@ public interface CipherUtil {
 	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
 	 * @return a new {@code CipherUtilInputStream} ad given mode.
 	 */
-	public CipherUtilInputStream inputStream(InputStream in, CipherUtil.CipherMode mode);
+	public CipherUtilInputStream inputStream(InputStream in, CipherMode mode);
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 

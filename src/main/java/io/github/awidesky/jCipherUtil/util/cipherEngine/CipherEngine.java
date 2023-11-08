@@ -4,8 +4,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 
-import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.util.CipherMode;
 
 
 /**
@@ -16,14 +16,14 @@ import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 public abstract class CipherEngine { //TODO : Thread safe version?
 
 	protected Cipher c;
-	protected CipherUtil.CipherMode mode;
+	protected CipherMode mode;
 	protected boolean finished = false;
 	
 	/**
-	 * Set the {@code CipherUtil.CipherMode} for this CipherEngine.
+	 * Set the {@code CipherMode} for this CipherEngine.
 	 * @param mode the cipher mode.
 	 */
-	protected CipherEngine(CipherUtil.CipherMode mode) {
+	protected CipherEngine(CipherMode mode) {
 		//TODO : if inner logic of CipherUtil will use CipherEngine, add the subclasses to root package, with package-private constructor.
 		this.mode = mode;
 	}
@@ -114,7 +114,7 @@ public abstract class CipherEngine { //TODO : Thread safe version?
 	 * Returns the cipher mode of this CipherEngine
 	 * @return the cipher mode of this CipherEngine
 	 */
-	public CipherUtil.CipherMode mode() { return mode; }
+	public CipherMode mode() { return mode; }
 }
 
 
