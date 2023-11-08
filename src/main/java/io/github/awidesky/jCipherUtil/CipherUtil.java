@@ -20,25 +20,37 @@ import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
+import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
-import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
+import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
+import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 
 /**
- * An utility that provides easy encrypt/decrypt methods from/to various input/output.
- * <p>The {@code CipherUtil} interface provides two generic encrypt/decrypt method named
- * {@link CipherUtil#encrypt(InPut, OutPut)} and {@link CipherUtil#decrypt(InPut, OutPut)},
- * that can be used to encrypt and decrypt from/to many types.
- * <p>Also, The {@code CipherUtil} interface provides several utility encrypt/decrypt method like 
- * {@link CipherUtil#encryptToBase64(InPut)}, {@link CipherUtil#decryptToBase64(InPut)}, {@link CipherUtil#decryptToString(InPut, Charset)}  
- * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
- * single {@code byte[]} buffer, etc)
- * <p>Every methods in this interface is thread-safe. Each call is run with new {@code Cipher} instance, and does not effect anything to the {@code CipherUtil} instance.
- * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableEncrypter} 
- * and {@link UpdatableDecrypter}
+ * An utility that provides easy encrypt/decrypt methods from/to various
+ * input/output.
+ * <p>
+ * The {@code CipherUtil} interface provides two generic encrypt/decrypt method
+ * named {@link CipherUtil#encrypt(InPut, OutPut)} and
+ * {@link CipherUtil#decrypt(InPut, OutPut)}, that can be used to encrypt and
+ * decrypt from/to many types.
+ * <p>
+ * Also, The {@code CipherUtil} interface provides several utility
+ * encrypt/decrypt method like {@link CipherUtil#encryptToBase64(InPut)},
+ * {@link CipherUtil#decryptToBase64(InPut)},
+ * {@link CipherUtil#decryptToString(InPut, Charset)} that returns result of
+ * cipher process as specified form(Base64 encoded {@code String} hex formated
+ * {@code String}, {@code String} encoded with given character set, single
+ * {@code byte[]} buffer, etc)
+ * <p>
+ * Every methods in this interface is thread-safe. Each call is run with new
+ * {@code Cipher} instance, and does not effect anything to the
+ * {@code CipherUtil} instance. Every cipher process by this interface's methods
+ * is done before return. If you need multiple-part encryption or decryption
+ * operation, use {@link CipherEngine}, {@link CipherTunnel},
+ * {@link CipherUtilInputStream} or {@link CipherUtilInputStream}.
  * 
  * 
  * @see InPut
@@ -46,7 +58,7 @@ import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
  * @see AbstractCipherUtil
  * @see SymmetricCipherUtil
  * @see AsymmetricCipherUtil
- * */
+ */
 public interface CipherUtil {
 
 	/**
@@ -198,45 +210,90 @@ public interface CipherUtil {
 		return HexFormat.of().formatHex(decryptToSingleBuffer(in));
 	}
 	
+
 	/**
-	 * Return a {@code CipherTunnel} that reads data from input, and write the encrypted data to the output.
+	 * Cipher operation mode for {@code CipherUtil#cipherTunnel(InPut, OutPut, CipherMode)}, {@code CipherUtil#updatableInput(OutPut, CipherMode)}
+	 * and {@code CipherUtil#updatableInput(OutPut, CipherMode)}.
+	 * */
+	static enum CipherMode { ENCRYPT_MODE, DECRYPT_MODE; } // TODO : just make as a separate Enum
+	
+	public static final CipherMode ENCRYPT_MODE = CipherMode.ENCRYPT_MODE;
+	public static final CipherMode DECRYPT_MODE = CipherMode.DECRYPT_MODE;
+	
+	/**
+	 * Return a new {@code CipherTunnel} that transfer data from input to output,
+	 * while encrypting/decrypting the data.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherTunnel} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherTunnel} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
 	 * @see CipherTunnel
 	 * 
-	 * @param in the input where the plain source data resides
-	 * @param out the output destination for the encrypted data to be written
-	 * @return a {@code CipherTunnel} in encrypt mode connected between given input and output
+	 * @param in   the input where the plain source data resides
+	 * @param out  the output destination for the encrypted/decrypted data to be
+	 *             written
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or
+	 *             {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherTunnel} as given mode.
 	 */
-	public CipherTunnel cipherEncryptTunnel(InPut in, OutPut out);
+	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode);
+	
 	/**
-	 * Return a {@code CipherTunnel} that reads data from input, and write the decrypted data to the output.
-	 * @see CipherTunnel
+	 * Returns a new {@code CipherEngine} with given mode.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherEngine} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherEngine} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
 	 * 
-	 * @param in the input where the encrypted source data resides
-	 * @param out the output destination for the decrypted data to be written
-	 * @return a {@code CipherTunnel} in decrypt mode connected between given input and output
+	 * @see CipherEngine
+	 * 
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherEngine} as given mode.
 	 */
-	public CipherTunnel cipherDecryptTunnel(InPut in, OutPut out);
+	public CipherEngine cipherEngine(CipherMode mode);
+	
 	/**
-	 * Return an {@code UpdatableEncrypter} that receives input
-	 * from user and writes encrypted data to the given output.
-	 * @see UpdatableEncrypter
+	 * Returns a new {@code CipherUtilOutputStream} connected with given {@code OutputStream}.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherUtilOutputStream} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherUtilOutputStream} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
 	 * 
-	 * @param out output destination that encrypted data will be saved.
-	 * @return an {@code UpdatableEncrypter} that encrypts data and write the result in the output
+	 * @param out underlying output stream
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherUtilOutputStream} ad given mode.
 	 */
-	public UpdatableEncrypter UpdatableEncryptCipher(OutPut out);
+	public CipherUtilOutputStream outputStream(OutputStream out, CipherUtil.CipherMode mode);
 	/**
-	 * Return an {@code UpdatableDecrypter} that reads encrypted data
-	 * from the given input and returns the decrypted result to user.
-	 * @see UpdatableDecrypter
+	 * Returns a new {@code CipherUtilInputStream} connected with given {@code InputStream}.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherUtilInputStream} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherUtilInputStream} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
 	 * 
-	 * @param in the input where the encrypted source data resides
-	 * @return an {@code UpdatableDecrypter} that decrypts data from the given input.
+	 * @param in underlying input stream
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherUtilInputStream} ad given mode.
 	 */
-	public UpdatableDecrypter UpdatableDecryptCipher(InPut in);
+	public CipherUtilInputStream inputStream(InputStream in, CipherUtil.CipherMode mode);
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 
 	 * */
 	public void destroyKey();
+	
+	
 }

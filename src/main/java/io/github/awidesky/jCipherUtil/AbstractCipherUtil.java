@@ -1,5 +1,7 @@
 package io.github.awidesky.jCipherUtil;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,8 +18,11 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
-import io.github.awidesky.jCipherUtil.util.UpdatableDecrypter;
-import io.github.awidesky.jCipherUtil.util.UpdatableEncrypter;
+import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
+import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherDecryptEngine;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEncryptEngine;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * An abstract subclass of {@code CipherUtil} that provides a few utility methods,
@@ -69,8 +74,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
 	protected abstract Cipher initDecrypt(InPut in) throws NestedIOException;
-
-
 	
 	/**
 	 * Encrypt from source(designated as <code>InPut</code>)
@@ -131,7 +134,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * 
 	 * @return amount of data read and processed. Size of the output may be different.
 	 */
-	protected int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) {
+	protected int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) { //TODO : This can be static
+		//TODO : use CipherEngine then Cipher? performance comparison needed
 		try {
 			int read = in.getSrc(buf);
 			if(read == -1) return -1;
@@ -157,10 +161,24 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			throw new OmittedCipherException(e);
 		}
 	}
+
+	
 	
 	@Override
-	public CipherTunnel cipherEncryptTunnel(InPut in, OutPut out) {
-		return new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) {
+	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) {
+		return mode == CipherMode.ENCRYPT_MODE ?
+		new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) { //TODO : if part in side initE/D method
+			@Override
+			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
+				return updateCipher(cipher, buffer, msgp, msgc);
+			}
+			@Override
+			protected int doFinal(Cipher cipher, OutPut msgc) {
+				return doFinalCipher(cipher, out);
+			}
+		}
+		:
+		new CipherTunnel(initDecrypt(in), in, out, BUFFER_SIZE) {
 			@Override
 			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
 				return updateCipher(cipher, buffer, msgp, msgc);
@@ -173,29 +191,31 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	@Override
-	public CipherTunnel cipherDecryptTunnel(InPut in, OutPut out) {
-		return new CipherTunnel(initDecrypt(in), in, out, BUFFER_SIZE) {
-			@Override
-			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
-				return updateCipher(cipher, buffer, msgp, msgc);
-			}
-			@Override
-			protected int doFinal(Cipher cipher, OutPut msgc) {
-				return doFinalCipher(cipher, out);
-			}
-		};
+	public CipherEngine cipherEngine(CipherMode mode) {
+		if(mode == CipherMode.ENCRYPT_MODE) {
+			return new CipherEncryptEngine(mode, this::initEncrypt, getMetadataLength());
+		} else {
+			return new CipherDecryptEngine(mode, this::initDecrypt, getMetadataLength());
+		}
 	}
 
 	@Override
-	public UpdatableEncrypter UpdatableEncryptCipher(OutPut out) {
-		return new UpdatableEncrypter(initEncrypt(out), out);
+	public CipherUtilOutputStream outputStream(OutputStream out, CipherMode mode) {
+		return new CipherUtilOutputStream(out, cipherEngine(mode));
 	}
 
 	@Override
-	public UpdatableDecrypter UpdatableDecryptCipher(InPut in) {
-		return new UpdatableDecrypter(initDecrypt(in), in, BUFFER_SIZE);
+	public CipherUtilInputStream inputStream(InputStream in, CipherMode mode) {
+		return new CipherUtilInputStream(in, cipherEngine(mode));
 	}
-	
+
+	/**
+	 * Returns the total length of the all metadata(iteration count, salt, nonce, etc.).<br>
+	 * This method is used in {@code AbstractCipherUtil#cipherEngine(io.github.awidesky.jCipherUtil.CipherUtil.CipherMode)}
+	 * @return
+	 */
+	protected abstract int getMetadataLength();
+
 	/**
 	 * Get algorithm name, transformation property and provider of this {@code CipherUtil}.
 	 * */

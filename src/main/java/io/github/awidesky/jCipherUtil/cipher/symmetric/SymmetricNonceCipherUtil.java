@@ -128,6 +128,11 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		return c;
 	}
 
+	@Override
+	protected int getMetadataLength() {
+		return 4 + keyMetadata.saltLen + getCipherProperty().NONCESIZE;
+	}
+	
 	/**
 	 * @return String represents this CipherUtil instance. <code>super.fields()</code> will be followed by value of the nonce.
 	 * */

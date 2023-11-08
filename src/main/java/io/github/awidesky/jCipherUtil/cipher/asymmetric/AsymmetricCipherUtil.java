@@ -94,6 +94,11 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	}
 	
 	@Override
+	protected int getMetadataLength() {
+		return 0;
+	}
+
+	@Override
 	public void destroyKey() {
 		key.destroy();
 	}

@@ -27,7 +27,7 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
  * and {@code CipherUtil#decrypt(InPut, OutPut)} should be avoided, allowing current thread to do other things or check the progress
  * (how much data has been processed, etc.) continuously.
  * <p>
- * If you have to intercept data during cipher process, consider using {@code UpdatableEncrypter}, {@code UpdatableDecrypter} or {@code CipherUtilOutputStream}, {@code CipherUtilInputStream}.
+ * If you have to intercept data during cipher process, consider using {@code UpdatableCipherInput}, {@code UpdatableCipherOutput} or {@code CipherUtilOutputStream}, {@code CipherUtilInputStream}.
  * */
 public abstract class CipherTunnel {
 	
