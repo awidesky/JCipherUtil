@@ -134,7 +134,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * 
 	 * @return amount of data read and processed. Size of the output may be different.
 	 */
-	protected int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) {
+	protected int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) { //TODO : This can be static
+		//TODO : use CipherEngine then Cipher? performance comparison needed
 		try {
 			int read = in.getSrc(buf);
 			if(read == -1) return -1;
@@ -166,7 +167,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) {
 		return mode == CipherMode.ENCRYPT_MODE ?
-		new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) {
+		new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) { //TODO : if part in side initE/D method
 			@Override
 			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
 				return updateCipher(cipher, buffer, msgp, msgc);
@@ -192,7 +193,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public CipherEngine cipherEngine(CipherMode mode) {
 		if(mode == CipherMode.ENCRYPT_MODE) {
-			return new CipherEncryptEngine(mode, this::initEncrypt);
+			return new CipherEncryptEngine(mode, this::initEncrypt, getMetadataLength());
 		} else {
 			return new CipherDecryptEngine(mode, this::initDecrypt, getMetadataLength());
 		}
@@ -205,7 +206,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 
 	@Override
 	public CipherUtilInputStream inputStream(InputStream in, CipherMode mode) {
-		// TODO add comments
 		return new CipherUtilInputStream(in, cipherEngine(mode));
 	}
 

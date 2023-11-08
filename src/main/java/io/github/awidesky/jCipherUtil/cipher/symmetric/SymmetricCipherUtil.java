@@ -119,31 +119,10 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		}	
 	}
 
-	
-
-	/* TODO
-	 * encryption은 out, decryption은 in만 가능.
-	 * 암호화는 initEncrypt에서 생성한 metadata를 바로 output해야 되고,
-	 * 복호화는 initDecrypt에서 바로 metadata를 input해 init해야 하기 때문
-	 * 
-	 * initEncrypt(dest)
-	 *   metadata 생성
-	 *   cipher init
-	 *   dest에 output
-	 *   
-	 * initDecrypt(src)
-	 *   src에서 metadata input
-	 *   cipher init
-	 *   
-	 *   
-	 * */
-
 	@Override
 	protected int getMetadataLength() {
 		return 4 + keyMetadata.saltLen;
 	}
-
-
 
 	/**
 	 * Generate random iteration count with given {@code SecureRandom} instance.

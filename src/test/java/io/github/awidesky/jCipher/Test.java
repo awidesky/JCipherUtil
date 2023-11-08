@@ -9,6 +9,7 @@
 
 package io.github.awidesky.jCipher;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
@@ -259,7 +260,7 @@ class Test {
 					/* CipherUtilInputStream Exception test */
 					CipherUtilInputStream temp = cipher.inputStream(new FileInputStream(plain), CipherUtil.CipherMode.ENCRYPT_MODE);
 					assertThrows(IOException.class, () -> { temp.close(); } );
-					temp.abort();
+					temp.abort(); assertDoesNotThrow(() -> { temp.close(); } );
 				}),
 				dynamicTest("CipherUtilInputStream(Decryption)", () -> {
 					File enc = mkTempFile(cipher.encryptToSingleBuffer(InPut.from(src)));
@@ -275,7 +276,7 @@ class Test {
 					/* CipherUtilInputStream Exception test */
 					CipherUtilInputStream temp = cipher.inputStream(new FileInputStream(enc), CipherUtil.CipherMode.DECRYPT_MODE);
 					assertThrows(IOException.class, () -> { temp.close(); } );
-					temp.abort();
+					temp.abort(); assertDoesNotThrow(() -> { temp.close(); } );
 				}),	
 				dynamicTest("CipherUtilOutputStream(Encryption)", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();

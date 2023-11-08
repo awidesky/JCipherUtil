@@ -9,20 +9,16 @@ import javax.crypto.Cipher;
 import io.github.awidesky.jCipherUtil.CipherUtil.CipherMode;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
+/**
+ * A {@code CipherEncryptEngine} is a {@code CipherEngine} subclass that used for encryption.
+ */
 public class CipherEncryptEngine extends CipherEngine {
 
 	private byte[] metadata = null;
-	private Function<OutPut, Cipher> init;
 
-	public CipherEncryptEngine(CipherMode mode, Function<OutPut, Cipher> init) {
+	public CipherEncryptEngine(CipherMode mode, Function<OutPut, Cipher> init, int metadataSize) {
 		super(mode);
-		this.init = init;
-		init();
-	}
-	
-	@Override
-	public void init() {
-		ByteArrayOutputStream o = new ByteArrayOutputStream();
+		ByteArrayOutputStream o = new ByteArrayOutputStream(metadataSize);
 		this.c = init.apply(OutPut.to(o));
 		metadata = o.toByteArray();
 	}

@@ -206,33 +206,79 @@ public interface CipherUtil {
 	 * Cipher operation mode for {@code CipherUtil#cipherTunnel(InPut, OutPut, CipherMode)}, {@code CipherUtil#updatableInput(OutPut, CipherMode)}
 	 * and {@code CipherUtil#updatableInput(OutPut, CipherMode)}.
 	 * */
-	static enum CipherMode { ENCRYPT_MODE, DECRYPT_MODE; }
+	static enum CipherMode { ENCRYPT_MODE, DECRYPT_MODE; } // TODO : just make as a separate Enum
 	
 	public static final CipherMode ENCRYPT_MODE = CipherMode.ENCRYPT_MODE;
 	public static final CipherMode DECRYPT_MODE = CipherMode.DECRYPT_MODE;
 	
 	/**
-	 * Return a {@code CipherTunnel} that transfer data from input to output, while encrypting/decrypting the data.
+	 * Return a new {@code CipherTunnel} that transfer data from input to output,
+	 * while encrypting/decrypting the data.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherTunnel} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherTunnel} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
 	 * @see CipherTunnel
 	 * 
-	 * @param in the input where the plain source data resides
-	 * @param out the output destination for the encrypted/decrypted data to be written
-	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
-	 * @return a {@code CipherTunnel} as given mode.
+	 * @param in   the input where the plain source data resides
+	 * @param out  the output destination for the encrypted/decrypted data to be
+	 *             written
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or
+	 *             {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherTunnel} as given mode.
 	 */
 	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode);
 	
 	/**
-	 * Returns a {@code CipherEngine} with given mode.
+	 * Returns a new {@code CipherEngine} with given mode.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherEngine} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherEngine} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
 	 * @see CipherEngine
 	 * 
 	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
-	 * @return a {@code CipherEngine} as given mode.
+	 * @return a new {@code CipherEngine} as given mode.
 	 */
 	public CipherEngine cipherEngine(CipherMode mode);
 	
-	
+	/**
+	 * Returns a new {@code CipherUtilOutputStream} connected with given {@code OutputStream}.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherUtilOutputStream} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherUtilOutputStream} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
+	 * @param out underlying output stream
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherUtilOutputStream} ad given mode.
+	 */
 	public CipherUtilOutputStream outputStream(OutputStream out, CipherUtil.CipherMode mode);
+	/**
+	 * Returns a new {@code CipherUtilInputStream} connected with given {@code InputStream}.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherUtilInputStream} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherUtilInputStream} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
+	 * @param out underlying input stream
+	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
+	 * @return a new {@code CipherUtilInputStream} ad given mode.
+	 */
 	public CipherUtilInputStream inputStream(InputStream in, CipherUtil.CipherMode mode);
 	
 	/**
