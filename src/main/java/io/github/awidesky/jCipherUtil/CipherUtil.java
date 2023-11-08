@@ -25,23 +25,32 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
-import io.github.awidesky.jCipherUtil.util.UpdatableCipherInput;
-import io.github.awidesky.jCipherUtil.util.UpdatableCipherOutput;
 import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 
 /**
- * An utility that provides easy encrypt/decrypt methods from/to various input/output.
- * <p>The {@code CipherUtil} interface provides two generic encrypt/decrypt method named
- * {@link CipherUtil#encrypt(InPut, OutPut)} and {@link CipherUtil#decrypt(InPut, OutPut)},
- * that can be used to encrypt and decrypt from/to many types.
- * <p>Also, The {@code CipherUtil} interface provides several utility encrypt/decrypt method like 
- * {@link CipherUtil#encryptToBase64(InPut)}, {@link CipherUtil#decryptToBase64(InPut)}, {@link CipherUtil#decryptToString(InPut, Charset)}  
- * that returns result of cipher process as specified form(Base64 encoded {@code String} hex formated {@code String}, {@code String} encoded with given character set, 
- * single {@code byte[]} buffer, etc)
- * <p>Every methods in this interface is thread-safe. Each call is run with new {@code Cipher} instance, and does not effect anything to the {@code CipherUtil} instance.
- * Every cipher process by this interface's methods is done before return. If you need multiple-part encryption or decryption operation, see {@link UpdatableCipherInput} 
- * and {@link UpdatableCipherOutput}
+ * An utility that provides easy encrypt/decrypt methods from/to various
+ * input/output.
+ * <p>
+ * The {@code CipherUtil} interface provides two generic encrypt/decrypt method
+ * named {@link CipherUtil#encrypt(InPut, OutPut)} and
+ * {@link CipherUtil#decrypt(InPut, OutPut)}, that can be used to encrypt and
+ * decrypt from/to many types.
+ * <p>
+ * Also, The {@code CipherUtil} interface provides several utility
+ * encrypt/decrypt method like {@link CipherUtil#encryptToBase64(InPut)},
+ * {@link CipherUtil#decryptToBase64(InPut)},
+ * {@link CipherUtil#decryptToString(InPut, Charset)} that returns result of
+ * cipher process as specified form(Base64 encoded {@code String} hex formated
+ * {@code String}, {@code String} encoded with given character set, single
+ * {@code byte[]} buffer, etc)
+ * <p>
+ * Every methods in this interface is thread-safe. Each call is run with new
+ * {@code Cipher} instance, and does not effect anything to the
+ * {@code CipherUtil} instance. Every cipher process by this interface's methods
+ * is done before return. If you need multiple-part encryption or decryption
+ * operation, use {@link CipherEngine}, {@link CipherTunnel},
+ * {@link CipherUtilInputStream} or {@link CipherUtilInputStream}.
  * 
  * 
  * @see InPut
@@ -49,7 +58,7 @@ import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
  * @see AbstractCipherUtil
  * @see SymmetricCipherUtil
  * @see AsymmetricCipherUtil
- * */
+ */
 public interface CipherUtil {
 
 	/**
@@ -275,7 +284,7 @@ public interface CipherUtil {
 	 * will not affect internal cipher operation of this {@code CipherUtil} instance
 	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
 	 * 
-	 * @param out underlying input stream
+	 * @param in underlying input stream
 	 * @param mode operation mode. either {@code CipherUtil#ENCRYPT_MODE} or {@code CipherUtil#ENCRYPT_MODE}
 	 * @return a new {@code CipherUtilInputStream} ad given mode.
 	 */

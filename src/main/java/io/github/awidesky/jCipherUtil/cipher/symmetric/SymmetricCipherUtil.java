@@ -127,9 +127,8 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	/**
 	 * Generate random iteration count with given {@code SecureRandom} instance.
 	 * Size of the iteration count is determined by {@code KeyMetadata}.
-	 * @return 
 	 * 
-	 * @see KeyMetadata#iterationRange
+	 * @return randomly decided number of iteration count
 	 * */
 	protected int generateIterationCount(SecureRandom sr) {
 		return sr.nextInt(keyMetadata.iterationRangeStart, keyMetadata.iterationRangeEnd);
@@ -140,6 +139,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * Read salt from given {@code InPut} instance.
 	 * Size of the salt is determined by {@code KeyMetadata}.
 	 * 
+	 * @return salt data read from the input
 	 * @see KeyMetadata#saltLen
 	 * */
 	protected byte[] readSalt(InPut in) {
@@ -151,9 +151,8 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	/**
 	 * Read iteration count from given {@code InPut} instance.
 	 * Size of the iteration count is determined by {@code KeyMetadata}.
-	 * @return 
 	 * 
-	 * @see KeyMetadata#iterationRange
+	 * @return interpreted number of iteration count
 	 * */
 	protected int readIterationCount(InPut in) {
 		byte[] iterationByte = new byte[4];

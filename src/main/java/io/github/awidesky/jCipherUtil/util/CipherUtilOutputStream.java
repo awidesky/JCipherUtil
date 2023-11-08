@@ -37,7 +37,7 @@ public class CipherUtilOutputStream extends FilterOutputStream {
 	 * is the recommended way to create {@code CipherUtilOutputStream},
 	 * 
 	 * @see CipherUtil#outputStream(OutputStream, io.github.awidesky.jCipherUtil.CipherUtil.CipherMode) 
-	 * @param in the to-be-processed {@code OutputStream}
+	 * @param out the to-be-processed {@code OutputStream}
 	 * @param cipher a {@code CipherEngine} to do the cipher process
 	 */
 	public CipherUtilOutputStream(OutputStream out, CipherEngine cipher) {
