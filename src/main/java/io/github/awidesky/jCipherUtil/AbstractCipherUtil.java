@@ -90,7 +90,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void encrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
 		try (in; out) {
-			processCipher(initEncrypt(out), in, out);
+			processCipher(initEncrypt(out), in, out, BUFFER_SIZE);
 		}
 	}
 
@@ -109,7 +109,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void decrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
 		try (in; out) {
-			processCipher(initDecrypt(in), in, out);
+			processCipher(initDecrypt(in), in, out, BUFFER_SIZE);
 		}
 	}
 	
@@ -124,8 +124,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
 	 * there's a internal flaw in the cipher library.
 	 * */
-	protected void processCipher(Cipher c, InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
-		byte[] buf = new byte[BUFFER_SIZE];
+	private static void processCipher(Cipher c, InPut in, OutPut out, int bufferSize) throws NestedIOException, OmittedCipherException {
+		byte[] buf = new byte[bufferSize];
 		while(updateCipher(c, buf, in, out) != -1) { }
 		doFinalCipher(c, out);
 	}
@@ -134,7 +134,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * 
 	 * @return amount of data read and processed. Size of the output may be different.
 	 */
-	protected int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) { //TODO : This can be static
+	private static int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) {
 		//TODO : use CipherEngine then Cipher? performance comparison needed
 		try {
 			int read = in.getSrc(buf);
@@ -152,7 +152,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 *  
 	 * @return amount of data processed and written.
 	 */
-	protected int doFinalCipher(Cipher c, OutPut out) {
+	private static int doFinalCipher(Cipher c, OutPut out) {
 		try {
 			byte[] res = c.doFinal();
 			out.consumeResult(res);
