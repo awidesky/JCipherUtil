@@ -68,6 +68,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
 	protected abstract Cipher initEncrypt(OutPut out) throws NestedIOException;
+	protected abstract Cipher initEncrypt(byte[] metadata) throws NestedIOException;
 
 	/**
 	 * Initialize {@code Cipher} in decrypt mode so that it can be usable(be able to call {@code Cipher#update(byte[])}, {@code Cipher#doFinal()}.
@@ -75,6 +76,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
 	protected abstract Cipher initDecrypt(InPut in) throws NestedIOException;
+	protected abstract Cipher initDecrypt(byte[] metadata) throws NestedIOException;
 	
 	/**
 	 * Encrypt from source(designated as <code>InPut</code>)
@@ -167,19 +169,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	
 	@Override
 	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) {
-		return mode == CipherMode.ENCRYPT_MODE ?
-		new CipherTunnel(initEncrypt(out), in, out, BUFFER_SIZE) { //TODO : if part in side initE/D method
-			@Override
-			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
-				return updateCipher(cipher, buffer, msgp, msgc);
-			}
-			@Override
-			protected int doFinal(Cipher cipher, OutPut msgc) {
-				return doFinalCipher(cipher, out);
-			}
-		}
-		:
-		new CipherTunnel(initDecrypt(in), in, out, BUFFER_SIZE) {
+		return new CipherTunnel((mode == CipherMode.ENCRYPT_MODE) ? initEncrypt(out) : initDecrypt(in), in, out, BUFFER_SIZE) {
 			@Override
 			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
 				return updateCipher(cipher, buffer, msgp, msgc);

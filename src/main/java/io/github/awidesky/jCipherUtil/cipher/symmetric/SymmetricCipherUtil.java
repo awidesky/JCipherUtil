@@ -55,6 +55,8 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	protected SymmetricKeyMaterial key;
 	protected final KeyMetadata keyMetadata;
 	protected final KeySize keySize;
+	
+	private final int ITERATION_COUNT_SIZE = 4; /* One int value */
 
 	/**
 	 * Construct this {@code SymmetricCipherUtil} with given parameters.
@@ -94,8 +96,27 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}
-		out.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
+		out.consumeResult(ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount).array());
 		out.consumeResult(salt);
+		return c;
+	}
+	
+
+	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
+		SecureRandom sr = new SecureRandom();
+		byte[] salt = new byte[keyMetadata.saltLen]; 
+		sr.nextBytes(salt);
+		int iterationCount = generateIterationCount(sr);
+		Cipher c = null;
+		try {
+			c = getCipherInstance();
+			c.init(Cipher.ENCRYPT_MODE, generateKey(salt, iterationCount));
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}
+		byte[] iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount).array();
+		System.arraycopy(iter, 0, metadata, 0, iter.length);
+		System.arraycopy(salt, 0, metadata, metadata.length, salt.length);
 		return c;
 	}
 
@@ -116,12 +137,28 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 			return c;
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
+		}
+	}
+	protected Cipher initDecrypt(byte[] metadata) throws NestedIOException {
+		ByteBuffer met = ByteBuffer.wrap(metadata);
+		int iterationCount = met.getInt();
+		byte[] salt = new byte[keyMetadata.saltLen];
+		met.get(salt);
+		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
+			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
+		}
+		try {
+			Cipher c = getCipherInstance();
+			c.init(Cipher.DECRYPT_MODE, generateKey(salt, iterationCount));
+			return c;
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
 		}	
 	}
 
 	@Override
 	protected int getMetadataLength() {
-		return 4 + keyMetadata.saltLen;
+		return ITERATION_COUNT_SIZE + keyMetadata.saltLen;
 	}
 
 	/**
