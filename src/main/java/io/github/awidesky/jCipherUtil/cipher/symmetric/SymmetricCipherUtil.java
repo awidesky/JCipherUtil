@@ -56,7 +56,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	protected final KeyMetadata keyMetadata;
 	protected final KeySize keySize;
 	
-	private final int ITERATION_COUNT_SIZE = 4; /* One int value */
+	protected final int ITERATION_COUNT_SIZE = 4; /* One int value */
 
 	/**
 	 * Construct this {@code SymmetricCipherUtil} with given parameters.
@@ -107,16 +107,15 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		byte[] salt = new byte[keyMetadata.saltLen]; 
 		sr.nextBytes(salt);
 		int iterationCount = generateIterationCount(sr);
-		Cipher c = null;
+		Cipher c = getCipherInstance();
 		try {
-			c = getCipherInstance();
 			c.init(Cipher.ENCRYPT_MODE, generateKey(salt, iterationCount));
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}
 		byte[] iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount).array();
 		System.arraycopy(iter, 0, metadata, 0, iter.length);
-		System.arraycopy(salt, 0, metadata, metadata.length, salt.length);
+		System.arraycopy(salt, 0, metadata, iter.length, salt.length);
 		return c;
 	}
 
@@ -153,7 +152,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 			return c;
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
-		}	
+		}
 	}
 
 	@Override
