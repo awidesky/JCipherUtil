@@ -2,6 +2,7 @@ package io.github.awidesky.jCipherUtil;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -78,7 +79,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
 	protected abstract Cipher initDecrypt(InPut in) throws NestedIOException;
-	protected abstract Cipher initDecrypt(byte[] metadata) throws NestedIOException;
+	protected abstract Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException;
 	
 	/**
 	 * Encrypt from source(designated as <code>InPut</code>)

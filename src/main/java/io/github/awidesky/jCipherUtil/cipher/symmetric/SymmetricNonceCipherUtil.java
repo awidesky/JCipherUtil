@@ -128,6 +128,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		return c;
 	}
 
+	@Override
 	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
 		byte[] salt = new byte[keyMetadata.saltLen]; 
@@ -140,20 +141,22 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
-		byte[] iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount).array();
-		System.arraycopy(iter, 0, metadata, 0, iter.length);
-		System.arraycopy(salt, 0, metadata, iter.length, salt.length);
-		System.arraycopy(nonce, 0, metadata, iter.length + salt.length, nonce.length);
+		ByteBuffer iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount);
+		ByteBuffer met = ByteBuffer.wrap(metadata);
+		met.put(iter);
+		met.put(salt);
+		met.put(nonce);
 		return c;
 	}
 
-	protected Cipher initDecrypt(byte[] metadata) throws NestedIOException {
-		ByteBuffer met = ByteBuffer.wrap(metadata);
-		int iterationCount = met.getInt();
+	@Override
+	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
+		int iterationCount = metadata.getInt();
 		byte[] salt = new byte[keyMetadata.saltLen];
-		met.get(salt);
+		metadata.get(salt);
 		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
-		met.get(nonce);
+		metadata.get(nonce);
+		
 		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
 		}
