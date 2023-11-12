@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import javax.crypto.Cipher;
 
-import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.util.CipherMode;
 
 /**
@@ -14,9 +13,9 @@ import io.github.awidesky.jCipherUtil.util.CipherMode;
 public class CipherDecryptEngine extends CipherEngine {
 
 	private ByteBuffer metadata;
-	private Function<InPut, Cipher> cipherGenerator;
+	private Function<ByteBuffer, Cipher> cipherGenerator;
 
-	public CipherDecryptEngine(CipherMode mode, Function<InPut, Cipher> cipherGenerator, int metadataLength) {
+	public CipherDecryptEngine(CipherMode mode, Function<ByteBuffer, Cipher> cipherGenerator, int metadataLength) {
 		super(mode);
 		this.cipherGenerator = cipherGenerator;
 		this.metadata = ByteBuffer.allocate(metadataLength);
@@ -27,7 +26,7 @@ public class CipherDecryptEngine extends CipherEngine {
 		if(metadata.remaining() < len) {
 			int remaining = metadata.remaining();
 			metadata.put(buf, off, remaining);
-			this.c = cipherGenerator.apply(InPut.from(metadata.array()));
+			this.c = cipherGenerator.apply(metadata.flip());
 			metadata = null;
 			byte[] ret = c.update(buf, off + remaining, len - remaining);
 			if(ret != null) return ret;

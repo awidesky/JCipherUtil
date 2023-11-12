@@ -1,5 +1,6 @@
 package io.github.awidesky.jCipherUtil.cipher.asymmetric;
 
+import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.util.Optional;
@@ -77,7 +78,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 		}
 	}
 
-	protected Cipher initDecrypt(byte[] metadata) throws NestedIOException {
+	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
