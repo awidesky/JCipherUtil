@@ -1,11 +1,9 @@
 package io.github.awidesky.jCipherUtil.util.cipherEngine;
 
-import java.io.ByteArrayOutputStream;
 import java.util.function.Function;
 
 import javax.crypto.Cipher;
 
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.util.CipherMode;
 
 /**
@@ -15,11 +13,10 @@ public class CipherEncryptEngine extends CipherEngine {
 
 	private byte[] metadata = null;
 
-	public CipherEncryptEngine(CipherMode mode, Function<OutPut, Cipher> init, int metadataSize) {
+	public CipherEncryptEngine(CipherMode mode, Function<byte[], Cipher> init, int metadataSize) {
 		super(mode);
-		ByteArrayOutputStream o = new ByteArrayOutputStream(metadataSize);
-		this.c = init.apply(OutPut.to(o));
-		metadata = o.toByteArray();
+		metadata = new byte[metadataSize];
+		this.c = init.apply(metadata);
 	}
 	
 	@Override

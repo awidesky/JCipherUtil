@@ -14,11 +14,11 @@ import io.github.awidesky.jCipherUtil.util.CipherMode;
 public class CipherDecryptEngine extends CipherEngine {
 
 	private ByteBuffer metadata;
-	private Function<InPut, Cipher> init;
+	private Function<InPut, Cipher> cipherGenerator;
 
-	public CipherDecryptEngine(CipherMode mode, Function<InPut, Cipher> init, int metadataLength) {
+	public CipherDecryptEngine(CipherMode mode, Function<InPut, Cipher> cipherGenerator, int metadataLength) {
 		super(mode);
-		this.init = init;
+		this.cipherGenerator = cipherGenerator;
 		this.metadata = ByteBuffer.allocate(metadataLength);
 	}
 
@@ -27,7 +27,7 @@ public class CipherDecryptEngine extends CipherEngine {
 		if(metadata.remaining() < len) {
 			int remaining = metadata.remaining();
 			metadata.put(buf, off, remaining);
-			this.c = init.apply(InPut.from(metadata.array()));
+			this.c = cipherGenerator.apply(InPut.from(metadata.array()));
 			metadata = null;
 			byte[] ret = c.update(buf, off + remaining, len - remaining);
 			if(ret != null) return ret;

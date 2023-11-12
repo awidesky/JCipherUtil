@@ -128,6 +128,44 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		return c;
 	}
 
+	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
+		SecureRandom sr = new SecureRandom();
+		byte[] salt = new byte[keyMetadata.saltLen]; 
+		sr.nextBytes(salt);
+		int iterationCount = generateIterationCount(sr);
+		byte[] nonce = generateNonce(sr);
+		Cipher c = getCipherInstance();
+		try {
+			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+			throw new OmittedCipherException(e);
+		}
+		byte[] iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount).array();
+		System.arraycopy(iter, 0, metadata, 0, iter.length);
+		System.arraycopy(salt, 0, metadata, iter.length, salt.length);
+		System.arraycopy(nonce, 0, metadata, iter.length + salt.length, nonce.length);
+		return c;
+	}
+
+	protected Cipher initDecrypt(byte[] metadata) throws NestedIOException {
+		ByteBuffer met = ByteBuffer.wrap(metadata);
+		int iterationCount = met.getInt();
+		byte[] salt = new byte[keyMetadata.saltLen];
+		met.get(salt);
+		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
+		met.get(nonce);
+		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
+			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
+		}
+		Cipher c = getCipherInstance();
+		try {
+			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
+			return c;
+		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
+			throw new OmittedCipherException(e);
+		}
+	}
+	
 	@Override
 	protected int getMetadataLength() {
 		return 4 + keyMetadata.saltLen + getCipherProperty().NONCESIZE;

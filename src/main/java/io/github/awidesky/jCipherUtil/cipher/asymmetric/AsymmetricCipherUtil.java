@@ -65,6 +65,29 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 		}
 	}
 	
+
+	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
+		try {
+			Cipher c = getCipherInstance();
+			c.init(Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
+					() -> new IllegalMetadataException("This " + toString() + " instance does not have a public key!")));
+			return c;
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}
+	}
+
+	protected Cipher initDecrypt(byte[] metadata) throws NestedIOException {
+		try {
+			Cipher c = getCipherInstance();
+			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
+					() -> new IllegalMetadataException("This " + toString() + " instance does not have a private key!")));
+			return c;
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		}
+	}
+	
 	/**
 	 * Generate a key pair of given size
 	 * @param keySize size of the key
