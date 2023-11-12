@@ -141,9 +141,8 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
 			throw new OmittedCipherException(e);
 		}
-		ByteBuffer iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount);
 		ByteBuffer met = ByteBuffer.wrap(metadata);
-		met.put(iter);
+		met.putInt(iterationCount);
 		met.put(salt);
 		met.put(nonce);
 		return c;
@@ -151,12 +150,12 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 
 	@Override
 	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
-		int iterationCount = metadata.getInt();
 		byte[] salt = new byte[keyMetadata.saltLen];
-		metadata.get(salt);
 		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
+		int iterationCount = metadata.clear().getInt();
+		metadata.get(salt);
 		metadata.get(nonce);
-		
+
 		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
 		}

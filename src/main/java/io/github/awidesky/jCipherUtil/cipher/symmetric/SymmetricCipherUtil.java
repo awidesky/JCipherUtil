@@ -113,9 +113,8 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
 		}
-		ByteBuffer iter = ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount);
 		ByteBuffer met = ByteBuffer.wrap(metadata);
-		met.put(iter);
+		met.putInt(iterationCount);
 		met.put(salt);
 		return c;
 	}
@@ -142,8 +141,8 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	
 	@Override
 	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
-		int iterationCount = metadata.getInt();
 		byte[] salt = new byte[keyMetadata.saltLen];
+		int iterationCount = metadata.getInt();
 		metadata.get(salt);
 		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
