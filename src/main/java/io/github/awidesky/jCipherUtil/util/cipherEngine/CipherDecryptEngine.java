@@ -27,6 +27,7 @@ public class CipherDecryptEngine extends CipherEngine {
 			int remaining = metadata.remaining();
 			metadata.put(buf, off, remaining);
 			this.c = cipherGenerator.apply(metadata.flip());
+			cipherGenerator = null;
 			metadata = null;
 			byte[] ret = c.update(buf, off + remaining, len - remaining);
 			if(ret != null) return ret;
