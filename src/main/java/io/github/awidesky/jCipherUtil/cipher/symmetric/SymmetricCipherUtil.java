@@ -24,7 +24,6 @@ import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 
 /**
  * Base class of all CipherUtil that uses symmetric cipher algorithm and salt, iteration count.
@@ -79,28 +78,14 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	
 
 	/**
-	 * Generates random salt and iteration count, initiate the <code>Cipher</code> instance, and write iteration count and salt
-	 * to {@code OutPut}.
+	 * Generates random salt and iteration count, initiate the <code>Cipher</code> instance.
+	 * Generated metadata will written to the parameter.
 	 * This method can be override to generate and write additional metadata(like Initial Vector).
+	 * 
+	 * @param metadata a pre-allocated byte array. The generated metadata will be written to it.
+	 * 		  Size is defined in {@code AbstractCipherUtil#getMetadataLength()}.
+	 * @return initiated {@code Cipher} instance
 	 * */
-	@Override
-	protected Cipher initEncrypt(OutPut out) throws NestedIOException {
-		SecureRandom sr = new SecureRandom();
-		byte[] salt = new byte[keyMetadata.saltLen]; 
-		sr.nextBytes(salt);
-		int iterationCount = generateIterationCount(sr);
-		Cipher c = null;
-		try {
-			c = getCipherInstance();
-			c.init(Cipher.ENCRYPT_MODE, generateKey(salt, iterationCount));
-		} catch (InvalidKeyException e) {
-			throw new OmittedCipherException(e);
-		}
-		out.consumeResult(ByteBuffer.allocate(ITERATION_COUNT_SIZE).putInt(iterationCount).array());
-		out.consumeResult(salt);
-		return c;
-	}
-	
 	@Override
 	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
@@ -120,25 +105,13 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	}
 
 	/**
-	 * Reads iteration count and salt from {@code InPut}, and initiate the <code>Cipher</code> instance.
-	 * This method can be override to read additional metadata(like Initial Vector) from {@code OutPut} 
+	 * Reads iteration count and salt from the given metadata, and initiate the <code>Cipher</code> instance.
+	 * This method can be override to read additional metadata(like initial vector).
+	 *
+	 * @param metadata a {@code ByteBuffer} that contains metadata.
+	 * 		  Size is defined in {@code AbstractCipherUtil#getMetadataLength()}.
+	 * @return initiated {@code Cipher} instance
 	 * */
-	@Override
-	protected Cipher initDecrypt(InPut in) throws NestedIOException {
-		int iterationCount = readIterationCount(in);
-		byte[] salt = readSalt(in);
-		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
-			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
-		}
-		try {
-			Cipher c = getCipherInstance();
-			c.init(Cipher.DECRYPT_MODE, generateKey(salt, iterationCount));
-			return c;
-		} catch (InvalidKeyException e) {
-			throw new OmittedCipherException(e);
-		}
-	}
-	
 	@Override
 	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
 		byte[] salt = new byte[keyMetadata.saltLen];

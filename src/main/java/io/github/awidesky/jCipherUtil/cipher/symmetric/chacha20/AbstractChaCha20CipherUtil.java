@@ -1,5 +1,6 @@
 package io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20;
 
+import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -14,7 +15,6 @@ import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
 
 /**
@@ -48,10 +48,12 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 	 * @throws NestedIOException When one of the following is thrown : {@code InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException}.
 	 * */
 	@Override
-	protected Cipher initDecrypt(InPut in) throws NestedIOException {
-		int iterationCount = readIterationCount(in);
-		byte[] salt = readSalt(in);
-		byte[] nonce = readNonce(in);
+	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
+		byte[] salt = new byte[keyMetadata.saltLen];
+		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
+		int iterationCount = metadata.clear().getInt();
+		metadata.get(salt);
+		metadata.get(nonce);
 		
 		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
@@ -59,7 +61,7 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 		Cipher c = getCipherInstance();
 		try {
 			/** Tweak IV and make random key */
-			byte[] iv = nonce.clone();
+			byte[] iv = nonce.clone(); //TODO : just re-flip the first byte??
 			//Tweak IV a little bit, making sure same IV not used again.
 			iv[0] = (byte) ~iv[0];
 			//Generate random key without use of ByteArrayKeyMaterial. 

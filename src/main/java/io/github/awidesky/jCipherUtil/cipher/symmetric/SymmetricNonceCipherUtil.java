@@ -25,7 +25,6 @@ import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
-import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
 import io.github.awidesky.jCipherUtil.properties.IVCipherProperty;
 
 /**
@@ -85,49 +84,16 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	@Override
 	public abstract IVCipherProperty getCipherProperty();
 
-	/**
-	 * Generate iteration count, salt and nonce, init the cipher, write the metadata. 
-	 * */
-	@Override
-	protected Cipher initEncrypt(OutPut out) throws NestedIOException {
-		SecureRandom sr = new SecureRandom();
-		byte[] salt = new byte[keyMetadata.saltLen]; 
-		sr.nextBytes(salt);
-		int iterationCount = generateIterationCount(sr);
-		byte[] nonce = generateNonce(sr);
-		Cipher c = getCipherInstance();
-		try {
-			c.init(Cipher.ENCRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-			throw new OmittedCipherException(e);
-		}
-		out.consumeResult(ByteBuffer.allocate(4).putInt(iterationCount).array());
-		out.consumeResult(salt);
-		out.consumeResult(nonce);
-		return c;
-	}
-	
-	/**
-	 * Read iteration count, salt and nonce, init the cipher. 
-	 * */
-	@Override
-	protected Cipher initDecrypt(InPut in) throws NestedIOException {
-		int iterationCount = readIterationCount(in);
-		byte[] salt = readSalt(in);
-		byte[] nonce = readNonce(in);
-		
-		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
-			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
-		}
-		Cipher c = getCipherInstance();
-		try {
-			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException e) {
-			throw new OmittedCipherException(e);
-		}
-		return c;
-	}
 
+	/**
+	 * Generates random iteration count, salt, and nonce, and initiate the <code>Cipher</code> instance.
+	 * Generated metadata will written to the parameter.
+	 * This method can be override to generate and write additional metadata(like Initial Vector).
+	 * 
+	 * @param metadata a pre-allocated byte array. The generated metadata will be written to it.
+	 * 		  Size is defined in {@code AbstractCipherUtil#getMetadataLength()}.
+	 * @return initiated {@code Cipher} instance
+	 * */
 	@Override
 	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
 		SecureRandom sr = new SecureRandom();
@@ -148,6 +114,14 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 		return c;
 	}
 
+	/**
+	 * Reads iteration count, salt, and nonce from the given metadata, and initiate the <code>Cipher</code> instance.
+	 * This method can be override to read additional metadata(like initial vector).
+	 *
+	 * @param metadata a {@code ByteBuffer} that contains metadata.
+	 * 		  Size is defined in {@code AbstractCipherUtil#getMetadataLength()}.
+	 * @return initiated {@code Cipher} instance
+	 * */
 	@Override
 	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
 		byte[] salt = new byte[keyMetadata.saltLen];
@@ -170,7 +144,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	
 	@Override
 	protected int getMetadataLength() {
-		return 4 + keyMetadata.saltLen + getCipherProperty().NONCESIZE;
+		return ITERATION_COUNT_SIZE + keyMetadata.saltLen + getCipherProperty().NONCESIZE;
 	}
 	
 	/**

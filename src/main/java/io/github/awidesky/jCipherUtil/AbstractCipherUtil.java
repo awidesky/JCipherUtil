@@ -8,9 +8,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
@@ -36,8 +34,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * Size of the internal buffer.
 	 */
 	protected final int BUFFER_SIZE;
-	
-	public boolean engine = true; //TODO : for test
 	
 	/**
 	 * Initialize buffer value.
@@ -68,17 +64,23 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	/**
 	 * Initialize {@code Cipher} in encrypt mode so that it can be usable(be able to call {@code Cipher#update(byte[])}, {@code Cipher#doFinal()}.
 	 * 
+	 * @param metadata a pre-allocated byte array. The generated metadata will be written to it.
+	 * 		  Size is defined in {@code AbstractCipherUtil#getMetadataLength()}.
+	 * @return initiated {@code Cipher} instance
+	 * 
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract Cipher initEncrypt(OutPut out) throws NestedIOException;
 	protected abstract Cipher initEncrypt(byte[] metadata) throws NestedIOException;
 
 	/**
 	 * Initialize {@code Cipher} in decrypt mode so that it can be usable(be able to call {@code Cipher#update(byte[])}, {@code Cipher#doFinal()}.
 	 * 
+	 * @param metadata a {@code ByteBuffer} that contains metadata.
+	 * 		  Size is defined in {@code AbstractCipherUtil#getMetadataLength()}.
+	 * @return initiated {@code Cipher} instance
+	 * 
 	 * @throws NestedIOException if {@code IOException} is thrown.
 	 * */
-	protected abstract Cipher initDecrypt(InPut in) throws NestedIOException;
 	protected abstract Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException;
 	
 	/**
@@ -96,11 +98,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void encrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
 		try (in; out) {
-			if(engine) {
-				processEngine(cipherEngine(CipherMode.ENCRYPT_MODE), in, out, BUFFER_SIZE);
-			} else {
-				processCipher(initEncrypt(out), in, out, BUFFER_SIZE);
-			}
+			processCipher(cipherEngine(CipherMode.ENCRYPT_MODE), in, out, BUFFER_SIZE);
 		}
 	}
 
@@ -119,16 +117,24 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void decrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
 		try (in; out) {
-			if(engine) {
-				processEngine(cipherEngine(CipherMode.DECRYPT_MODE), in, out, BUFFER_SIZE);
-			} else {
-				processCipher(initDecrypt(in), in, out, BUFFER_SIZE);
-			}
+			processCipher(cipherEngine(CipherMode.DECRYPT_MODE), in, out, BUFFER_SIZE);
 		}
 	}
 	
 
-	private static void processEngine(CipherEngine cipherEngine, InPut in, OutPut out, int bufferSize) {
+	
+	/**
+	 * Do Cipher Process with pre-initiated {@code CipherEngine} until every data of the input is processed.
+	 * 
+	 * @param cipherEngine The {@code CipherEngine} instance 
+	 * @param in Plain data Provider of source for encryption/decryption
+	 * @param out Data Consumer that writes encrypted/decryption data to designated destination 
+	 * @throws NestedIOException if {@code IOException} is thrown. If this cipher process related with
+	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
+	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
+	 * there's a internal flaw in the cipher library.
+	 * */
+	private static void processCipher(CipherEngine cipherEngine, InPut in, OutPut out, int bufferSize) {
 		byte[] buf = new byte[bufferSize];
 		while (true) {
 			int read = in.getSrc(buf);
@@ -138,60 +144,12 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		}
 		out.consumeResult(cipherEngine.doFinal());
 	}
-
-	/**
-	 * Do Cipher Process with pre-initiated <code>cipher</code> until every data of the input is processed.
-	 * 
-	 * @param c The {@code Cipher} instance 
-	 * @param in Plain data Provider of source for encryption/decryption
-	 * @param out Data Consumer that writes encrypted/decryption data to designated destination 
-	 * @throws NestedIOException if {@code IOException} is thrown. If this cipher process related with
-	 * external resources(like {@code File}, caller should catch {@code NestedIOException}.  
-	 * @throws OmittedCipherException if a cipher-related, omitted exceptions that won't happen unless
-	 * there's a internal flaw in the cipher library.
-	 * */
-	private static void processCipher(Cipher c, InPut in, OutPut out, int bufferSize) throws NestedIOException, OmittedCipherException {
-		byte[] buf = new byte[bufferSize];
-		while(updateCipher(c, buf, in, out) != -1) { }
-		doFinalCipher(c, out);
-	}
-	/**
-	 * Tries to read from input to the buffer, process it, and write the result to output.
-	 * 
-	 * @return amount of data read and processed. Size of the output may be different.
-	 */
-	private static int updateCipher(Cipher c, byte[] buf, InPut in, OutPut out) {
-		//TODO : use CipherEngine then Cipher? performance comparison needed
-		try {
-			int read = in.getSrc(buf);
-			if(read == -1) return -1;
-			byte[] result = c.update(buf, 0, read);
-			if(result != null) out.consumeResult(result);
-			return read;
-		} catch (IllegalStateException e) {
-			throw new OmittedCipherException(e);
-		}
-	}
-	/**
-	 * Does not read any more data from the input. Instead, finalize the cipher process and write
-	 * all internally buffered(in {@code javax.crypto.Cipher} result data to the output.
-	 *  
-	 * @return amount of data processed and written.
-	 */
-	private static int doFinalCipher(Cipher c, OutPut out) {
-		try {
-			byte[] res = c.doFinal();
-			out.consumeResult(res);
-			return res.length;
-		} catch (IllegalStateException | IllegalBlockSizeException | BadPaddingException e) {
-			throw new OmittedCipherException(e);
-		}
-	}
-
 	
 	
 	@Override
-	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) {
+	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) { //TODO : rewrite this too
+		return null;
+		/*
 		return new CipherTunnel((mode == CipherMode.ENCRYPT_MODE) ? initEncrypt(out) : initDecrypt(in), in, out, BUFFER_SIZE) {
 			@Override
 			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
@@ -202,6 +160,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 				return doFinalCipher(cipher, out);
 			}
 		};
+		*/
 	}
 
 	@Override
