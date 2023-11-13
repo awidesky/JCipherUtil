@@ -37,6 +37,8 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 */
 	protected final int BUFFER_SIZE;
 	
+	public boolean engine = true; //TODO : for test
+	
 	/**
 	 * Initialize buffer value.
 	 * */
@@ -94,7 +96,11 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void encrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
 		try (in; out) {
-			processCipher(initEncrypt(out), in, out, BUFFER_SIZE);
+			if(engine) {
+				processEngine(cipherEngine(CipherMode.ENCRYPT_MODE), in, out, BUFFER_SIZE);
+			} else {
+				processCipher(initEncrypt(out), in, out, BUFFER_SIZE);
+			}
 		}
 	}
 
@@ -113,10 +119,26 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public void decrypt(InPut in, OutPut out) throws NestedIOException, OmittedCipherException {
 		try (in; out) {
-			processCipher(initDecrypt(in), in, out, BUFFER_SIZE);
+			if(engine) {
+				processEngine(cipherEngine(CipherMode.DECRYPT_MODE), in, out, BUFFER_SIZE);
+			} else {
+				processCipher(initDecrypt(in), in, out, BUFFER_SIZE);
+			}
 		}
 	}
 	
+
+	private static void processEngine(CipherEngine cipherEngine, InPut in, OutPut out, int bufferSize) {
+		byte[] buf = new byte[bufferSize];
+		while (true) {
+			int read = in.getSrc(buf);
+			if(read == -1) break;
+			byte[] result = cipherEngine.update(buf, 0, read);
+			if (result != null) out.consumeResult(result);
+		}
+		out.consumeResult(cipherEngine.doFinal());
+	}
+
 	/**
 	 * Do Cipher Process with pre-initiated <code>cipher</code> until every data of the input is processed.
 	 * 
