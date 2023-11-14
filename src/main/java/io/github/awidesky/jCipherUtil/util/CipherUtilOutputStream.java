@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Optional;
 
+import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.CipherUtil;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * A {@code CipherUtilOutputStream} serves as a layer on top of underlying {@code OutputStream}

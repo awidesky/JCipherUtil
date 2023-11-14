@@ -20,9 +20,6 @@ import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherDecryptEngine;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEncryptEngine;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * An abstract subclass of {@code CipherUtil} that provides a few utility methods,
@@ -154,9 +151,9 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	@Override
 	public CipherEngine cipherEngine(CipherMode mode) {
 		if(mode == CipherMode.ENCRYPT_MODE) {
-			return new CipherEncryptEngine(mode, this::initEncrypt, getMetadataLength());
+			return new CipherEncryptEngine(this::initEncrypt, getMetadataLength());
 		} else if(mode == CipherMode.DECRYPT_MODE) {
-			return new CipherDecryptEngine(mode, this::initDecrypt, getMetadataLength());
+			return new CipherDecryptEngine(this::initDecrypt, getMetadataLength());
 		} else {
 			// This must not happen. only for barrier against to possible changes of CipherMode in the future. 
 			throw new OmittedCipherException(new IllegalArgumentException("Unknown cipher mode : " + mode.name()));

@@ -9,9 +9,9 @@
 
 package io.github.awidesky.jCipherUtil.util;
 
+import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * Provides a cipher tunnel between {@code InPut} and {@code OutPut}.

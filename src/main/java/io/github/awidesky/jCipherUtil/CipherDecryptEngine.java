@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipherUtil.util.cipherEngine;
+package io.github.awidesky.jCipherUtil;
 
 import java.nio.ByteBuffer;
 import java.util.function.Function;
@@ -15,8 +15,8 @@ public class CipherDecryptEngine extends CipherEngine {
 	private ByteBuffer metadata;
 	private Function<ByteBuffer, Cipher> cipherGenerator;
 
-	public CipherDecryptEngine(CipherMode mode, Function<ByteBuffer, Cipher> cipherGenerator, int metadataLength) {
-		super(mode);
+	CipherDecryptEngine(Function<ByteBuffer, Cipher> cipherGenerator, int metadataLength) {
+		this.mode = CipherMode.DECRYPT_MODE;
 		this.cipherGenerator = cipherGenerator;
 		this.metadata = ByteBuffer.allocate(metadataLength);
 	}
@@ -37,7 +37,6 @@ public class CipherDecryptEngine extends CipherEngine {
 			return new byte[0];
 		}
 	}
-	//TODO : add abstract init() method, implement at AbstractCipherUtil.cipherEngine 
 	@Override
 	public byte[] update(byte[] buf, int off, int len) {
 		if(finished) return null;

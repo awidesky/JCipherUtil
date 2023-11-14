@@ -26,7 +26,6 @@ import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 
 /**

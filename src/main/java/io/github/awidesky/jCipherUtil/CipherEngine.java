@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipherUtil.util.cipherEngine;
+package io.github.awidesky.jCipherUtil;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -18,15 +18,6 @@ public abstract class CipherEngine { //TODO : Thread safe version?
 	protected Cipher c;
 	protected CipherMode mode;
 	protected boolean finished = false;
-	
-	/**
-	 * Set the {@code CipherMode} for this CipherEngine.
-	 * @param mode the cipher mode.
-	 */
-	protected CipherEngine(CipherMode mode) {
-		//TODO : if inner logic of CipherUtil will use CipherEngine, add the subclasses to root package, with package-private constructor.
-		this.mode = mode;
-	}
 	
     /**
      * Continues a multiple-part encryption or decryption operation

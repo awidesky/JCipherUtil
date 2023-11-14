@@ -1,4 +1,4 @@
-package io.github.awidesky.jCipherUtil.util.cipherEngine;
+package io.github.awidesky.jCipherUtil;
 
 import java.util.function.Function;
 
@@ -13,8 +13,8 @@ public class CipherEncryptEngine extends CipherEngine {
 
 	private byte[] metadata = null;
 
-	public CipherEncryptEngine(CipherMode mode, Function<byte[], Cipher> init, int metadataSize) {
-		super(mode);
+	CipherEncryptEngine(Function<byte[], Cipher> init, int metadataSize) {
+		this.mode = CipherMode.DECRYPT_MODE;
 		metadata = new byte[metadataSize];
 		this.c = init.apply(metadata);
 	}

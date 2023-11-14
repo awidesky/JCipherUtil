@@ -53,6 +53,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
+import io.github.awidesky.jCipherUtil.CipherEncryptEngine;
+import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.KeyPairMaterial;
@@ -83,7 +85,6 @@ import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
 import io.github.awidesky.jCipherUtil.util.CipherUtilOutputStream;
-import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 @DisplayName("ALL Cipher Tests")
 @Execution(ExecutionMode.CONCURRENT)
