@@ -147,28 +147,19 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	
 	
 	@Override
-	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) { //TODO : rewrite this too
-		return null;
-		/*
-		return new CipherTunnel((mode == CipherMode.ENCRYPT_MODE) ? initEncrypt(out) : initDecrypt(in), in, out, BUFFER_SIZE) {
-			@Override
-			protected int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc) {
-				return updateCipher(cipher, buffer, msgp, msgc);
-			}
-			@Override
-			protected int doFinal(Cipher cipher, OutPut msgc) {
-				return doFinalCipher(cipher, out);
-			}
-		};
-		*/
+	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode) {
+		return new CipherTunnel(cipherEngine(mode), in, out, BUFFER_SIZE);
 	}
 
 	@Override
 	public CipherEngine cipherEngine(CipherMode mode) {
 		if(mode == CipherMode.ENCRYPT_MODE) {
 			return new CipherEncryptEngine(mode, this::initEncrypt, getMetadataLength());
-		} else {
+		} else if(mode == CipherMode.DECRYPT_MODE) {
 			return new CipherDecryptEngine(mode, this::initDecrypt, getMetadataLength());
+		} else {
+			// This must not happen. only for barrier against to possible changes of CipherMode in the future. 
+			throw new OmittedCipherException(new IllegalArgumentException("Unknown cipher mode : " + mode.name()));
 		}
 	}
 

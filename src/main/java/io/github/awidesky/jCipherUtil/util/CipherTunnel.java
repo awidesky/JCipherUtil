@@ -9,10 +9,9 @@
 
 package io.github.awidesky.jCipherUtil.util;
 
-import javax.crypto.Cipher;
-
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.util.cipherEngine.CipherEngine;
 
 /**
  * Provides a cipher tunnel between {@code InPut} and {@code OutPut}.
@@ -29,12 +28,14 @@ import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
  * <p>
  * If you have to intercept data during cipher process, consider using {@code UpdatableCipherInput}, {@code UpdatableCipherOutput} or {@code CipherUtilOutputStream}, {@code CipherUtilInputStream}.
  * */
-public abstract class CipherTunnel {
+public class CipherTunnel {
 	
-	final protected Cipher c;
+	final protected CipherEngine c;
 	final protected InPut in;
 	final protected OutPut out;
 	final byte[] buf;
+	
+	private boolean finished = false;
 	
 	/**
 	 * Create a cipher I/O tunnel between {@code InPut} and {@code OutPut}.
@@ -50,7 +51,7 @@ public abstract class CipherTunnel {
 	 * @param out output destination to store data that is encrypted or decrypted depending on mode of {@code c}
 	 * @param bufferSize value of the buffer. {@code bufferSize} amount of data will processed in one {@code CipherTunnel#transfer()} call.
 	 */
-	public CipherTunnel(Cipher c, InPut in, OutPut out, int bufferSize) {
+	public CipherTunnel(CipherEngine c, InPut in, OutPut out, int bufferSize) {
 		this.c = c;
 		this.in = in;
 		this.out = out;
@@ -58,35 +59,47 @@ public abstract class CipherTunnel {
 	}
 	
 	/**
-	 * Tries to fill the buffer, update cipher process, and store the result if exists. 
-	 * @return amount of data read and processed in bytes
+	 * Tries to fill the buffer, update cipher process, and store the result if exists.
+	 * 
+	 * @return amount of data read and processed in bytes.
+	 * 		   -1 if the cipher process is finished because there is nothing to read.
 	 */
-	public int transfer() { return update(c, buf, in, out); }
+	public int transfer() {
+		if(finished) return -1;
+		int ret = in.getSrc(buf);
+		if(ret != -1) out.consumeResult(c.update(buf,0 , ret));
+		else {
+			out.consumeResult(c.doFinal());
+			finished = true;
+		}
+		return ret;
+	}
 	/**
-	 * Repeat filling the buffer, update cipher process, and store the result until there is nothing left to read. 
+	 * Repeat filling the buffer from input, update cipher process,
+	 * and write the result to the output until there is nothing left to read.
+	 * <p>This methods always finishes the cipher process.
+	 *  
 	 * @return amount of total data read and processed in bytes
 	 */
-	public int transferFinal() { 
+	public int transferFinal() {
+		if(finished) return -1;
 		int read = 0;
 		int total = 0;
 		while(true) {
-			read = update(c, buf, in, out);
+			read = transfer();
 			if(read == -1) break;
 			total += read;
 		}
-		total += doFinal(c, out);
 		return total;
 	}
 	
 	/**
-	 * Implementation of {@code CipherTunnel#transfer()} 
-	 * @return amount of data read and processed in bytes
+	 * Return whether the cipher process is finished.
+	 * If it is, {@code CipherTunnel#transfer()} and {@code CipherTunnel#transferFinal()}
+	 * methods will always return {@code -1}.
+	 * 
+	 * @return {@code true} if the cipher process is finished(every bytes of the input is processed and
+	 * 		   the output is written to the output), otherwise {@code false}.
 	 */
-	protected abstract int update(Cipher cipher, byte[] buffer, InPut msgp, OutPut msgc);
-	/**
-	 * Finish the cipher process, flush the data remaining inside of the {@code Cipher} object, and writes the final result
-	 * to the {@code OutPut}. 
-	 * @return amount of total data read and processed in bytes
-	 */
-	protected abstract int doFinal(Cipher cipher, OutPut msgc);
+	public boolean isFinished() { return finished; }
 }
