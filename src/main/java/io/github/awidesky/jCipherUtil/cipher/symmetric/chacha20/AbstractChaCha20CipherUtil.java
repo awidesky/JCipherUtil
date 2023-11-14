@@ -61,15 +61,16 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 		Cipher c = getCipherInstance();
 		try {
 			/** Tweak IV and make random key */
-			byte[] iv = nonce.clone(); //TODO : just re-flip the first byte??
 			//Tweak IV a little bit, making sure same IV not used again.
-			iv[0] = (byte) ~iv[0];
+			nonce[0] = (byte) ~nonce[0];
 			//Generate random key without use of ByteArrayKeyMaterial. 
 			//Key iteration process would consume much more time.
 			KeyGenerator sf = KeyGenerator.getInstance(getCipherProperty().KEY_ALGORITMH_NAME);
 			sf.init(keySize.value);
-			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), getAlgorithmParameterSpec(iv));
+			c.init(Cipher.ENCRYPT_MODE, sf.generateKey(), getAlgorithmParameterSpec(nonce));
 			
+			//Re-invert the first bit
+			nonce[0] = (byte) ~nonce[0];
 			/** initialize with actual key and IV */
 			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
 		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
