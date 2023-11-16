@@ -48,13 +48,11 @@ public class Hash {
 		}
 	}
 	public static String hashPlain(byte[] is) {
-		MessageDigest digest;
 		try {
-			digest = MessageDigest.getInstance("SHA-512");
+			MessageDigest digest = MessageDigest.getInstance("SHA-512");
 			return HexFormat.of().formatHex(digest.digest(is));
 		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 }

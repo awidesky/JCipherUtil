@@ -61,7 +61,7 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
 		MessageDigest digest;
 		try {
-			digest = MessageDigest.getInstance("SHA-512");
+			digest = MessageDigest.getInstance("SHA-512"); // TODO : use Hash
 		} catch (NoSuchAlgorithmException e) {
 			throw new OmittedCipherException(e);
 		}

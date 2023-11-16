@@ -11,8 +11,10 @@ package io.github.awidesky.jCipher;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicContainer.dynamicContainer;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -53,7 +55,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
-import io.github.awidesky.jCipherUtil.CipherEncryptEngine;
 import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
@@ -217,7 +218,7 @@ class Test {
 					assertThrows(IllegalArgumentException.class,
 							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).counterLen(256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
 					assertThrows(IllegalArgumentException.class,
-							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).counterLen(-256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
+							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256, -256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
 				})));
 	}
 
@@ -311,16 +312,20 @@ class Test {
 					ct.transfer();
 					ct.transfer();
 					ct.transferFinal();
+					assertEquals(-1, ct.transfer()); assertEquals(-1, ct.transferFinal()); assertTrue(ct.isFinished());
 					ct = cipher.cipherTunnel(InPut.from(enc.toByteArray()), OutPut.to(dec), CipherMode.DECRYPT_MODE);
 					ct.transfer();
 					ct.transfer();
 					ct.transferFinal();
+					assertEquals(-1, ct.transfer()); assertEquals(-1, ct.transferFinal()); assertTrue(ct.isFinished());
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 				}),
 				dynamicTest("CipherEngine", () -> {
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					CipherEngine ue = cipher.cipherEngine(CipherMode.ENCRYPT_MODE);
 					CipherEngine ud = cipher.cipherEngine(CipherMode.DECRYPT_MODE);
+					assertEquals(CipherMode.ENCRYPT_MODE, ue.mode());
+					assertEquals(CipherMode.DECRYPT_MODE, ud.mode());
 					dec.write(ud.update(ue.update(src)));
 					dec.write(ud.doFinal(ue.doFinal()));
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
@@ -331,6 +336,7 @@ class Test {
 				dynamicTest("CipherUtilInputStream(Encryption)", () -> {
 					File plain = mkTempPlainFile();
 					CipherUtilInputStream ci = cipher.inputStream(new FileInputStream(plain), CipherMode.ENCRYPT_MODE);
+					assertEquals(CipherMode.ENCRYPT_MODE, ci.mode()); assertFalse(ci.markSupported());
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					dec.write(ci.read());
 					int n = 0;
@@ -347,6 +353,7 @@ class Test {
 				dynamicTest("CipherUtilInputStream(Decryption)", () -> {
 					File enc = mkTempFile(cipher.encryptToSingleBuffer(InPut.from(src)));
 					CipherUtilInputStream ci = cipher.inputStream(new FileInputStream(enc), CipherMode.DECRYPT_MODE);
+					assertEquals(CipherMode.DECRYPT_MODE, ci.mode()); assertFalse(ci.markSupported());
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					dec.write(ci.read());
 					int n = 0;
@@ -363,6 +370,7 @@ class Test {
 				dynamicTest("CipherUtilOutputStream(Encryption)", () -> {
 					ByteArrayOutputStream enc = new ByteArrayOutputStream();
 					CipherUtilOutputStream co = cipher.outputStream(enc, CipherMode.ENCRYPT_MODE);
+					assertEquals(CipherMode.ENCRYPT_MODE, co.mode());
 					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(enc.toByteArray()))));
 					co.close(); assertThrows(IOException.class, () -> { co.write(new byte[4]); } );
@@ -371,6 +379,7 @@ class Test {
 					byte[] enc = cipher.encryptToSingleBuffer(InPut.from(src));
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
 					CipherUtilOutputStream co = cipher.outputStream(dec, CipherMode.DECRYPT_MODE);
+					assertEquals(CipherMode.DECRYPT_MODE, co.mode());
 					co.write(enc[0]); co.write(enc, 1, enc.length - 1); co.close();
 					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
 					co.close(); assertThrows(IOException.class, () -> { co.write(new byte[4]); } );
