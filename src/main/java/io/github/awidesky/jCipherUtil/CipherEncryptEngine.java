@@ -14,7 +14,7 @@ public class CipherEncryptEngine extends CipherEngine {
 	private byte[] metadata = null;
 
 	CipherEncryptEngine(Function<byte[], Cipher> init, int metadataSize) {
-		this.mode = CipherMode.DECRYPT_MODE;
+		this.mode = CipherMode.ENCRYPT_MODE;
 		metadata = new byte[metadataSize];
 		this.c = init.apply(metadata);
 	}
