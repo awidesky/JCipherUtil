@@ -23,7 +23,6 @@ import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
 /**
  * Base class of all CipherUtil that uses symmetric cipher algorithm and salt, iteration count.
@@ -144,33 +143,6 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		return sr.nextInt(keyMetadata.iterationRangeStart, keyMetadata.iterationRangeEnd);
 	}
 
-
-	/**
-	 * Read salt from given {@code InPut} instance.
-	 * Size of the salt is determined by {@code KeyMetadata}.
-	 * 
-	 * @return salt data read from the input
-	 * @see KeyMetadata#saltLen
-	 * */
-	protected byte[] readSalt(InPut in) {
-		byte[] salt = new byte[keyMetadata.saltLen]; 
-		int read = 0;
-		while ((read += in.getSrc(salt, read)) != salt.length);
-		return salt;
-	}
-	/**
-	 * Read iteration count from given {@code InPut} instance.
-	 * Size of the iteration count is determined by {@code KeyMetadata}.
-	 * 
-	 * @return interpreted number of iteration count
-	 * */
-	protected int readIterationCount(InPut in) {
-		byte[] iterationByte = new byte[4];
-		int read = 0;
-		while ((read += in.getSrc(iterationByte, read)) != iterationByte.length);
-		return ByteBuffer.wrap(iterationByte).getInt();
-	}
-	
 	/**
 	 * Returns the size of the key
 	 * @return the size of the key

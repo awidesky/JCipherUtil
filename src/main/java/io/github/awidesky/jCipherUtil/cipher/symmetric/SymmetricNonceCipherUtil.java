@@ -24,7 +24,6 @@ import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
-import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.properties.IVCipherProperty;
 
 /**
@@ -61,20 +60,6 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	protected byte[] generateNonce(SecureRandom sr) {
 		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
 		sr.nextBytes(nonce);
-		return nonce;
-	}
-	
-	/**
-	 * Read nonce from given {@code InPut} instance.
-	 * Size of the Nonce is determined by {@code CipherProperty}.
-	 * 
-	 * @return nonce from the {@code InPut}
-	 * @see IVCipherProperty#NONCESIZE
-	 * */
-	protected byte[] readNonce(InPut in) {
-		byte[] nonce = new byte[getCipherProperty().NONCESIZE];
-		int read = 0;
-		while ((read += in.getSrc(nonce, read)) != nonce.length);
 		return nonce;
 	}
 	
