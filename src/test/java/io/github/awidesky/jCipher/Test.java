@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.DigestException;
 import java.security.NoSuchAlgorithmException;
@@ -395,6 +396,14 @@ class Test {
 					cipher.encrypt(InPut.from(fsrc), OutPut.to(encDest));
 					cipher.decrypt(InPut.from(encDest), OutPut.to(decDest));
 					assertEquals(Hash.hashPlain(new FileInputStream(fsrc)), Hash.hashPlain(new FileInputStream(decDest)));
+				}),
+				dynamicTest("Path <-> Path", () -> {
+					Path psrc = mkTempPlainFile().toPath();
+					Path encDest = mkEmptyTempFile().toPath();
+					Path decDest = mkEmptyTempFile().toPath();
+					cipher.encrypt(InPut.from(psrc), OutPut.to(encDest));
+					cipher.decrypt(InPut.from(encDest), OutPut.to(decDest));
+					assertEquals(Hash.hashPlain(new FileInputStream(psrc.toFile())), Hash.hashPlain(new FileInputStream(decDest.toFile())));
 				}),
 				dynamicTest("Base64 encoded String <-> Base64 encoded String", () -> {
 					String encrypted = cipher.encryptToBase64(InPut.fromBase64(Base64.getEncoder().encodeToString(src)));

@@ -15,7 +15,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 
@@ -48,6 +51,15 @@ public interface OutPut extends AutoCloseable {
 	 * */
 	public static OutPut to(File f) throws FileNotFoundException {
 		return to(new FileOutputStream(f));
+	}
+	/**
+	 * Returns a {@code OutPut} that writes data to given <code>Path</code>
+	 * 
+	 * @param p the destination
+	 * @throws IOException if an I/O error occurs
+	 * */
+	public static OutPut to(Path p) throws IOException {
+		return to(FileChannel.open(p, StandardOpenOption.WRITE));
 	}
 	/**
 	 * Returns a {@code OutPut} that writes data to given <code>OutputStream</code>.<p>

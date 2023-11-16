@@ -16,8 +16,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 import java.util.HexFormat;
 
@@ -67,9 +70,19 @@ public interface InPut extends AutoCloseable {
 	 * Returns a {@code InPut} that reads data from given <code>File</code>
 	 * 
 	 * @param src source of the data
+	 * @throws FileNotFoundException if file does not exist
 	 * */
 	public static InPut from(File src) throws FileNotFoundException {
 		return from(new FileInputStream(src));
+	}
+	/**
+	 * Returns a {@code InPut} that reads data from given <code>Path</code>
+	 * 
+	 * @param src source of the data
+	 * @throws IOException if an I/O error occurs
+	 * */
+	public static InPut from(Path src) throws IOException {
+		return from(FileChannel.open(src, StandardOpenOption.READ));
 	}
 	/**
 	 * Returns a {@code InPut} that reads data from given <code>String</code>.
