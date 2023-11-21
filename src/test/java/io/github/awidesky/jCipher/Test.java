@@ -9,6 +9,7 @@
 
 package io.github.awidesky.jCipher;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -26,6 +27,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -40,10 +43,14 @@ import java.util.Base64;
 import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.HexFormat;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Stream;
+import java.util.zip.Adler32;
+import java.util.zip.CRC32;
+import java.util.zip.CRC32C;
 
 import javax.crypto.SecretKey;
 
@@ -56,6 +63,9 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
+import io.github.awidesky.jCipher.hashCompareHelpers.ChecksumHashTestPair;
+import io.github.awidesky.jCipher.hashCompareHelpers.HashTestPair;
+import io.github.awidesky.jCipher.hashCompareHelpers.MessageDigestHashTestPair;
 import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
@@ -75,6 +85,23 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.hash.Hash;
+import io.github.awidesky.jCipherUtil.hash.checksum.Adler32Hash;
+import io.github.awidesky.jCipherUtil.hash.checksum.CRC32CHash;
+import io.github.awidesky.jCipherUtil.hash.checksum.CRC32Hash;
+import io.github.awidesky.jCipherUtil.hash.checksum.CheckSumHash;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.MD2;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.MD5;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.SHA_1;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_224;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_256;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_384;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_512;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_224;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_256;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_384;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_512_224;
+import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_512_256;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.key.keyExchange.EllipticCurveKeyExchanger;
 import io.github.awidesky.jCipherUtil.key.keyExchange.ecdh.ECDHCurves;
@@ -115,6 +142,17 @@ class Test {
 			Map.entry("XDH", Stream.of(XDHKeyExchanger.getAvailableCurves()).map(XDHCurves::valueOf).map(c -> new XDHKeyExchanger[] {new XDHKeyExchanger(c), new XDHKeyExchanger(c)}))
 			);
 			
+	static final Map<String, Stream<? extends MessageDigestHashTestPair>> messageDigestHashes = Map.ofEntries(
+			Map.entry("SHA1", Stream.of(new MessageDigestHashTestPair(SHA_1::new))),
+			Map.entry("SHA2", Stream.of(new MessageDigestHashTestPair(SHA_224::new), new MessageDigestHashTestPair(SHA_256::new), new MessageDigestHashTestPair(SHA_384::new), new MessageDigestHashTestPair(SHA_512_224::new), new MessageDigestHashTestPair(SHA_512_256::new))),
+			Map.entry("SHA3", Stream.of(new MessageDigestHashTestPair(SHA3_224::new), new MessageDigestHashTestPair(SHA3_256::new), new MessageDigestHashTestPair(SHA3_384::new), new MessageDigestHashTestPair(SHA3_512::new))),
+			Map.entry("MD", Stream.of(new MessageDigestHashTestPair(MD2::new), new MessageDigestHashTestPair(MD5::new)))
+			);
+	static final Map<String, Stream<? extends ChecksumHashTestPair>> checksumHashes = Map.ofEntries(
+			Map.entry("Adler", Stream.of(new ChecksumHashTestPair(Adler32Hash::new, new Adler32()))),
+			Map.entry("CRC", Stream.of(new ChecksumHashTestPair(CRC32Hash::new, new CRC32()), new ChecksumHashTestPair(CRC32CHash::new, new CRC32C())))
+			);
+	
 
 	static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
 	static final SecureRandom ran = new SecureRandom();
@@ -154,6 +192,13 @@ class Test {
 		l.add(dynamicContainer("Symmetric ciphers", symmetricList));
 		l.add(dynamicContainer("Asymmetric ciphers", asymmetricCiphers.entrySet().stream().map(entry -> // per RSA...
 			dynamicContainer(entry.getKey(), entry.getValue().map(Test::asymmetricCipherTests)))));
+		
+
+		LinkedList<DynamicContainer> hashTests = new LinkedList<>();
+		messageDigestHashes.entrySet().stream().map(entry -> dynamicContainer(entry.getKey(), entry.getValue().map(Test::addHashTests))).forEach(hashTests::add);
+		checksumHashes.entrySet().stream().map(entry -> dynamicContainer(entry.getKey(), entry.getValue().map(Test::addHashTests))).forEach(hashTests::add);
+		l.add(dynamicContainer("Hash", hashTests));
+		
 		return l;
 	}
 	
@@ -169,8 +214,8 @@ class Test {
 			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(k1.exchangeKey(p2)); 
 			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(k2.exchangeKey(p1));
 					
-			assertEquals(Hash.hashPlain(src),
-					Hash.hashPlain(c2.decryptToSingleBuffer(InPut.from(c1.encryptToSingleBuffer(InPut.from(src))))));
+			assertEquals(HashHelper.hashPlain(src),
+					HashHelper.hashPlain(c2.decryptToSingleBuffer(InPut.from(c1.encryptToSingleBuffer(InPut.from(src))))));
 		});
 	}
 	
@@ -178,7 +223,7 @@ class Test {
 	private static DynamicContainer symmetricCipherTests(SymmetricCipherUtilBuilder<? extends SymmetricCipherUtil> cipherBuilder) {
 		List<DynamicNode> tests = new ArrayList<>();
 		addSymmetricCipherKeyTests(tests, cipherBuilder);
-		SymmetricCipherUtil cipher = cipherBuilder.build(Hash.password);
+		SymmetricCipherUtil cipher = cipherBuilder.build(HashHelper.password);
 		addCommonCipherTests(tests, cipher);
 		tests.add(dynamicTest("CipherUtilInputStream large input test", () -> {
 			/*
@@ -201,7 +246,7 @@ class Test {
 			n = 0;
 			while((n = ciDec.read(buf)) != -1) dec.write(buf, 0, n);
 			ciDec.close();
-			assertEquals(Hash.hashPlain(hugeData), Hash.hashPlain(dec.toByteArray()));
+			assertEquals(HashHelper.hashPlain(hugeData), HashHelper.hashPlain(dec.toByteArray()));
 		}));
 		return dynamicContainer(cipher.toString(), tests);
 	}
@@ -217,9 +262,9 @@ class Test {
 		return dynamicContainer("additional tests", Stream.of(
 				dynamicTest("AES_CTR counter bound", () -> {
 					assertThrows(IllegalArgumentException.class,
-							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).counterLen(256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
+							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256).counterLen(256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(HashHelper.password);});
 					assertThrows(IllegalArgumentException.class,
-							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256, -256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(Hash.password);});
+							() -> { new AES_CTRCipherUtil.Builder(AESKeySize.SIZE_256, -256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(HashHelper.password);});
 				})));
 	}
 
@@ -230,21 +275,21 @@ class Test {
 			new Random().nextBytes(key);
 			CipherUtil ci1 = cipherBuilder.build(key);
 			CipherUtil ci2 = cipherBuilder.build(key);
-			assertEquals(Hash.hashPlain(src),
-					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
+			assertEquals(HashHelper.hashPlain(src),
+					HashHelper.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));	
 		list.add(dynamicTest("password test", () -> {
-			CipherUtil ci1 = cipherBuilder.build(Hash.password);
-			CipherUtil ci2 = cipherBuilder.build(Hash.password);
-			assertEquals(Hash.hashPlain(src),
-					Hash.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
+			CipherUtil ci1 = cipherBuilder.build(HashHelper.password);
+			CipherUtil ci2 = cipherBuilder.build(HashHelper.password);
+			assertEquals(HashHelper.hashPlain(src),
+					HashHelper.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));
 		list.add(dynamicTest("invalid key size test", () -> {
 			int smallKeySize = 12;
 			int largeKeySize = 264;
-			int originalKeySize = cipherBuilder.build(Hash.password).keySize();
-			SymmetricCipherUtil c1 = cipherBuilder.keySize(new KeySize(smallKeySize)).build(Hash.password);
-			SymmetricCipherUtil c2 = cipherBuilder.keySize(new KeySize(largeKeySize)).build(Hash.password);
+			int originalKeySize = cipherBuilder.build(HashHelper.password).keySize();
+			SymmetricCipherUtil c1 = cipherBuilder.keySize(new KeySize(smallKeySize)).build(HashHelper.password);
+			SymmetricCipherUtil c2 = cipherBuilder.keySize(new KeySize(largeKeySize)).build(HashHelper.password);
 			cipherBuilder.keySize(new KeySize(originalKeySize));
 			assertThrows(OmittedCipherException.class,
 					() -> c1.encryptToSingleBuffer(InPut.from(src)));
@@ -252,7 +297,7 @@ class Test {
 					() -> c2.encryptToSingleBuffer(InPut.from(src)));
 		}));
 		list.add(dynamicTest("key material destroy test", () -> {
-			PasswordKeyMaterial p = new PasswordKeyMaterial(Hash.password);
+			PasswordKeyMaterial p = new PasswordKeyMaterial(HashHelper.password);
 			ByteArrayKeyMaterial b = new ByteArrayKeyMaterial(src);
 			char[] prev1 = p.getPassword();
 			byte[] prev2 = b.getKeySource();
@@ -261,10 +306,10 @@ class Test {
 			assertEquals(true, b.isDestroyed(), "ByteArrayKeyMaterial is not destroyed");
 			assertNotEquals(prev1, p.getPassword(), "PasswordKeyMaterial data is not deleted");
 			assertNotEquals(prev2, b.getKeySource(), "ByteArrayKeyMaterial data is not deleted");
-			String keyAlgo = cipherBuilder.build(Hash.password).getCipherProperty().KEY_ALGORITMH_NAME;
+			String keyAlgo = cipherBuilder.build(HashHelper.password).getCipherProperty().KEY_ALGORITMH_NAME;
 			assertThrows(IllegalStateException.class, () -> p.genKey(keyAlgo, 256, src, 100));
 			assertThrows(IllegalStateException.class, () -> b.genKey(keyAlgo, 256, src, 100));
-			SymmetricCipherUtil c1 = cipherBuilder.build(Hash.password);
+			SymmetricCipherUtil c1 = cipherBuilder.build(HashHelper.password);
 			c1.destroyKey();
 			assertThrows(IllegalStateException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
 			SymmetricCipherUtil c2 = cipherBuilder.build(src); c2.destroyKey();
@@ -276,13 +321,13 @@ class Test {
 		AsymmetricCipherUtil publicKey = cipherSuppl.withPublicOnly();
 		AsymmetricCipherUtil privateKey = cipherSuppl.withPrivateOnly();
 		list.add(dynamicTest("Encrypt with PublicKey only instance", () -> {
-			assertEquals(Hash.hashPlain(src), Hash.hashPlain(bothKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
+			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(bothKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
 		}));
 		list.add(dynamicTest("Decrypt with PrivateKey only instance", () -> {
-			assertEquals(Hash.hashPlain(src), Hash.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src))))));
+			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src))))));
 		}));
 		list.add(dynamicTest("Encrypt/Decrypt with PublicKey/PrivateKey instance", () -> {
-			assertEquals(Hash.hashPlain(src), Hash.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
+			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
 		}));
 		list.add(dynamicTest("public/private key size", () -> {
 			assertEquals(publicKey.publicKeyLength(), privateKey.privateKeyLength());
@@ -319,7 +364,7 @@ class Test {
 					ct.transfer();
 					ct.transferFinal();
 					assertEquals(-1, ct.transfer()); assertEquals(-1, ct.transferFinal()); assertTrue(ct.isFinished());
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(dec.toByteArray()));
 				}),
 				dynamicTest("CipherEngine", () -> {
 					ByteArrayOutputStream dec = new ByteArrayOutputStream();
@@ -329,7 +374,7 @@ class Test {
 					assertEquals(CipherMode.DECRYPT_MODE, ud.mode());
 					dec.write(ud.update(ue.update(src)));
 					dec.write(ud.doFinal(ue.doFinal()));
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(dec.toByteArray()));
 					assertEquals(ud.isFinished(), true); assertEquals(ue.isFinished(), true);
 					assertEquals(null, ud.update(new byte[4])); assertEquals(null, ud.doFinal()); assertEquals(null, ud.doFinal(new byte[4]));
 					assertEquals(null, ue.update(new byte[4])); assertEquals(null, ue.doFinal()); assertEquals(null, ue.doFinal(new byte[4]));
@@ -344,7 +389,7 @@ class Test {
 					byte[] buf = new byte[src.length / 2];
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					ci.close();
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(dec.toByteArray()))));
+					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(cipher.decryptToSingleBuffer(InPut.from(dec.toByteArray()))));
 					assertEquals(-1, ci.read());
 					/* CipherUtilInputStream Exception test */
 					CipherUtilInputStream temp = cipher.inputStream(new FileInputStream(plain), CipherMode.ENCRYPT_MODE);
@@ -361,7 +406,7 @@ class Test {
 					byte[] buf = new byte[src.length / 2];
 					while((n = ci.read(buf)) != -1) dec.write(buf, 0, n);
 					ci.close();
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(dec.toByteArray()));
 					assertEquals(-1, ci.read(), "CipherUtilInputStream.read() does not return -1 after closed!");
 					/* CipherUtilInputStream Exception test */
 					CipherUtilInputStream temp = cipher.inputStream(new FileInputStream(enc), CipherMode.DECRYPT_MODE);
@@ -373,7 +418,7 @@ class Test {
 					CipherUtilOutputStream co = cipher.outputStream(enc, CipherMode.ENCRYPT_MODE);
 					assertEquals(CipherMode.ENCRYPT_MODE, co.mode());
 					co.write(src[0]); co.write(src, 1, src.length - 1); co.close();
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(enc.toByteArray()))));
+					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(cipher.decryptToSingleBuffer(InPut.from(enc.toByteArray()))));
 					co.close(); assertThrows(IOException.class, () -> { co.write(new byte[4]); } );
 				}),
 				dynamicTest("CipherUtilOutputStream(Decryption)", () -> {
@@ -382,12 +427,12 @@ class Test {
 					CipherUtilOutputStream co = cipher.outputStream(dec, CipherMode.DECRYPT_MODE);
 					assertEquals(CipherMode.DECRYPT_MODE, co.mode());
 					co.write(enc[0]); co.write(enc, 1, enc.length - 1); co.close();
-					assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray()));
+					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(dec.toByteArray()));
 					co.close(); assertThrows(IOException.class, () -> { co.write(new byte[4]); } );
 				}),
 				dynamicTest("byte[] <-> byte[]", () -> {
-					assertEquals(Hash.hashPlain(src),
-							Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(cipher.encryptToSingleBuffer(InPut.from(src))))));
+					assertEquals(HashHelper.hashPlain(src),
+							HashHelper.hashPlain(cipher.decryptToSingleBuffer(InPut.from(cipher.encryptToSingleBuffer(InPut.from(src))))));
 				}),	
 				dynamicTest("File <-> File", () -> {
 					File fsrc = mkTempPlainFile();
@@ -395,7 +440,7 @@ class Test {
 					File decDest = mkEmptyTempFile();
 					cipher.encrypt(InPut.from(fsrc), OutPut.to(encDest));
 					cipher.decrypt(InPut.from(encDest), OutPut.to(decDest));
-					assertEquals(Hash.hashPlain(new FileInputStream(fsrc)), Hash.hashPlain(new FileInputStream(decDest)));
+					assertEquals(HashHelper.hashPlain(new FileInputStream(fsrc)), HashHelper.hashPlain(new FileInputStream(decDest)));
 				}),
 				dynamicTest("Path <-> Path", () -> {
 					Path psrc = mkTempPlainFile().toPath();
@@ -403,7 +448,7 @@ class Test {
 					Path decDest = mkEmptyTempFile().toPath();
 					cipher.encrypt(InPut.from(psrc), OutPut.to(encDest));
 					cipher.decrypt(InPut.from(encDest), OutPut.to(decDest));
-					assertEquals(Hash.hashPlain(new FileInputStream(psrc.toFile())), Hash.hashPlain(new FileInputStream(decDest.toFile())));
+					assertEquals(HashHelper.hashPlain(new FileInputStream(psrc.toFile())), HashHelper.hashPlain(new FileInputStream(decDest.toFile())));
 				}),
 				dynamicTest("Base64 encoded String <-> Base64 encoded String", () -> {
 					String encrypted = cipher.encryptToBase64(InPut.fromBase64(Base64.getEncoder().encodeToString(src)));
@@ -430,7 +475,7 @@ class Test {
 							new BufferedOutputStream(new FileOutputStream(encDest)));
 					cipher.decrypt(new BufferedInputStream(new FileInputStream(encDest)),
 							new BufferedOutputStream(new FileOutputStream(decDest)));
-					assertEquals(Hash.hashPlain(new FileInputStream(fsrc)), Hash.hashPlain(new FileInputStream(decDest)));
+					assertEquals(HashHelper.hashPlain(new FileInputStream(fsrc)), HashHelper.hashPlain(new FileInputStream(decDest)));
 				}),
 				dynamicTest("Inputstream <-> Outputstream through InPut/Output", () -> {
 					File fsrc = mkTempPlainFile();
@@ -440,12 +485,12 @@ class Test {
 							OutPut.to(new BufferedOutputStream(new FileOutputStream(encDest))));
 					cipher.decrypt(InPut.from(new BufferedInputStream(new FileInputStream(encDest))),
 							OutPut.to(new BufferedOutputStream(new FileOutputStream(decDest))));
-					assertEquals(Hash.hashPlain(new FileInputStream(fsrc)), Hash.hashPlain(new FileInputStream(decDest)));
+					assertEquals(HashHelper.hashPlain(new FileInputStream(fsrc)), HashHelper.hashPlain(new FileInputStream(decDest)));
 				}),
 				dynamicTest("From part of InputStream", () -> {
 					File fsrc = mkTempPlainFile();
-					assertEquals(Hash.hashPlain(new FileInputStream(fsrc), 71),
-							Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(cipher.encryptToSingleBuffer(
+					assertEquals(HashHelper.hashPlain(new FileInputStream(fsrc), 71),
+							HashHelper.hashPlain(cipher.decryptToSingleBuffer(InPut.from(cipher.encryptToSingleBuffer(
 									InPut.from(new BufferedInputStream(new FileInputStream(fsrc)), 71))))));
 				}),
 				dynamicTest("ReadableByteChannel <-> WritableByteChannel", () -> {
@@ -456,16 +501,91 @@ class Test {
 							OutPut.to(FileChannel.open(encDest.toPath(), StandardOpenOption.WRITE)));
 					cipher.decrypt(InPut.from(FileChannel.open(encDest.toPath(), StandardOpenOption.READ)),
 							OutPut.to(FileChannel.open(decDest.toPath(), StandardOpenOption.WRITE)));
-					assertEquals(Hash.hashPlain(new FileInputStream(fsrc)), Hash.hashPlain(new FileInputStream(decDest)));
+					assertEquals(HashHelper.hashPlain(new FileInputStream(fsrc)), HashHelper.hashPlain(new FileInputStream(decDest)));
 				}),
 				dynamicTest("From part of ReadableByteChannel", () -> {
 					File fsrc = mkTempPlainFile();
-					assertEquals(Hash.hashPlain(new FileInputStream(fsrc), 71),
-							Hash.hashPlain(cipher.decryptToSingleBuffer(InPut.from(new ByteArrayInputStream(
+					assertEquals(HashHelper.hashPlain(new FileInputStream(fsrc), 71),
+							HashHelper.hashPlain(cipher.decryptToSingleBuffer(InPut.from(new ByteArrayInputStream(
 									cipher.encryptToSingleBuffer(InPut.from(FileChannel.open(fsrc.toPath(), StandardOpenOption.READ), 71)))))));
 				})
 			).forEach(list::add);;
 	}
+
+	private static DynamicContainer addHashTests(HashTestPair hashPair) {
+		LinkedList<DynamicNode> tests = new LinkedList<>();
+		Stream.of(
+			dynamicTest("partial hashing vs whole hashing", () -> {
+				Hash h = hashPair.getHash();
+				h.update(src, 0, src.length / 2);
+				h.update(src, src.length / 2, src.length - src.length / 2);
+				byte[] bytesPart = h.doFinalhToBytes();
+				byte[] bytesWhole = h.doFinalToBytes(src);
+				byte[] bytesInput = h.toBytes(InPut.from(mkTempPlainFile()));
+				
+				assertArrayEquals(bytesPart, bytesWhole, "partial update result is not matched with one-time finish result!");
+				assertArrayEquals(bytesWhole, bytesInput, "partial update result is not matched with one-time finish result!(Hash.toBytes)");
+			}),
+			dynamicTest("compare from Java library results", () -> {
+				Hash h = hashPair.getHash();
+				byte[] bytesWhole = h.doFinalToBytes(src);
+				byte[] cmp = hashPair.getCmp().hash(src);
+				
+				assertArrayEquals(cmp, bytesWhole, "the result differes from one calculated from JDK classes!");
+			}),
+			dynamicTest("Base64 output format", () -> {
+				Hash h = hashPair.getHash();
+				byte[] bytesPart = h.doFinalToBytes(src);
+				String base64_1 = h.doFinalToBase64(src);
+				String base64_2 = h.toBase64(InPut.from(mkTempPlainFile()));
+				
+				assertArrayEquals(bytesPart, Base64.getDecoder().decode(base64_1), "Base64 result not matching!");
+				assertArrayEquals(bytesPart, Base64.getDecoder().decode(base64_2), "Base64 result not matching!(Hash.toBase64)");
+			}),
+			dynamicTest("Hex output format", () -> {
+				Hash h = hashPair.getHash();
+				byte[] bytesPart = h.doFinalToBytes(src);
+				String hex_1 = h.doFinalToHex(src);
+				String hex_2 = h.toHex(InPut.from(mkTempPlainFile()));
+				
+				assertArrayEquals(bytesPart, HexFormat.of().parseHex(hex_1), "Hex format result not matching!");
+				assertArrayEquals(bytesPart, HexFormat.of().parseHex(hex_2), "Hex format result not matching!(Hash.toHex)");
+			})
+		).forEach(tests::add);
+		
+		if (hashPair instanceof ChecksumHashTestPair chtp) {
+			Stream.of(
+				dynamicTest("partial hashing vs whole hashing in type long", () -> {
+					CheckSumHash h = chtp.getHash();
+					h.update(src, 0, src.length / 2);
+					h.update(src, src.length / 2, src.length - src.length / 2);
+					long longPart = h.finishToLong();
+					long longWhole = h.finishToLong(src);
+					long longInput = h.toLong(InPut.from(src));
+						
+					assertEquals(longPart, longWhole, "partial update result is not matched with one-time finish result!");
+					assertEquals(longWhole, longInput, "partial update result is not matched with one-time finish result!(CheckSumHash.toLong)");
+				}),
+				dynamicTest("byte[] to long conversion", () -> {
+					CheckSumHash h = chtp.getHash();
+					long longWhole = h.finishToLong(src);
+						
+					assertEquals(longWhole, ByteBuffer.wrap(h.doFinalToBytes(src)).order(ByteOrder.BIG_ENDIAN).getLong(),
+							"the long result is erroneously converted to byte[]!");
+				}),
+				dynamicTest("compare from Java library results", () -> {
+					CheckSumHash h = chtp.getHash();
+					long longWhole = h.finishToLong(src);
+					long cmp = chtp.getCmp().hashLong(src);
+
+					assertEquals(cmp, longWhole, "the result differes from one calculated from Java library!");
+				})
+			).forEach(tests::add);
+		}
+		
+		return dynamicContainer(hashPair.getHash().getName(), tests);
+	}
+	
 	
 	private static File mkTempPlainFile() throws IOException {
 		return mkTempFile(src);

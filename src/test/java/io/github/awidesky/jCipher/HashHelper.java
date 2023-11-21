@@ -14,7 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-public class Hash {
+public class HashHelper {
 
 	public static char[] password = "tH!s1Smyp@Ssw0rd".toCharArray();
 	
