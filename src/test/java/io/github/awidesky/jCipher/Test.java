@@ -571,12 +571,11 @@ class Test {
 	
 	private static File mkTempFile(byte[] data) throws IOException {
 		File f = Files.createTempFile("CipherUtilTestSrc", "bin").toFile();
-		//File fsrc = new File(".\\test.bin");
 		if(f.exists()) { f.delete(); f.createNewFile(); }
 		f.deleteOnExit();
-		BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(f));
-		bo.write(data);
-		bo.close();
+		FileOutputStream fo = new FileOutputStream(f);
+		fo.write(data);
+		fo.flush(); fo.close();
 		return f;
 	}
 	private static File mkEmptyTempFile() throws IOException {
