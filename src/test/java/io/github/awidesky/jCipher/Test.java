@@ -497,7 +497,7 @@ class Test {
 				Hash h = hash.getInstance();
 				h.update(src, 0, src.length / 2);
 				h.update(src, src.length / 2, src.length - src.length / 2);
-				byte[] bytesPart = h.doFinalhToBytes();
+				byte[] bytesPart = h.doFinalToBytes();
 				byte[] bytesWhole = h.doFinalToBytes(src);
 				byte[] bytesInput = h.toBytes(InPut.from(mkTempPlainFile()));
 				

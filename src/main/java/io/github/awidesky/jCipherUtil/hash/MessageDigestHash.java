@@ -35,7 +35,7 @@ public class MessageDigestHash implements Hash {
 	}
 
 	@Override
-	public byte[] doFinalhToBytes() {
+	public byte[] doFinalToBytes() {
 		byte[] ret = md.digest();
 		reset();
 		return ret;

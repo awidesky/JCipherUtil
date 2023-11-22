@@ -50,7 +50,7 @@ public interface Hash { //TODO : put one-time methods in the enum
 	 */
 	public default byte[] doFinalToBytes(byte[] buf) {
 		update(buf);
-		return doFinalhToBytes();
+		return doFinalToBytes();
 	}
 
 	/**
@@ -60,7 +60,7 @@ public interface Hash { //TODO : put one-time methods in the enum
 	 *
 	 * @return the result of hash digest
 	 */
-	public byte[] doFinalhToBytes();
+	public byte[] doFinalToBytes();
 
 	/**
 	 * After updating with given buffer,
@@ -86,7 +86,7 @@ public interface Hash { //TODO : put one-time methods in the enum
 	 * @return the result of hash digest in hex formated string
 	 */
 	public default String doFinalToHex() {
-		return HexFormat.of().formatHex(doFinalhToBytes());
+		return HexFormat.of().formatHex(doFinalToBytes());
 	}
 
 	/**
@@ -114,7 +114,7 @@ public interface Hash { //TODO : put one-time methods in the enum
 	 * @return the result of hash digest in base64 formated string
 	 */
 	public default String doFinalToBase64() {
-		return Base64.getEncoder().encodeToString(doFinalhToBytes());
+		return Base64.getEncoder().encodeToString(doFinalToBytes());
 	}
 
 	
@@ -134,7 +134,7 @@ public interface Hash { //TODO : put one-time methods in the enum
 		while ((read = input.getSrc(buf)) != -1) {
 			update(buf, 0, read);
 		}
-		return doFinalhToBytes();
+		return doFinalToBytes();
 
 	}
 

@@ -30,7 +30,7 @@ public class CheckSumHash implements Hash {
 
 
 	@Override
-	public byte[] doFinalhToBytes() {
+	public byte[] doFinalToBytes() {
 		return ByteBuffer.allocate(Long.BYTES).putLong(finishToLong()).array();
 	}
 
