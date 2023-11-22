@@ -3,8 +3,6 @@ package io.github.awidesky.jCipherUtil.hash;
 import java.util.Base64;
 import java.util.HexFormat;
 
-import io.github.awidesky.jCipherUtil.hash.checksum.CheckSumHash;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.MessageDigestHash;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
 /**
@@ -18,8 +16,8 @@ import io.github.awidesky.jCipherUtil.messageInterface.InPut;
  * @see CheckSumHash
  * @see MessageDigestHash
  */
-public interface Hash { //TODO : make enum, parameter is algorithm name/or supplier, public getInstance(). put one-time methods in the enum
-
+public interface Hash { //TODO : put one-time methods in the enum
+//TODO : version name change
 	/**
 	 * Continues the hash computation with the given {@code buf}.
 	 * <p>

@@ -1,25 +1,26 @@
-package io.github.awidesky.jCipherUtil.hash.checksum;
+package io.github.awidesky.jCipherUtil.hash;
 
 import java.nio.ByteBuffer;
 import java.util.zip.Checksum;
 
-import io.github.awidesky.jCipherUtil.hash.Hash;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 
 /**
  * Subset of {@code Hash} instances that use checksum algorithms as internal hash process.
  * (e.g. Adler-32, CRC-32, CRC-32C)
  */
-public abstract class CheckSumHash implements Hash {
+public class CheckSumHash implements Hash {
 
 	private Checksum checksum;
+	private final String name;
 	
 	/**
 	 * Each {@code Checksum} instance is given from the subclass.
 	 * @param checksum
 	 */
-	protected CheckSumHash(Checksum checksum) {
+	protected CheckSumHash(Checksum checksum, String name) {
 		this.checksum = checksum;
+		this.name = name;
 	}
 	
 	@Override
@@ -80,4 +81,9 @@ public abstract class CheckSumHash implements Hash {
 
 	@Override
 	public void reset() { checksum.reset(); }
+
+	@Override
+	public String getName() {
+		return name;
+	}
 }

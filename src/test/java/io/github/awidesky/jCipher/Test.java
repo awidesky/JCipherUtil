@@ -48,9 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Stream;
-import java.util.zip.Adler32;
-import java.util.zip.CRC32;
-import java.util.zip.CRC32C;
 
 import javax.crypto.SecretKey;
 
@@ -63,9 +60,8 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import io.github.awidesky.jCipher.cipherSupplier.AsymmetricSupplier;
 import io.github.awidesky.jCipher.cipherSupplier.RSA_ECBSupplier;
-import io.github.awidesky.jCipher.hashCompareHelpers.ChecksumHashTestPair;
-import io.github.awidesky.jCipher.hashCompareHelpers.HashTestPair;
-import io.github.awidesky.jCipher.hashCompareHelpers.MessageDigestHashTestPair;
+import io.github.awidesky.jCipher.hashCompareHelpers.ChecksumComparator;
+import io.github.awidesky.jCipher.hashCompareHelpers.HashComparartorGenerator;
 import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.CipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
@@ -85,23 +81,9 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.hash.CheckSumHash;
 import io.github.awidesky.jCipherUtil.hash.Hash;
-import io.github.awidesky.jCipherUtil.hash.checksum.Adler32Hash;
-import io.github.awidesky.jCipherUtil.hash.checksum.CRC32CHash;
-import io.github.awidesky.jCipherUtil.hash.checksum.CRC32Hash;
-import io.github.awidesky.jCipherUtil.hash.checksum.CheckSumHash;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.MD2;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.MD5;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.SHA_1;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_224;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_256;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_384;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha3.SHA3_512;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_224;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_256;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_384;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_512_224;
-import io.github.awidesky.jCipherUtil.hash.messageDigest.sha_2.SHA_512_256;
+import io.github.awidesky.jCipherUtil.hash.Hashes;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.key.keyExchange.EllipticCurveKeyExchanger;
 import io.github.awidesky.jCipherUtil.key.keyExchange.ecdh.ECDHCurves;
@@ -142,16 +124,7 @@ class Test {
 			Map.entry("XDH", Stream.of(XDHKeyExchanger.getAvailableCurves()).map(XDHCurves::valueOf).map(c -> new XDHKeyExchanger[] {new XDHKeyExchanger(c), new XDHKeyExchanger(c)}))
 			);
 			
-	static final Map<String, Stream<? extends MessageDigestHashTestPair>> messageDigestHashes = Map.ofEntries(
-			Map.entry("SHA1", Stream.of(new MessageDigestHashTestPair(SHA_1::new))),
-			Map.entry("SHA2", Stream.of(new MessageDigestHashTestPair(SHA_224::new), new MessageDigestHashTestPair(SHA_256::new), new MessageDigestHashTestPair(SHA_384::new), new MessageDigestHashTestPair(SHA_512_224::new), new MessageDigestHashTestPair(SHA_512_256::new))),
-			Map.entry("SHA3", Stream.of(new MessageDigestHashTestPair(SHA3_224::new), new MessageDigestHashTestPair(SHA3_256::new), new MessageDigestHashTestPair(SHA3_384::new), new MessageDigestHashTestPair(SHA3_512::new))),
-			Map.entry("MD", Stream.of(new MessageDigestHashTestPair(MD2::new), new MessageDigestHashTestPair(MD5::new)))
-			);
-	static final Map<String, Stream<? extends ChecksumHashTestPair>> checksumHashes = Map.ofEntries(
-			Map.entry("Adler", Stream.of(new ChecksumHashTestPair(Adler32Hash::new, new Adler32()))),
-			Map.entry("CRC", Stream.of(new ChecksumHashTestPair(CRC32Hash::new, new CRC32()), new ChecksumHashTestPair(CRC32CHash::new, new CRC32C())))
-			);
+	static final Stream<Hashes> hashes = Stream.of(Hashes.values());
 	
 
 	static final Charset TESTCHARSET = Charset.forName("UTF-16"); 
@@ -165,7 +138,7 @@ class Test {
 	@TestFactory
 	@DisplayName("Test all")
 	Collection<DynamicNode> testAll() throws NoSuchAlgorithmException, DigestException, IOException {
-		List<DynamicNode> l = new ArrayList<>(3);
+		List<DynamicNode> l = new ArrayList<>(4);
 		
 		List<DynamicNode> keyExList = new ArrayList<DynamicNode>();
 		keyExList.add(dynamicTest("default curves", () -> {
@@ -195,8 +168,7 @@ class Test {
 		
 
 		LinkedList<DynamicContainer> hashTests = new LinkedList<>();
-		messageDigestHashes.entrySet().stream().map(entry -> dynamicContainer(entry.getKey(), entry.getValue().map(Test::addHashTests))).forEach(hashTests::add);
-		checksumHashes.entrySet().stream().map(entry -> dynamicContainer(entry.getKey(), entry.getValue().map(Test::addHashTests))).forEach(hashTests::add);
+		hashes.map(Test::addHashTests).forEach(hashTests::add);
 		l.add(dynamicContainer("Hash", hashTests));
 		
 		return l;
@@ -512,11 +484,17 @@ class Test {
 			).forEach(list::add);;
 	}
 
-	private static DynamicContainer addHashTests(HashTestPair hashPair) {
+	private static DynamicContainer addHashTests(Hashes hash) {
 		LinkedList<DynamicNode> tests = new LinkedList<>();
 		Stream.of(
+			dynamicTest("name check", () -> {
+				String hashName = hash.getInstance().getName();
+				String enumName = hash.name();
+				assertEquals(hashName.replace("/", "").replace("-", ""), enumName.replace("_", ""),
+						"the enum \"" + enumName + "\" is using algorithm \"" + hashName + "\"");
+			}),
 			dynamicTest("partial hashing vs whole hashing", () -> {
-				Hash h = hashPair.getHash();
+				Hash h = hash.getInstance();
 				h.update(src, 0, src.length / 2);
 				h.update(src, src.length / 2, src.length - src.length / 2);
 				byte[] bytesPart = h.doFinalhToBytes();
@@ -527,14 +505,14 @@ class Test {
 				assertArrayEquals(bytesWhole, bytesInput, "partial update result is not matched with one-time finish result!(Hash.toBytes)");
 			}),
 			dynamicTest("compare from Java library results", () -> {
-				Hash h = hashPair.getHash();
+				Hash h = hash.getInstance();
 				byte[] bytesWhole = h.doFinalToBytes(src);
-				byte[] cmp = hashPair.getCmp().hash(src);
+				byte[] cmp = HashComparartorGenerator.generate(hash).hash(src);
 				
 				assertArrayEquals(cmp, bytesWhole, "the result differes from one calculated from JDK classes!");
 			}),
 			dynamicTest("Base64 output format", () -> {
-				Hash h = hashPair.getHash();
+				Hash h = hash.getInstance();
 				byte[] bytesPart = h.doFinalToBytes(src);
 				String base64_1 = h.doFinalToBase64(src);
 				String base64_2 = h.toBase64(InPut.from(mkTempPlainFile()));
@@ -543,7 +521,7 @@ class Test {
 				assertArrayEquals(bytesPart, Base64.getDecoder().decode(base64_2), "Base64 result not matching!(Hash.toBase64)");
 			}),
 			dynamicTest("Hex output format", () -> {
-				Hash h = hashPair.getHash();
+				Hash h = hash.getInstance();
 				byte[] bytesPart = h.doFinalToBytes(src);
 				String hex_1 = h.doFinalToHex(src);
 				String hex_2 = h.toHex(InPut.from(mkTempPlainFile()));
@@ -553,10 +531,10 @@ class Test {
 			})
 		).forEach(tests::add);
 		
-		if (hashPair instanceof ChecksumHashTestPair chtp) {
+		if (hash.getInstance() instanceof CheckSumHash) {
 			Stream.of(
 				dynamicTest("partial hashing vs whole hashing in type long", () -> {
-					CheckSumHash h = chtp.getHash();
+					CheckSumHash h = (CheckSumHash)hash.getInstance();
 					h.update(src, 0, src.length / 2);
 					h.update(src, src.length / 2, src.length - src.length / 2);
 					long longPart = h.finishToLong();
@@ -567,23 +545,23 @@ class Test {
 					assertEquals(longWhole, longInput, "partial update result is not matched with one-time finish result!(CheckSumHash.toLong)");
 				}),
 				dynamicTest("byte[] to long conversion", () -> {
-					CheckSumHash h = chtp.getHash();
+					CheckSumHash h = (CheckSumHash)hash.getInstance();
 					long longWhole = h.finishToLong(src);
 						
 					assertEquals(longWhole, ByteBuffer.wrap(h.doFinalToBytes(src)).order(ByteOrder.BIG_ENDIAN).getLong(),
 							"the long result is erroneously converted to byte[]!");
 				}),
 				dynamicTest("compare from Java library results", () -> {
-					CheckSumHash h = chtp.getHash();
+					CheckSumHash h = (CheckSumHash)hash.getInstance();
 					long longWhole = h.finishToLong(src);
-					long cmp = chtp.getCmp().hashLong(src);
+					long cmp = ((ChecksumComparator) HashComparartorGenerator.generate(hash)).hashLong(src);
 
 					assertEquals(cmp, longWhole, "the result differes from one calculated from Java library!");
 				})
 			).forEach(tests::add);
 		}
 		
-		return dynamicContainer(hashPair.getHash().getName(), tests);
+		return dynamicContainer(hash.getInstance().getName(), tests);
 	}
 	
 	

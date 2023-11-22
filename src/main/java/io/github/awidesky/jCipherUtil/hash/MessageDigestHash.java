@@ -1,10 +1,9 @@
-package io.github.awidesky.jCipherUtil.hash.messageDigest;
+package io.github.awidesky.jCipherUtil.hash;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
-import io.github.awidesky.jCipherUtil.hash.Hash;
 
 /**
  * Subset of {@code Hash} instances that use {@code MessageDigest} as internal hash process.
