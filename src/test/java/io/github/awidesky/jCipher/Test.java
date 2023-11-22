@@ -528,6 +528,15 @@ class Test {
 				
 				assertArrayEquals(bytesPart, HexFormat.of().parseHex(hex_1), "Hex format result not matching!");
 				assertArrayEquals(bytesPart, HexFormat.of().parseHex(hex_2), "Hex format result not matching!(Hash.toHex)");
+			}),
+			dynamicTest("used for key stretching", () -> {
+				byte[] key = new byte[128];
+				new Random().nextBytes(key);
+				SymmetricCipherUtilBuilder<?> cipherBuilder = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT);
+				CipherUtil ci1 = cipherBuilder.build(key, hash);
+				CipherUtil ci2 = cipherBuilder.build(key, hash);
+				assertEquals(HashHelper.hashPlain(src),
+						HashHelper.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 			})
 		).forEach(tests::add);
 		
