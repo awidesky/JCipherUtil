@@ -25,6 +25,8 @@ public enum Hashes {
 	SHA_256("SHA-256"),
 	/** SHA-384 hash algorithm */
 	SHA_384("SHA-384"),
+	/** SHA-512 hash algorithm */
+	SHA_512("SHA-512"),
 	/** SHA-512/224 hash algorithm */
 	SHA_512_224("SHA-512/224"),
 	/** SHA-512/256 hash algorithm */
