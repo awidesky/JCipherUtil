@@ -16,11 +16,13 @@ import java.util.HexFormat;
 
 public class HashHelper {
 
-	public static char[] password = "tH!s1Smyp@Ssw0rd".toCharArray();
+	public static final char[] password = "tH!s1Smyp@Ssw0rd".toCharArray();
+	public static final String hashName = "SHA-512/256";
 	
 	public static String hashPlain(InputStream is) {
 		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-512");
+			MessageDigest digest = MessageDigest.getInstance(hashName);
+			digest.reset();
 			int read = 0;
 			byte[] buf = new byte[8 * 1024];
 			while ((read = is.read(buf)) != -1)
@@ -31,9 +33,10 @@ public class HashHelper {
 			throw new RuntimeException(e);
 		}
 	}
+
 	public static String hashPlain(InputStream is, int i) {
 		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-512");
+			MessageDigest digest = MessageDigest.getInstance(hashName);
 			int read = 0;
 			int totalRead = 0;
 			byte[] buf = new byte[8 * 1024];
@@ -49,7 +52,7 @@ public class HashHelper {
 	}
 	public static String hashPlain(byte[] is) {
 		try {
-			MessageDigest digest = MessageDigest.getInstance("SHA-512");
+			MessageDigest digest = MessageDigest.getInstance(hashName);
 			return HexFormat.of().formatHex(digest.digest(is));
 		} catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
