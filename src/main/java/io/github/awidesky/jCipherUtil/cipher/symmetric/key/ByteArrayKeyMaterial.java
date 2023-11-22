@@ -9,13 +9,14 @@
 
 package io.github.awidesky.jCipherUtil.cipher.symmetric.key;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import javax.crypto.spec.SecretKeySpec;
 
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.hash.Hash;
+import io.github.awidesky.jCipherUtil.hash.Hashes;
 
 /**
  * A byte array key material generates key with given byte array.
@@ -59,23 +60,18 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	@Override
 	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException, IllegalStateException {
 		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
-		MessageDigest digest;
-		try {
-			digest = MessageDigest.getInstance("SHA-512"); // TODO : use Hash
-		} catch (NoSuchAlgorithmException e) {
-			throw new OmittedCipherException(e);
-		}
+		Hash digest = Hashes.SHA3_512.getInstance();
 		byte[] result = key;
 		
 		for (int i = 0; i < iterationCount; i++) { //key stretching
 			digest.reset();
 			digest.update(result);
 			digest.update(Arrays.copyOf(salt, salt.length));
-			result = digest.digest();
+			result = digest.doFinalToBytes();
 		}
 		while(result.length < keySize) {
 			digest.reset();
-			byte[] hashed = digest.digest(result);
+			byte[] hashed = digest.doFinalToBytes(result);
 	        byte[] result1 = new byte[result.length + hashed.length];
 	        System.arraycopy(result, 0, result1, 0, result.length);
 	        System.arraycopy(hashed, 0, result1, result.length, hashed.length);
