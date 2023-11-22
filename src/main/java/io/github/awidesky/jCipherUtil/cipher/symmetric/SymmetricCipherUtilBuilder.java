@@ -13,6 +13,7 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.SymmetricKeyMaterial;
+import io.github.awidesky.jCipherUtil.hash.Hashes;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 
 /**
@@ -83,6 +84,18 @@ public abstract class SymmetricCipherUtilBuilder <T extends SymmetricCipherUtil>
 	 * */
 	public T build(byte[] key) {
 		keyMet = new ByteArrayKeyMaterial(key);
+		return generate();
+	}
+	/**
+	 * Returns a new {@code CipherUtil} instance configured with specified parameters,
+	 * given <code>byte[]</code> key and hash algorithm for key stretching.
+	 * 
+	 * @see ByteArrayKeyMaterial#ByteArrayKeyMaterial(byte[])
+	 * @param key the secret key data which used as <code>SecretKey</code>(after key stretching)
+	 * @param hash the hash algorithm used for key stretching
+	 * */
+	public T build(byte[] key, Hashes hash) {
+		keyMet = new ByteArrayKeyMaterial(key, hash);
 		return generate();
 	}
 }

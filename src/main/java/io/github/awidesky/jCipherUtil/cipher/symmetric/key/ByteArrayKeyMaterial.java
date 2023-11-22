@@ -30,11 +30,12 @@ import io.github.awidesky.jCipherUtil.hash.Hashes;
 public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 
 	private final byte[] key;
+	private final Hashes hash;
 	
 	/**
 	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
 	 * is not generated now, because other necessary metadata(salt, iteration count) is unknown.
-	 * <p>The <code>key</code> is stretched via <code>SHA-512</code> algorithm.
+	 * <p>The <code>key</code> is stretched via default <code>SHA3-512</code> algorithm.
 	 * <p>This process is needed for consistency of key generating algorithm and metadata layout. 
 	 * Since password salt and iteration count is included in cipherText header metadata,
 	 * they should be used in every cases, otherwise, metadata scheme should be more complicated to let 
@@ -45,7 +46,26 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	 * @param key the key
 	 * The contents of the buffer are copied to protect against subsequent modification.
 	 * */
-	public ByteArrayKeyMaterial(byte[] key) { this.key = Arrays.copyOf(key, key.length); }
+	public ByteArrayKeyMaterial(byte[] key) { this(key, Hashes.SHA3_512); }
+	/**
+	 * Initiate <code>KeyProperty</code> with given <code>key</code>. Actual {@link javax.crypto.SecretKey}
+	 * is not generated now, because other necessary metadata(salt, iteration count) is unknown.
+	 * <p>The <code>key</code> is stretched via given hash algorithm.
+	 * <p>This process is needed for consistency of key generating algorithm and metadata layout. 
+	 * Since password salt and iteration count is included in cipherText header metadata,
+	 * they should be used in every cases, otherwise, metadata scheme should be more complicated to let 
+	 * cipher processor know if the cipherText uses salt and iteration count or not.
+	 * And if <code>key</code> as byte array isn't salted, user might use same byte array multiple times,
+	 * which causes vulnerability.
+	 * 
+	 * @param key the key
+	 * @param hash the hash algorithm used for key stretching
+	 * The contents of the buffer are copied to protect against subsequent modification.
+	 * */
+	public ByteArrayKeyMaterial(byte[] key, Hashes hash) {
+		this.key = Arrays.copyOf(key, key.length);
+		this.hash = hash;
+	}
 
 	/**
 	 * Generate {@link javax.crypto.SecretKey} with given metadata.
@@ -60,7 +80,7 @@ public class ByteArrayKeyMaterial extends SymmetricKeyMaterial {
 	@Override
 	public SecretKeySpec genKey(String algorithm, int keySize, byte[] salt, int iterationCount) throws OmittedCipherException, IllegalStateException {
 		if(destroyed) throw new IllegalStateException("The key material is destroyed!");
-		Hash digest = Hashes.SHA3_512.getInstance();
+		Hash digest = hash.getInstance();
 		byte[] result = key;
 		
 		for (int i = 0; i < iterationCount; i++) { //key stretching
