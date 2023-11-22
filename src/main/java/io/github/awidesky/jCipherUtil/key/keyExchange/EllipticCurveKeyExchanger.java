@@ -99,8 +99,8 @@ public abstract class EllipticCurveKeyExchanger {
 	 * */
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " [\"" + keyPairGenerator.getAlgorithm() + "\" from \"" + keyPairGenerator.getProvider()
-			+ "\", KeyAgreement : \"" + keyAgreement.getAlgorithm() + "\" from \"" + keyAgreement.getProvider() + "\"]";
+		return getClass().getSimpleName() + " [KeyPairGenerator : \"" + keyPairGenerator.getAlgorithm() + "\" from \"" + keyPairGenerator.getProvider()
+			+ "\" with curve : \"" + getCurve() + "\", KeyAgreement : \"" + keyAgreement.getAlgorithm() + "\" from \"" + keyAgreement.getProvider() + "\"]";
 	}
 
 	
