@@ -7,13 +7,7 @@ package io.github.awidesky.jCipherUtil.key.keyExchange.xdh;
  */
 public enum XDHCurves {
 
-	X25519("X25519"),
-	X448("X448");
-	
-	String curveName;
-
-	XDHCurves(String curveName) {
-		this.curveName = curveName;
-	}
+	X25519,
+	X448;
 	
 }

@@ -7,14 +7,8 @@ package io.github.awidesky.jCipherUtil.key.keyExchange.ecdh;
  */
 public enum ECDHCurves {
 
-	secp256r1("secp256r1"),
-	secp384r1("secp384r1"),
-	secp521r1("secp521r1");
-	
-	String curveName;
-
-	ECDHCurves(String curveName) {
-		this.curveName = curveName;
-	}
+	secp256r1,
+	secp384r1,
+	secp521r1;
 	
 }
