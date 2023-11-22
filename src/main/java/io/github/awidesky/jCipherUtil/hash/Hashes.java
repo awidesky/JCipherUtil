@@ -1,8 +1,19 @@
 package io.github.awidesky.jCipherUtil.hash;
 
+import java.util.Base64;
+import java.util.HexFormat;
 import java.util.function.Supplier;
 import java.util.zip.Checksum;
 
+import io.github.awidesky.jCipherUtil.messageInterface.InPut;
+
+/**
+ * An enum representing all {@code Hash} interface subclasses.
+ * Also contains one-call digest methods
+ * ({@code Hashes#toBytes(Hash, InPut)}, {@code Hashes#toBase64(Hash, InPut)}, and
+ * {@code Hashes#toHex(Hash, InPut)}) that process hash process with given
+ * {@code InPut} in single call.
+ */
 public enum Hashes {
 	/** Adler-32 checksum hash algorithm */
 	Adler32(java.util.zip.Adler32::new, "Adler32"), 
@@ -52,4 +63,56 @@ public enum Hashes {
 	}
 	
 	public Hash getInstance() { return suppl.get(); }
+	
+
+	
+	/**
+	 * Read the data from given {@code InPut}, process them and
+	 * completes the hash computation.
+	 * The result is returned as a byte array.
+	 * The hash digest is reset before the hash process begins, and also before this method returns.
+	 *
+	 * @param input input data to hash
+	 * @return the result of hash digest
+	 */
+	public byte[] toBytes(InPut input) {
+		Hash h = suppl.get();
+		h.reset();
+		byte[] buf = new byte[8 * 1024];
+		int read = 0;
+		while ((read = input.getSrc(buf)) != -1) {
+			h.update(buf, 0, read);
+		}
+		return h.doFinalToBytes();
+
+	}
+
+	/**
+	 * Read the data from given {@code InPut}, process them and
+	 * completes the hash computation.
+	 * The result is returned as {@link HexFormat hex formatted} {@code String}.
+	 * The hash digest is reset before the hash process begins, and also before this method returns.
+	 * 
+	 * 
+	 * @see HexFormat 
+	 * @param input input data to hash
+	 * @return the result of hash digest in hex formated string
+	 */
+	public String toHex(InPut input) {
+		return HexFormat.of().formatHex(toBytes(input));
+	}
+
+	/**
+	 * Read the data from given {@code InPut}, process them and
+	 * completes the hash computation.
+	 * The result is returned as {@link Base64 Base64 formatted} {@code String}.
+	 * The hash digest is reset before the hash process begins, and also before this method returns.
+	 * 
+	 * @see Base64 
+	 * @param input input data to hash
+	 * @return the result of hash digest in base64 formated string
+	 */
+	public String toBase64(InPut input) {
+		return Base64.getEncoder().encodeToString(toBytes(input));
+	}
 }

@@ -499,7 +499,7 @@ class Test {
 				h.update(src, src.length / 2, src.length - src.length / 2);
 				byte[] bytesPart = h.doFinalToBytes();
 				byte[] bytesWhole = h.doFinalToBytes(src);
-				byte[] bytesInput = h.toBytes(InPut.from(mkTempPlainFile()));
+				byte[] bytesInput = hash.toBytes(InPut.from(mkTempPlainFile()));
 				
 				assertArrayEquals(bytesPart, bytesWhole, "partial update result is not matched with one-time finish result!");
 				assertArrayEquals(bytesWhole, bytesInput, "partial update result is not matched with one-time finish result!(Hash.toBytes)");
@@ -515,7 +515,7 @@ class Test {
 				Hash h = hash.getInstance();
 				byte[] bytesPart = h.doFinalToBytes(src);
 				String base64_1 = h.doFinalToBase64(src);
-				String base64_2 = h.toBase64(InPut.from(mkTempPlainFile()));
+				String base64_2 = hash.toBase64(InPut.from(mkTempPlainFile()));
 				
 				assertArrayEquals(bytesPart, Base64.getDecoder().decode(base64_1), "Base64 result not matching!");
 				assertArrayEquals(bytesPart, Base64.getDecoder().decode(base64_2), "Base64 result not matching!(Hash.toBase64)");
@@ -524,7 +524,7 @@ class Test {
 				Hash h = hash.getInstance();
 				byte[] bytesPart = h.doFinalToBytes(src);
 				String hex_1 = h.doFinalToHex(src);
-				String hex_2 = h.toHex(InPut.from(mkTempPlainFile()));
+				String hex_2 = hash.toHex(InPut.from(mkTempPlainFile()));
 				
 				assertArrayEquals(bytesPart, HexFormat.of().parseHex(hex_1), "Hex format result not matching!");
 				assertArrayEquals(bytesPart, HexFormat.of().parseHex(hex_2), "Hex format result not matching!(Hash.toHex)");
@@ -581,7 +581,6 @@ class Test {
 	}
 	private static File mkEmptyTempFile() throws IOException {
 		File f = Files.createTempFile("CipherUtilTestEmpty", "bin").toFile();
-		//File fsrc = new File(".\\test.bin");
 		if(f.exists()) { f.delete(); f.createNewFile(); }
 		f.deleteOnExit();
 		return f;

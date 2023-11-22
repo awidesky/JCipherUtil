@@ -3,20 +3,15 @@ package io.github.awidesky.jCipherUtil.hash;
 import java.util.Base64;
 import java.util.HexFormat;
 
-import io.github.awidesky.jCipherUtil.messageInterface.InPut;
-
 /**
  * A common interface for hashing functions(including checksums) utilities.
- * Provides basic update/doFinal methods and one-call digest methods
- * ({@code Hash#toBytes(Hash, InPut)}, {@code Hash#toBase64(Hash, InPut)}, and
- * {@code Hash#toHex(Hash, InPut)}) that process hash process with given
- * {@code InPut} and {@code Hash} instance in single call.
+ * Provides basic update/doFinal methods.
  *
  * @since 1.2.0
  * @see CheckSumHash
  * @see MessageDigestHash
  */
-public interface Hash { //TODO : put one-time methods in the enum
+public interface Hash {
 //TODO : version name change
 	/**
 	 * Continues the hash computation with the given {@code buf}.
@@ -115,56 +110,6 @@ public interface Hash { //TODO : put one-time methods in the enum
 	 */
 	public default String doFinalToBase64() {
 		return Base64.getEncoder().encodeToString(doFinalToBytes());
-	}
-
-	
-	/**
-	 * Read the data from given {@code InPut}, process them and
-	 * completes the hash computation.
-	 * The result is returned as a byte array.
-	 * The hash digest is reset before the hash process begins, and also before this method returns.
-	 *
-	 * @param input input data to hash
-	 * @return the result of hash digest
-	 */
-	public default byte[] toBytes(InPut input) {
-		reset();
-		byte[] buf = new byte[8 * 1024];
-		int read = 0;
-		while ((read = input.getSrc(buf)) != -1) {
-			update(buf, 0, read);
-		}
-		return doFinalToBytes();
-
-	}
-
-	/**
-	 * Read the data from given {@code InPut}, process them and
-	 * completes the hash computation.
-	 * The result is returned as {@link HexFormat hex formatted} {@code String}.
-	 * The hash digest is reset before the hash process begins, and also before this method returns.
-	 * 
-	 * 
-	 * @see HexFormat 
-	 * @param input input data to hash
-	 * @return the result of hash digest in hex formated string
-	 */
-	public default String toHex(InPut input) {
-		return HexFormat.of().formatHex(toBytes(input));
-	}
-
-	/**
-	 * Read the data from given {@code InPut}, process them and
-	 * completes the hash computation.
-	 * The result is returned as {@link Base64 Base64 formatted} {@code String}.
-	 * The hash digest is reset before the hash process begins, and also before this method returns.
-	 * 
-	 * @see Base64 
-	 * @param input input data to hash
-	 * @return the result of hash digest in base64 formated string
-	 */
-	public default String toBase64(InPut input) {
-		return Base64.getEncoder().encodeToString(toBytes(input));
 	}
 
 	/**
