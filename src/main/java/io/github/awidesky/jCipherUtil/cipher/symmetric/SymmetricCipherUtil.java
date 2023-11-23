@@ -112,7 +112,7 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 	 * @return initiated {@code Cipher} instance
 	 * */
 	@Override
-	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
+	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException { //TODO
 		byte[] salt = new byte[keyMetadata.saltLen];
 		int iterationCount = metadata.getInt();
 		metadata.get(salt);

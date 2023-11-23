@@ -39,7 +39,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
-					() -> new IllegalMetadataException("This " + toString() + " instance does not have a public key!")));
+					() -> new InvalidKeyException("This " + toString() + " instance does not have a public key!")));
 			return c;
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
@@ -56,7 +56,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
-					() -> new IllegalMetadataException("This " + toString() + " instance does not have a private key!")));
+					() -> new InvalidKeyException("This " + toString() + " instance does not have a private key!")));
 			return c;
 		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);

@@ -1,9 +1,6 @@
 package io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20;
 
 import java.nio.ByteBuffer;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -73,7 +70,7 @@ public abstract class AbstractChaCha20CipherUtil extends SymmetricNonceCipherUti
 			nonce[0] = (byte) ~nonce[0];
 			/** initialize with actual key and IV */
 			c.init(Cipher.DECRYPT_MODE, key.genKey(getCipherProperty().KEY_ALGORITMH_NAME, keySize.value, salt, iterationCount), getAlgorithmParameterSpec(nonce));
-		} catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			throw new OmittedCipherException(e);
 		}
 		return c;

@@ -80,7 +80,6 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20_Poly130
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
-import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.hash.CheckSumHash;
@@ -235,7 +234,7 @@ class Test {
 	}
 	
 
-	private DynamicContainer symmetricAdditionalTests() {
+	private static DynamicContainer symmetricAdditionalTests() {
 		return dynamicContainer("additional tests", Stream.of(
 				dynamicTest("AES_CTR counter bound", () -> {
 					assertThrows(IllegalArgumentException.class,
@@ -272,6 +271,12 @@ class Test {
 					() -> c1.encryptToSingleBuffer(InPut.from(src)));
 			assertThrows(OmittedCipherException.class,
 					() -> c2.encryptToSingleBuffer(InPut.from(src)));
+			
+			byte[] encrypted = cipherBuilder.build(HashHelper.password).encryptToSingleBuffer(InPut.from(src));
+			assertThrows(OmittedCipherException.class,
+					() -> c1.decryptToSingleBuffer(InPut.from(encrypted)));
+			assertThrows(OmittedCipherException.class,
+					() -> c2.decryptToSingleBuffer(InPut.from(encrypted)));
 		}));
 		list.add(dynamicTest("key material destroy test", () -> {
 			PasswordKeyMaterial p = new PasswordKeyMaterial(HashHelper.password);
@@ -304,10 +309,10 @@ class Test {
 			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src))))));
 		}));
 		list.add(dynamicTest("Should not encrypt with PrivateKey only instance", () -> {
-			assertThrows(IllegalMetadataException.class, () -> privateKey.encryptToSingleBuffer(InPut.from(src)));
+			assertThrows(OmittedCipherException.class, () -> privateKey.encryptToSingleBuffer(InPut.from(src)));
 		}));
 		list.add(dynamicTest("Should not decrypt with PublicKey only instance", () -> {
-			assertThrows(IllegalMetadataException.class, () -> publicKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src)))));
+			assertThrows(OmittedCipherException.class, () -> publicKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src)))));
 		}));
 		list.add(dynamicTest("Encrypt/Decrypt with PublicKey/PrivateKey instance", () -> {
 			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
