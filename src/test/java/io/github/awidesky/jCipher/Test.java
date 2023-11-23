@@ -305,11 +305,11 @@ class Test {
 			ByteBuffer buf = ByteBuffer.allocate(ci.getMetadataLength() + 1);
 			
 			buf.putInt(km.iterationRangeStart - 1);
-			assertThrows(IllegalMetadataException.class, () -> ci.cipherEngine(CipherMode.DECRYPT_MODE).update(buf.array()));
+			assertThrows(IllegalMetadataException.class, () -> ci.cipherDecryptEngine().update(buf.array()));
 			
 			buf.clear();
 			buf.putInt(km.iterationRangeEnd);
-			assertThrows(IllegalMetadataException.class, () -> ci.cipherEngine(CipherMode.DECRYPT_MODE).update(buf.array()));
+			assertThrows(IllegalMetadataException.class, () -> ci.cipherDecryptEngine().update(buf.array()));
 		}));
 	}
 	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, AsymmetricSupplier cipherSuppl) {

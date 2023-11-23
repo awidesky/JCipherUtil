@@ -234,6 +234,7 @@ public interface CipherUtil {
 	 */
 	public CipherTunnel cipherTunnel(InPut in, OutPut out, CipherMode mode);
 	
+
 	/**
 	 * Returns a new {@code CipherEngine} with given mode.
 	 * <p>
@@ -250,6 +251,36 @@ public interface CipherUtil {
 	 * @return a new {@code CipherEngine} as given mode.
 	 */
 	public CipherEngine cipherEngine(CipherMode mode);
+	/**
+	 * Returns a new {@code CipherEncryptEngine}.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherEncryptEngine} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherEncryptEngine} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
+	 * @see CipherEncryptEngine
+	 * 
+	 * @return a new {@code CipherEncryptEngine}.
+	 */
+	public CipherEncryptEngine cipherEncryptEngine();
+	/**
+	 * Returns a new {@code CipherDecryptEngine}.
+	 * <p>
+	 * Cipher operation of the returned {@code CipherDecryptEngine} instance is irrelevant
+	 * from that of this {@code CipherUtil} instance.
+	 * Every metadata(including key) and cipher algorithm follow those of the {@code CipherUtil}
+	 * instance, but using the returned {@code CipherDecryptEngine} instance
+	 * will not affect internal cipher operation of this {@code CipherUtil} instance
+	 * (in other words, each uses different {@code javax.crypto.Cipher} object).
+	 * 
+	 * @see CipherDecryptEngine
+	 * 
+	 * @return a new {@code CipherDecryptEngine}.
+	 */
+	public CipherDecryptEngine cipherDecryptEngine();
 	
 	/**
 	 * Returns a new {@code CipherUtilOutputStream} connected with given {@code OutputStream}.

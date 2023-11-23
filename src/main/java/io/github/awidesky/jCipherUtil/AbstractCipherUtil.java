@@ -170,7 +170,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		while (true) {
 			int read = in.getSrc(buf);
 			if(read == -1) break;
-			byte[] result = cipherEngine.update(buf, 0, read);
+			byte[] result = cipherEngine.update(buf, 0, read);//optional.orelsecompute
 			if (result != null) out.consumeResult(result);
 		}
 		out.consumeResult(cipherEngine.doFinal());
@@ -183,15 +183,22 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	@Override
-	public CipherEngine cipherEngine(CipherMode mode) { // TODO : separate
+	public CipherEngine cipherEngine(CipherMode mode) {
 		if(mode == CipherMode.ENCRYPT_MODE) {
-			return new CipherEncryptEngine(this::initEncrypt, getMetadataLength());
-		} else if(mode == CipherMode.DECRYPT_MODE) {
-			return new CipherDecryptEngine(this::initDecrypt, getMetadataLength());
+			return cipherEncryptEngine();
 		} else {
-			// This must not happen. only for barrier against to possible changes of CipherMode in the future. 
-			throw new OmittedCipherException(new IllegalArgumentException("Unknown cipher mode : " + mode.name()));
+			return cipherDecryptEngine();
 		}
+	}
+	
+	@Override
+	public CipherEncryptEngine cipherEncryptEngine() {
+		return new CipherEncryptEngine(this::initEncrypt, getMetadataLength());
+	}
+
+	@Override
+	public CipherDecryptEngine cipherDecryptEngine() {
+		return new CipherDecryptEngine(this::initDecrypt, getMetadataLength());
 	}
 
 	@Override
