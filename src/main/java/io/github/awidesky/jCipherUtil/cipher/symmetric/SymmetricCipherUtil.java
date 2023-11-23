@@ -119,13 +119,9 @@ public abstract class SymmetricCipherUtil extends AbstractCipherUtil {
 		if (!(keyMetadata.iterationRangeStart <= iterationCount && iterationCount < keyMetadata.iterationRangeEnd)) {
 			throw new IllegalMetadataException("Unacceptable iteration count : " + iterationCount + ", must between " + keyMetadata.iterationRangeStart + " and " + keyMetadata.iterationRangeEnd);
 		}
-		try {
-			Cipher c = getCipherInstance();
-			c.init(Cipher.DECRYPT_MODE, generateKey(salt, iterationCount));
-			return c;
-		} catch (InvalidKeyException e) {
-			throw new OmittedCipherException(e);
-		}
+		Cipher c = getCipherInstance();
+		initCipherInstance(c, Cipher.DECRYPT_MODE, generateKey(salt, iterationCount));
+		return c;
 	}
 
 	@Override

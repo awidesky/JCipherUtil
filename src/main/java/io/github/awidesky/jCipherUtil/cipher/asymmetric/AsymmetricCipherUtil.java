@@ -32,13 +32,13 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	/**
 	 * Initialize backing {@code CipherUtil} for encrypt mode.
 	 * 
-	 * @throws IllegalMetadataException If this {@code AsymmetricCipherUtil} does not have a {@code PublicKey}. 
+	 * @throws OmittedCipherException If this {@code AsymmetricCipherUtil} does not have a {@code PublicKey}. 
 	 * */
 	@Override
-	protected Cipher initEncrypt(byte[] metadata) throws IllegalMetadataException {
+	protected Cipher initEncrypt(byte[] metadata) throws OmittedCipherException {
 		try {
 			Cipher c = getCipherInstance();
-			c.init(Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
+			initCipherInstance(c, Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
 					() -> new InvalidKeyException("This " + toString() + " instance does not have a public key!")));
 			return c;
 		} catch (InvalidKeyException e) {
@@ -49,13 +49,13 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	/**
 	 * Initialize backing {@code CipherUtil} for decrypt mode.
 	 * 
-	 * @throws IllegalMetadataException If this {@code AsymmetricCipherUtil} does not have a {@code PrivateKey}.
+	 * @throws OmittedCipherException If this {@code AsymmetricCipherUtil} does not have a {@code PrivateKey}.
 	 * */
 	@Override
-	protected Cipher initDecrypt(ByteBuffer metadata) throws IllegalMetadataException {
+	protected Cipher initDecrypt(ByteBuffer metadata) throws OmittedCipherException {
 		try {
 			Cipher c = getCipherInstance();
-			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
+			initCipherInstance(c, Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
 					() -> new InvalidKeyException("This " + toString() + " instance does not have a private key!")));
 			return c;
 		} catch (InvalidKeyException e) {

@@ -19,6 +19,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 
 /**
@@ -58,7 +59,7 @@ public class PasswordKeyMaterial extends SymmetricKeyMaterial {
 		try { //maybe PBEKeySpec.clearPassword must be called
 			pbeKey = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512").generateSecret(new PBEKeySpec(password, Arrays.copyOf(salt, salt.length), iterationCount, keySize));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			throw new OmittedCipherException(e);
+			throw new NotSupposedToThrownException(e);
 		}
 		byte[] key = pbeKey.getEncoded();
 		SecretKeySpec ret = new SecretKeySpec(key, algorithm);

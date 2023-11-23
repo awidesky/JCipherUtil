@@ -3,7 +3,7 @@ package io.github.awidesky.jCipherUtil.hash;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 
 /**
  * Subset of {@code Hash} instances that use {@code MessageDigest} as internal hash process.
@@ -25,7 +25,7 @@ public class MessageDigestHash implements Hash {
 			this.md = MessageDigest.getInstance(name);
 			this.name = name;
 		} catch (NoSuchAlgorithmException e) {
-			throw new OmittedCipherException(e);
+			throw new NotSupposedToThrownException(e);
 		}
 	}
 	

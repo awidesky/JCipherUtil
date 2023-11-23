@@ -3,7 +3,11 @@ package io.github.awidesky.jCipherUtil;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.AlgorithmParameterSpec;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,6 +16,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
@@ -50,7 +55,41 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			return Cipher.getInstance(Stream.of(getCipherProperty().ALGORITMH_NAME, getCipherProperty().ALGORITMH_MODE, getCipherProperty().ALGORITMH_PADDING)
 					.filter(Predicate.not(""::equals)).collect(Collectors.joining("/")));
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			/**
+			 * Only CipherUtil subclasses(which are guaranteed to put right metadata name) can call this method.
+			 * So if above exception is thrown, there must be something wrong with the library. 
+			 * */
+			throw new NotSupposedToThrownException(e);
+		}
+	}
+	/**
+	 * Initiate given {@code Cipher} instance.
+	 * 
+	 * @throws OmittedCipherException when InvalidKeyException is thrown
+	 */
+	protected void initCipherInstance(Cipher c, int opmode, Key key) {
+		try {
+			c.init(opmode, key);
+		} catch (InvalidKeyException e) {
 			throw new OmittedCipherException(e);
+		}
+	}
+	/**
+	 * Initiate given {@code Cipher} instance.
+	 * 
+	 * @throws OmittedCipherException when InvalidKeyException is thrown
+	 */
+	protected void initCipherInstance(Cipher c, int opmode, Key key, AlgorithmParameterSpec params) {
+		try {
+			c.init(opmode, key, params);
+		} catch (InvalidKeyException e) {
+			throw new OmittedCipherException(e);
+		} catch (InvalidAlgorithmParameterException e) {
+			/**
+			 * Only CipherUtil subclasses(which are guaranteed to put right metadata name) can call this method.
+			 * So if above exception is thrown, there must be something wrong with the library. 
+			 * */
+			throw new NotSupposedToThrownException(e);
 		}
 	}
 	/**

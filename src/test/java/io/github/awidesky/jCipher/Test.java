@@ -81,6 +81,7 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.hash.CheckSumHash;
 import io.github.awidesky.jCipherUtil.hash.Hash;
@@ -604,6 +605,15 @@ class Test {
 					dynamicTest("NestedIOException", () -> {
 						IOException nested = new IOException("nested IO message");
 						NestedIOException e = new NestedIOException(nested);
+						assertEquals(nested, e.getNested());
+						assertEquals(nested.getMessage(), e.getMessage());
+						assertEquals(nested.getLocalizedMessage(), e.getLocalizedMessage());
+						assertEquals(nested, e.getCause());
+						assertEquals(e.getClass().getSimpleName() + " with nested " + nested.toString(), e.toString());
+					}),
+					dynamicTest("NotSupposedToThrownException", () -> {
+						IOException nested = new IOException("nested message");
+						NotSupposedToThrownException e = new NotSupposedToThrownException(nested);
 						assertEquals(nested, e.getNested());
 						assertEquals(nested.getMessage(), e.getMessage());
 						assertEquals(nested.getLocalizedMessage(), e.getLocalizedMessage());
