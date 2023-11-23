@@ -80,6 +80,8 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20_Poly130
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
+import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
+import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.hash.CheckSumHash;
 import io.github.awidesky.jCipherUtil.hash.Hash;
@@ -138,7 +140,7 @@ class Test {
 	@TestFactory
 	@DisplayName("Test all")
 	Collection<DynamicNode> testAll() throws NoSuchAlgorithmException, DigestException, IOException {
-		List<DynamicNode> l = new ArrayList<>(4);
+		List<DynamicNode> l = new ArrayList<>(5);
 		
 		List<DynamicNode> keyExList = new ArrayList<DynamicNode>();
 		keyExList.add(dynamicTest("default curves", () -> {
@@ -157,23 +159,26 @@ class Test {
 			SecretKey key =  bk.genKey("AES", largeKeySize * 8, new byte[] { 6, 7, 8, 9, 10 }, 1000);
 			assertEquals(largeKeySize, key.getEncoded().length);
 		}));
-		symmetricList.addAll(symmetricCiphers.entrySet().stream().map(entry -> // per AES, ChaCha20...
-			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))).toList());
+		symmetricCiphers.entrySet().stream().map(entry -> // per AES, ChaCha20...
+			dynamicContainer(entry.getKey(), entry.getValue().map(Test::symmetricCipherTests))).forEach(symmetricList::add);
 		symmetricList.add(symmetricAdditionalTests());
 		
-		
 		l.add(dynamicContainer("Symmetric ciphers", symmetricList));
+		
+		
 		l.add(dynamicContainer("Asymmetric ciphers", asymmetricCiphers.entrySet().stream().map(entry -> // per RSA...
-			dynamicContainer(entry.getKey(), entry.getValue().map(Test::asymmetricCipherTests)))));
+						dynamicContainer(entry.getKey(), entry.getValue().map(Test::asymmetricCipherTests)))));
 		
 
 		LinkedList<DynamicContainer> hashTests = new LinkedList<>();
-		hashes.map(Test::addHashTests).forEach(hashTests::add);
+		hashes.map(Test::hashTests).forEach(hashTests::add);
 		l.add(dynamicContainer("Hash", hashTests));
+		
+		l.add(exceptionTests());
 		
 		return l;
 	}
-	
+
 
 	private static DynamicNode keyExchangerTests(EllipticCurveKeyExchanger[] keyExchArr) {
 		return dynamicTest(keyExchArr[0].toString(), () -> {
@@ -297,6 +302,12 @@ class Test {
 		}));
 		list.add(dynamicTest("Decrypt with PrivateKey only instance", () -> {
 			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src))))));
+		}));
+		list.add(dynamicTest("Should not encrypt with PrivateKey only instance", () -> {
+			assertThrows(IllegalMetadataException.class, () -> privateKey.encryptToSingleBuffer(InPut.from(src)));
+		}));
+		list.add(dynamicTest("Should not decrypt with PublicKey only instance", () -> {
+			assertThrows(IllegalMetadataException.class, () -> publicKey.decryptToSingleBuffer(InPut.from(bothKey.encryptToSingleBuffer(InPut.from(src)))));
 		}));
 		list.add(dynamicTest("Encrypt/Decrypt with PublicKey/PrivateKey instance", () -> {
 			assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(privateKey.decryptToSingleBuffer(InPut.from(publicKey.encryptToSingleBuffer(InPut.from(src))))));
@@ -484,7 +495,7 @@ class Test {
 			).forEach(list::add);;
 	}
 
-	private static DynamicContainer addHashTests(Hashes hash) {
+	private static DynamicContainer hashTests(Hashes hash) {
 		LinkedList<DynamicNode> tests = new LinkedList<>();
 		Stream.of(
 			dynamicTest("name check", () -> {
@@ -571,6 +582,30 @@ class Test {
 		}
 		
 		return dynamicContainer(hash.getInstance().getName(), tests);
+	}
+	
+
+	private static DynamicContainer exceptionTests() {
+		return dynamicContainer("Exeptions", Stream.of(
+					dynamicTest("OmittedCipherException", () -> {
+						Exception nested = new Exception("nested message");
+						OmittedCipherException e = new OmittedCipherException(nested);
+						assertEquals(nested, e.getNested());
+						assertEquals(nested.getMessage(), e.getMessage());
+						assertEquals(nested.getLocalizedMessage(), e.getLocalizedMessage());
+						assertEquals(nested, e.getCause());
+						assertEquals(e.getClass().getSimpleName() + " with nested " + nested.toString(), e.toString());
+					}),
+					dynamicTest("NestedIOException", () -> {
+						IOException nested = new IOException("nested IO message");
+						NestedIOException e = new NestedIOException(nested);
+						assertEquals(nested, e.getNested());
+						assertEquals(nested.getMessage(), e.getMessage());
+						assertEquals(nested.getLocalizedMessage(), e.getLocalizedMessage());
+						assertEquals(nested, e.getCause());
+						assertEquals(e.getClass().getSimpleName() + " with nested " + nested.toString(), e.toString());
+					})
+				));
 	}
 	
 	
