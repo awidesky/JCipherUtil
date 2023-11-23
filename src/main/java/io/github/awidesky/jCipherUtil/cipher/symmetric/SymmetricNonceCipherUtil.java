@@ -116,7 +116,7 @@ public abstract class SymmetricNonceCipherUtil extends SymmetricCipherUtil {
 	}
 	
 	@Override
-	protected int getMetadataLength() {
+	public int getMetadataLength() {
 		return ITERATION_COUNT_SIZE + keyMetadata.saltLen + getCipherProperty().NONCESIZE;
 	}
 	

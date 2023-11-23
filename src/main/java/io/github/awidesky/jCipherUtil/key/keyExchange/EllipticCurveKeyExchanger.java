@@ -10,6 +10,7 @@ import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.KeyAgreement;
 
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.properties.EllipticCurveKeyExchangeProperty;
 
@@ -35,7 +36,7 @@ public abstract class EllipticCurveKeyExchanger {
 			keyPairGenerator = KeyPairGenerator.getInstance(property.KEYPAIRALGORITHM);
 			keyAgreement = KeyAgreement.getInstance(property.KEYAGREEMENTALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
-			throw new OmittedCipherException(e);
+			throw new NotSupposedToThrownException(e);
 		}
 	}
 	

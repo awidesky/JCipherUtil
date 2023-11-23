@@ -20,7 +20,6 @@ import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
-import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
@@ -92,10 +91,6 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 			throw new NotSupposedToThrownException(e);
 		}
 	}
-	/**
-	 * @return {@code CipherProperty} object of the subclass.
-	 * */
-	public abstract CipherProperty getCipherProperty();
 
 	/**
 	 * Initialize {@code Cipher} in encrypt mode so that it can be usable(be able to call {@code Cipher#update(byte[])}, {@code Cipher#doFinal()}.
@@ -188,7 +183,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	}
 
 	@Override
-	public CipherEngine cipherEngine(CipherMode mode) {
+	public CipherEngine cipherEngine(CipherMode mode) { // TODO : separate
 		if(mode == CipherMode.ENCRYPT_MODE) {
 			return new CipherEncryptEngine(this::initEncrypt, getMetadataLength());
 		} else if(mode == CipherMode.DECRYPT_MODE) {
@@ -214,7 +209,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 	 * This method is used in {@code AbstractCipherUtil#cipherEngine(io.github.awidesky.jCipherUtil.CipherMode)}
 	 * @return
 	 */
-	protected abstract int getMetadataLength();
+	public abstract int getMetadataLength();
 
 	/**
 	 * Get algorithm name, transformation property and provider of this {@code CipherUtil}.

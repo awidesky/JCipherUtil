@@ -43,8 +43,9 @@ public class KeyMetadata {
 	
 	/** Length of salt */
 	public final int saltLen;
-	/** Range of salting iteration count */
+	/** Minimum number of salting iteration count(inclusive) */
 	public final int iterationRangeStart;
+	/** Maximum number of salting iteration count(exclusive) */
 	public final int iterationRangeEnd;
 	
 	/**

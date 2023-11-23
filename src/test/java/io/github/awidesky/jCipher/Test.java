@@ -80,6 +80,7 @@ import io.github.awidesky.jCipherUtil.cipher.symmetric.chacha20.ChaCha20_Poly130
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.ByteArrayKeyMaterial;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.KeyMetadata;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.key.PasswordKeyMaterial;
+import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
 import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
@@ -298,6 +299,18 @@ class Test {
 			SymmetricCipherUtil c2 = cipherBuilder.build(src); c2.destroyKey();
 			assertThrows(IllegalStateException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
 		}));
+		list.add(dynamicTest("invalid iteration count test", () -> {
+			SymmetricCipherUtil ci = cipherBuilder.build(HashHelper.password);
+			KeyMetadata km = ci.getKeyMetadata();
+			ByteBuffer buf = ByteBuffer.allocate(ci.getMetadataLength() + 1);
+			
+			buf.putInt(km.iterationRangeStart - 1);
+			assertThrows(IllegalMetadataException.class, () -> ci.cipherEngine(CipherMode.DECRYPT_MODE).update(buf.array()));
+			
+			buf.clear();
+			buf.putInt(km.iterationRangeEnd);
+			assertThrows(IllegalMetadataException.class, () -> ci.cipherEngine(CipherMode.DECRYPT_MODE).update(buf.array()));
+		}));
 	}
 	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, AsymmetricSupplier cipherSuppl) {
 		AsymmetricCipherUtil bothKey = cipherSuppl.withBothKey();
@@ -361,8 +374,10 @@ class Test {
 					CipherEngine ud = cipher.cipherEngine(CipherMode.DECRYPT_MODE);
 					assertEquals(CipherMode.ENCRYPT_MODE, ue.mode());
 					assertEquals(CipherMode.DECRYPT_MODE, ud.mode());
+					dec.write(ud.update(ue.update(new byte[0]))); //zero array input
 					dec.write(ud.update(ue.update(src)));
-					dec.write(ud.doFinal(ue.doFinal()));
+					dec.write(ud.update(ue.update(new byte[0]))); //zero array input
+					dec.write(ud.doFinal(ue.doFinal(null)));
 					assertEquals(HashHelper.hashPlain(src), HashHelper.hashPlain(dec.toByteArray()));
 					assertEquals(ud.isFinished(), true); assertEquals(ue.isFinished(), true);
 					assertEquals(null, ud.update(new byte[4])); assertEquals(null, ud.doFinal()); assertEquals(null, ud.doFinal(new byte[4]));

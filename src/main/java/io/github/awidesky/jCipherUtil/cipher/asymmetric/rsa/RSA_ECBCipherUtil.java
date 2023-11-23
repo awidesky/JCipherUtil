@@ -13,6 +13,7 @@ import javax.crypto.NoSuchPaddingException;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMaterial;
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
@@ -49,7 +50,7 @@ public class RSA_ECBCipherUtil extends AsymmetricCipherUtil {
 			}
 			return rsa.getOutputSize(0) * Byte.SIZE;
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException e) {
-			throw new OmittedCipherException(e);
+			throw new NotSupposedToThrownException(e);
 		}
 	}
 

@@ -29,7 +29,7 @@ public class CipherDecryptEngine extends CipherEngine {
 			this.c = cipherGenerator.apply(metadata.flip());
 			cipherGenerator = null;
 			metadata = null;
-			byte[] ret = c.update(buf, off + remaining, len - remaining);
+			byte[] ret = c.update(buf, off + remaining, len - remaining); // TODO : optional
 			if(ret != null) return ret;
 			else return new byte[0];
 		} else {

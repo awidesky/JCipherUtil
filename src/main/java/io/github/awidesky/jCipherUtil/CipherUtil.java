@@ -22,6 +22,7 @@ import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.messageInterface.InPut;
 import io.github.awidesky.jCipherUtil.messageInterface.OutPut;
+import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 import io.github.awidesky.jCipherUtil.util.CipherMode;
 import io.github.awidesky.jCipherUtil.util.CipherTunnel;
 import io.github.awidesky.jCipherUtil.util.CipherUtilInputStream;
@@ -280,6 +281,12 @@ public interface CipherUtil {
 	 * @return a new {@code CipherUtilInputStream} ad given mode.
 	 */
 	public CipherUtilInputStream inputStream(InputStream in, CipherMode mode);
+	
+
+	/**
+	 * @return {@code CipherProperty} object of the CipherUtil.
+	 * */
+	public CipherProperty getCipherProperty();
 	
 	/**
 	 * Destroy or clear associated secret(key), therefore make this {@code CipherUtil} unable to use anymore. 

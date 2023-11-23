@@ -18,6 +18,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 
+import io.github.awidesky.jCipherUtil.exceptions.NotSupposedToThrownException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.properties.CipherProperty;
 
@@ -49,7 +50,7 @@ public class PrivateKeyMaterial extends AsymmetricKeyMaterial {
 		try {
 			return new KeyPair(null, KeyFactory.getInstance(algorithm).generatePrivate(new PKCS8EncodedKeySpec(pkcs8EncodedPrivateKey)));
 		} catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-			throw new OmittedCipherException(e);
+			throw new NotSupposedToThrownException(e);
 		}
 	}
 

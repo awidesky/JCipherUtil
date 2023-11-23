@@ -28,11 +28,17 @@ public class CipherEncryptEngine extends CipherEngine {
 			else return new byte[0];
 		} else {
 			byte[] extra = c.update(buf, off, len);
-			byte[] ret = new byte[metadata.length + extra.length];
-			System.arraycopy(metadata, 0, ret, 0, metadata.length);
-			System.arraycopy(extra, 0, ret, metadata.length, extra.length);
-			metadata = null;
-			return ret;
+			if (extra != null) {
+				byte[] ret = new byte[metadata.length + extra.length];
+				System.arraycopy(metadata, 0, ret, 0, metadata.length);
+				System.arraycopy(extra, 0, ret, metadata.length, extra.length);
+				metadata = null;
+				return ret;
+			} else {
+				byte[] tmp = metadata;
+				metadata = null;
+				return tmp;
+			}
 		}
 	}
 }
