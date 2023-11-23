@@ -10,7 +10,6 @@ import javax.crypto.Cipher;
 import io.github.awidesky.jCipherUtil.AbstractCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.AsymmetricKeyMaterial;
 import io.github.awidesky.jCipherUtil.exceptions.IllegalMetadataException;
-import io.github.awidesky.jCipherUtil.exceptions.NestedIOException;
 import io.github.awidesky.jCipherUtil.exceptions.OmittedCipherException;
 import io.github.awidesky.jCipherUtil.key.KeySize;
 
