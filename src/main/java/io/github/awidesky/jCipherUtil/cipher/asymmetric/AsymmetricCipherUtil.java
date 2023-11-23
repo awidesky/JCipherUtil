@@ -36,7 +36,7 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	 * @throws IllegalMetadataException If this {@code AsymmetricCipherUtil} does not have a {@code PublicKey}. 
 	 * */
 	@Override
-	protected Cipher initEncrypt(byte[] metadata) throws NestedIOException {
+	protected Cipher initEncrypt(byte[] metadata) throws IllegalMetadataException {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.ENCRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPublic()).orElseThrow(
@@ -50,10 +50,10 @@ public abstract class AsymmetricCipherUtil extends AbstractCipherUtil {
 	/**
 	 * Initialize backing {@code CipherUtil} for decrypt mode.
 	 * 
-	 * @throws IllegalMetadataException If this {@code AsymmetricCipherUtil} does not have a {@code PrivateKey}. 
+	 * @throws IllegalMetadataException If this {@code AsymmetricCipherUtil} does not have a {@code PrivateKey}.
 	 * */
 	@Override
-	protected Cipher initDecrypt(ByteBuffer metadata) throws NestedIOException {
+	protected Cipher initDecrypt(ByteBuffer metadata) throws IllegalMetadataException {
 		try {
 			Cipher c = getCipherInstance();
 			c.init(Cipher.DECRYPT_MODE, Optional.ofNullable(key.getKey(getCipherProperty().KEY_ALGORITMH_NAME).getPrivate()).orElseThrow(
