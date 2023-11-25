@@ -170,8 +170,7 @@ public abstract class AbstractCipherUtil implements CipherUtil {
 		while (true) {
 			int read = in.getSrc(buf);
 			if(read == -1) break;
-			byte[] result = cipherEngine.update(buf, 0, read);//optional.orelsecompute
-			if (result != null) out.consumeResult(result);
+			out.consumeResult(cipherEngine.update(buf, 0, read));
 		}
 		out.consumeResult(cipherEngine.doFinal());
 	}

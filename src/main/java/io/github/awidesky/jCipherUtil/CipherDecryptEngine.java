@@ -1,6 +1,7 @@
 package io.github.awidesky.jCipherUtil;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.crypto.Cipher;
@@ -29,9 +30,7 @@ public class CipherDecryptEngine extends CipherEngine {
 			this.c = cipherGenerator.apply(metadata.flip());
 			cipherGenerator = null;
 			metadata = null;
-			byte[] ret = c.update(buf, off + remaining, len - remaining); // TODO : optional
-			if(ret != null) return ret;
-			else return new byte[0];
+			return Optional.ofNullable(c.update(buf, off + remaining, len - remaining)).orElse(new byte[0]);
 		} else {
 			metadata.put(buf, off, len);
 			return new byte[0];

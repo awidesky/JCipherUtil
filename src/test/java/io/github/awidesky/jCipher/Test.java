@@ -203,6 +203,11 @@ class Test {
 		addSymmetricCipherKeyTests(tests, cipherBuilder);
 		SymmetricCipherUtil cipher = cipherBuilder.build(HashHelper.password);
 		addCommonCipherTests(tests, cipher);
+		tests.add(dynamicTest("tiny buffer size test", () -> {
+			SymmetricCipherUtil tiny = cipherBuilder.bufferSize(5).build(HashHelper.password);
+			assertEquals(HashHelper.hashPlain(src),
+					HashHelper.hashPlain(tiny.decryptToSingleBuffer(InPut.from(tiny.encryptToSingleBuffer(InPut.from(src))))));
+		}));
 		tests.add(dynamicTest("CipherUtilInputStream large input test", () -> {
 			/*
 			 * Test if inner buffer (outputBuffer) of CipherUtilInputStream works well with large inputs,
