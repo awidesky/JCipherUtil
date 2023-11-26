@@ -12,7 +12,7 @@ import java.util.HexFormat;
  * @see MessageDigestHash
  */
 public interface Hash {
-//TODO : version name change
+
 	/**
 	 * Continues the hash computation with the given {@code buf}.
 	 * <p>

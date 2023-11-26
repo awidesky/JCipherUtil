@@ -13,7 +13,7 @@ import io.github.awidesky.jCipherUtil.util.CipherMode;
  * {@code javax.crypto.Cipher} that take cases of
  * metadata reading/generating, and inner buffering,
  */
-public abstract class CipherEngine { //TODO : Thread safe version?
+public abstract class CipherEngine {
 
 	protected Cipher c;
 	protected CipherMode mode;
