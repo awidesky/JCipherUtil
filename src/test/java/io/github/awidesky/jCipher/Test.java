@@ -54,6 +54,7 @@ import javax.crypto.SecretKey;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicContainer;
 import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
@@ -64,10 +65,10 @@ import io.github.awidesky.jCipher.hashCompareHelpers.ChecksumComparator;
 import io.github.awidesky.jCipher.hashCompareHelpers.HashComparartorGenerator;
 import io.github.awidesky.jCipherUtil.CipherEngine;
 import io.github.awidesky.jCipherUtil.CipherUtil;
+import io.github.awidesky.jCipherUtil.cipher.NullCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.AsymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.key.KeyPairMaterial;
 import io.github.awidesky.jCipherUtil.cipher.asymmetric.rsa.RSAKeySize;
-import io.github.awidesky.jCipherUtil.cipher.symmetric.NullCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtil;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.SymmetricCipherUtilBuilder;
 import io.github.awidesky.jCipherUtil.cipher.symmetric.aes.AESKeySize;
@@ -116,9 +117,6 @@ class Test {
 			Map.entry("ChaCha20", Stream.of(
 					new ChaCha20_Poly1305CipherUtil.Builder(ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT),
 					new ChaCha20CipherUtil.Builder(ChaCha20KeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT)
-				)),
-			Map.entry("NullCipher", Stream.of(
-					new NullCipherUtil.Builder()
 				))
 			);
 	static final Map<String, Stream<AsymmetricSupplier>> asymmetricCiphers = Map.ofEntries(
@@ -145,7 +143,7 @@ class Test {
 	@TestFactory
 	@DisplayName("Test all")
 	Collection<DynamicNode> testAll() throws NoSuchAlgorithmException, DigestException, IOException {
-		List<DynamicNode> l = new ArrayList<>(5);
+		List<DynamicNode> l = new ArrayList<>(6);
 		
 		List<DynamicNode> keyExList = new ArrayList<DynamicNode>();
 		keyExList.add(dynamicTest("default curves", () -> {
@@ -170,6 +168,7 @@ class Test {
 		
 		l.add(dynamicContainer("Symmetric ciphers", symmetricList));
 		
+		l.add(nullCipherTest());
 		
 		l.add(dynamicContainer("Asymmetric ciphers", asymmetricCiphers.entrySet().stream().map(entry -> // per RSA...
 						dynamicContainer(entry.getKey(), entry.getValue().map(Test::asymmetricCipherTests)))));
@@ -271,55 +270,53 @@ class Test {
 			assertEquals(HashHelper.hashPlain(src),
 					HashHelper.hashPlain(ci1.decryptToSingleBuffer(InPut.from(ci2.encryptToSingleBuffer(InPut.from(src))))));
 		}));
-		if (!(cipherBuilder.build(HashHelper.password) instanceof NullCipherUtil)) {
-			list.add(dynamicTest("invalid key size test", () -> {
-				int smallKeySize = 12;
-				int largeKeySize = 264;
-				int originalKeySize = cipherBuilder.build(HashHelper.password).keySize();
-				SymmetricCipherUtil c1 = cipherBuilder.keySize(new KeySize(smallKeySize)).build(HashHelper.password);
-				SymmetricCipherUtil c2 = cipherBuilder.keySize(new KeySize(largeKeySize)).build(HashHelper.password);
-				cipherBuilder.keySize(new KeySize(originalKeySize));
-				assertThrows(OmittedCipherException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
-				assertThrows(OmittedCipherException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
+		list.add(dynamicTest("invalid key size test", () -> {
+			int smallKeySize = 12;
+			int largeKeySize = 264;
+			int originalKeySize = cipherBuilder.build(HashHelper.password).keySize();
+			SymmetricCipherUtil c1 = cipherBuilder.keySize(new KeySize(smallKeySize)).build(HashHelper.password);
+			SymmetricCipherUtil c2 = cipherBuilder.keySize(new KeySize(largeKeySize)).build(HashHelper.password);
+			cipherBuilder.keySize(new KeySize(originalKeySize));
+			assertThrows(OmittedCipherException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
+			assertThrows(OmittedCipherException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
 
-				byte[] encrypted = cipherBuilder.build(HashHelper.password).encryptToSingleBuffer(InPut.from(src));
-				assertThrows(OmittedCipherException.class, () -> c1.decryptToSingleBuffer(InPut.from(encrypted)));
-				assertThrows(OmittedCipherException.class, () -> c2.decryptToSingleBuffer(InPut.from(encrypted)));
-			}));
-			list.add(dynamicTest("key material destroy test", () -> {
-				PasswordKeyMaterial p = new PasswordKeyMaterial(HashHelper.password);
-				ByteArrayKeyMaterial b = new ByteArrayKeyMaterial(src);
-				char[] prev1 = p.getPassword();
-				byte[] prev2 = b.getKeySource();
-				p.destroy();
-				b.destroy();
-				assertEquals(true, p.isDestroyed(), "PasswordKeyMaterial is not destroyed");
-				assertEquals(true, b.isDestroyed(), "ByteArrayKeyMaterial is not destroyed");
-				assertNotEquals(prev1, p.getPassword(), "PasswordKeyMaterial data is not deleted");
-				assertNotEquals(prev2, b.getKeySource(), "ByteArrayKeyMaterial data is not deleted");
-				String keyAlgo = cipherBuilder.build(HashHelper.password).getCipherProperty().KEY_ALGORITMH_NAME;
-				assertThrows(IllegalStateException.class, () -> p.genKey(keyAlgo, 256, src, 100));
-				assertThrows(IllegalStateException.class, () -> b.genKey(keyAlgo, 256, src, 100));
-				SymmetricCipherUtil c1 = cipherBuilder.build(HashHelper.password);
-				c1.destroyKey();
-				assertThrows(IllegalStateException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
-				SymmetricCipherUtil c2 = cipherBuilder.build(src);
-				c2.destroyKey();
-				assertThrows(IllegalStateException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
-			}));
-			list.add(dynamicTest("invalid iteration count test", () -> {
-				SymmetricCipherUtil ci = cipherBuilder.build(HashHelper.password);
-				KeyMetadata km = ci.getKeyMetadata();
-				ByteBuffer buf = ByteBuffer.allocate(ci.getMetadataLength() + 1);
+			byte[] encrypted = cipherBuilder.build(HashHelper.password).encryptToSingleBuffer(InPut.from(src));
+			assertThrows(OmittedCipherException.class, () -> c1.decryptToSingleBuffer(InPut.from(encrypted)));
+			assertThrows(OmittedCipherException.class, () -> c2.decryptToSingleBuffer(InPut.from(encrypted)));
+		}));
+		list.add(dynamicTest("key material destroy test", () -> {
+			PasswordKeyMaterial p = new PasswordKeyMaterial(HashHelper.password);
+			ByteArrayKeyMaterial b = new ByteArrayKeyMaterial(src);
+			char[] prev1 = p.getPassword();
+			byte[] prev2 = b.getKeySource();
+			p.destroy();
+			b.destroy();
+			assertEquals(true, p.isDestroyed(), "PasswordKeyMaterial is not destroyed");
+			assertEquals(true, b.isDestroyed(), "ByteArrayKeyMaterial is not destroyed");
+			assertNotEquals(prev1, p.getPassword(), "PasswordKeyMaterial data is not deleted");
+			assertNotEquals(prev2, b.getKeySource(), "ByteArrayKeyMaterial data is not deleted");
+			String keyAlgo = cipherBuilder.build(HashHelper.password).getCipherProperty().KEY_ALGORITMH_NAME;
+			assertThrows(IllegalStateException.class, () -> p.genKey(keyAlgo, 256, src, 100));
+			assertThrows(IllegalStateException.class, () -> b.genKey(keyAlgo, 256, src, 100));
+			SymmetricCipherUtil c1 = cipherBuilder.build(HashHelper.password);
+			c1.destroyKey();
+			assertThrows(IllegalStateException.class, () -> c1.encryptToSingleBuffer(InPut.from(src)));
+			SymmetricCipherUtil c2 = cipherBuilder.build(src);
+			c2.destroyKey();
+			assertThrows(IllegalStateException.class, () -> c2.encryptToSingleBuffer(InPut.from(src)));
+		}));
+		list.add(dynamicTest("invalid iteration count test", () -> {
+			SymmetricCipherUtil ci = cipherBuilder.build(HashHelper.password);
+			KeyMetadata km = ci.getKeyMetadata();
+			ByteBuffer buf = ByteBuffer.allocate(ci.getMetadataLength() + 1);
 
-				buf.putInt(km.iterationRangeStart - 1);
-				assertThrows(IllegalMetadataException.class, () -> ci.cipherDecryptEngine().update(buf.array()));
+			buf.putInt(km.iterationRangeStart - 1);
+			assertThrows(IllegalMetadataException.class, () -> ci.cipherDecryptEngine().update(buf.array()));
 
-				buf.clear();
-				buf.putInt(km.iterationRangeEnd);
-				assertThrows(IllegalMetadataException.class, () -> ci.cipherDecryptEngine().update(buf.array()));
-			}));
-		}
+			buf.clear();
+			buf.putInt(km.iterationRangeEnd);
+			assertThrows(IllegalMetadataException.class, () -> ci.cipherDecryptEngine().update(buf.array()));
+		}));
 	}
 	private static void addAsymmetricCipherKeyTests(List<DynamicNode> list, AsymmetricSupplier cipherSuppl) {
 		AsymmetricCipherUtil bothKey = cipherSuppl.withBothKey();
@@ -525,6 +522,17 @@ class Test {
 			).forEach(list::add);;
 	}
 
+	private static DynamicTest nullCipherTest() {
+		return dynamicTest(new NullCipherUtil(CIPHERUTILBUFFERSIZE).toString(), () -> {
+			NullCipherUtil c = new NullCipherUtil(CIPHERUTILBUFFERSIZE);
+			c.destroyKey(); // does nothing
+			assertEquals("no algorithm", c.getCipherProperty().ALGORITMH_NAME);
+			byte[] enc = c.encryptToSingleBuffer(InPut.from(src));
+			assertArrayEquals(src, enc);
+			assertArrayEquals(src, c.decryptToSingleBuffer(InPut.from(enc)));
+		});
+	}
+	
 	private static DynamicContainer hashTests(Hashes hash) {
 		LinkedList<DynamicNode> tests = new LinkedList<>();
 		Stream.of(
