@@ -70,7 +70,9 @@ public abstract class CipherEngine {
 		if(finished) return null;
 		finished = true;
 		try {
-			return c.doFinal();
+			byte[] ret = c.doFinal();
+			if(ret != null) return ret;
+			else return new byte[0];
 		} catch (IllegalBlockSizeException | BadPaddingException e) {
 			throw new OmittedCipherException(e);
 		}
