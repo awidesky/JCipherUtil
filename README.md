@@ -1,16 +1,37 @@
-# JEncrypter
-Simple Java library that provides wrapper to encrypt between Streams, Files...etc.  
+# JCipherUtil
+Simple Java library that provides a wrapper to encrypt between various sources like Streams, Files...etc.  
   
-* [Examples](#examples)
-    * [Initialization](initialization)
-    * [byte array Encryption/Decryption](#byte-byte)
-* [Installation](#installation)
+* [Examples](#examples)  
+	* [Initialization](#initialization)  
+    	* [byte array Encryption/Decryption](#byte-byte)  
+
 
 
 # Examples  
 
-## Initialization  
+## Initialization    
 ```
+char[] password = "tH!s1Smyp@Ssw0rd".toCharArray();
+new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256)
+					.bufferSize(BUFFERSIZE)
+					.keySize(AESKeySize.SIZE_128) // override key size
+					.keyMetadata(KeyMetadata.DEFAULT)
+					.build(password);
+				  //.built(byteArray)
+```
+### Password as the key
+```
+char[] password = "tH!s1Smyp@Ssw0rd".toCharArray();
+new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).build(password);
+```
+### byte array as the key
+```
+byte[] key = new byte[some_random_size]; //size of the key is irrelevant
+// there are no required format or length for the key.
+// the array will be hashed and stretched(if needed) to match required key size.
+// even though, long and random data is recommended.
+new Random().nextBytes(key);
+new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).build(key);
 ```
 ## CipherTunnel  
 ```
@@ -98,3 +119,4 @@ cipher.decryptToSingleBuffer(MessageProvider.from(cipher.encryptToSingleBuffer(M
 				})
 
 # Installation
+asdfasdf
