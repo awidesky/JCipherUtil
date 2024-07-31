@@ -87,7 +87,7 @@ public interface CipherUtil {
 	
 	
 	/**
-	 * Simple way to encrypt from a {@code InputStreamr} to a {@code OutputStream}.<p>
+	 * Simple way to encrypt from a {@code InputStream} to a {@code OutputStream}.<p>
 	 * Both streams are closed after cipher process is finished.
 	 * 
 	 * @param in Source for encryption
@@ -102,7 +102,7 @@ public interface CipherUtil {
 	}
 
 	/**
-	 * Simple way to decrypt from a {@code InputStreamr} to a {@code OutputStream}.<p>
+	 * Simple way to decrypt from a {@code InputStream} to a {@code OutputStream}.<p>
 	 * Both streams are closed after cipher process is finished.
 	 * 
 	 * @param in Source for encryption
