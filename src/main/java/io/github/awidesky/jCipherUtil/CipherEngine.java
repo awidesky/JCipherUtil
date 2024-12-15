@@ -34,7 +34,8 @@ public abstract class CipherEngine {
      *
      * @param buf the input buffer
      *
-     * @return the new buffer with the result, or null if the cipher process is finished.
+     * @return the new buffer with the result(might be an array with size 0 if input is too small
+     * 		   to generate a output block), or null if the cipher process is finished.
      */
 	public byte[] update(byte[] buf) {
 		return update(buf, 0, buf.length);
