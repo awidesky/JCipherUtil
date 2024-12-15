@@ -10,9 +10,8 @@ JCipherUtil takes all the dirty work you've been doing with Java Cryptography Ex
 You can just pick a cipher/hash algorithm to use, and way to go!
 
 Most of the modern algorithms(AES/ChaCha/RSA/ECDH/XDH/SHA) are supported.
+
 For detail, please obtain the javadoc from [releases](https://github.com/awidesky/JCipherUtil/releases).(I spent TONs of time writting it)
-
-
 
 * [Examples](#examples)  
   
@@ -26,6 +25,9 @@ For detail, please obtain the javadoc from [releases](https://github.com/awidesk
     * [Hex String](#hex-encoded-string-hex-encoded-string)  
     * [Stream](#inputstream-outputstream)  
     * [Channel](#readablebytechannel-writablebytechannel)  
+  * [Asymmetric cipher](#asymmetric-cipher)
+    * [RSA](#rsa)
+  * [Elliptic Curve Key Exchange](#elliptic-curve-key-exchange)
   - [Utility classes](#utility-classes)
     * [CipherTunnel](#ciphertunnel)
     * [CipherEngine](#cipherengine)
@@ -144,6 +146,44 @@ cipher.encrypt(
 );
 ```
 
+## Asymmetric cipher
+
+### RSA
+
+Everything is the same except for generating a key pair.
+
+```
+KeyPair key = RSA_ECBCipherUtil.generateKeyPair(keySize);
+CipherUtil has_public_key_only = new RSA_ECBCipherUtil.Builder(key.getPublic()).build();
+CipherUtil has_private_key_only = new RSA_ECBCipherUtil.Builder(key.getPrivate())build();
+CipherUtil has_both_key = new RSA_ECBCipherUtil.Builder(key).build();
+```
+
+## Elliptic Curve Key Exchange
+
+Elliptic curve key agreement(key exchange) protocol includes ECDH/XDH algorithm.
+These algorithm can share common secret key with each other's public key.
+
+It can be used to share secret key through unsafe connection(e.g. client and server through tcp network).
+
+```
+EllipticCurveKeyExchanger k1 = new ECDHKeyExchanger(ECDHCurves.secp256r1); 
+EllipticCurveKeyExchanger k2 = new ECDHKeyExchanger(ECDHCurves.secp256r1); 
+
+PublicKey p1 = k1.init();
+PublicKey p2 = k2.init();
+
+byte[] key1 = k1.exchangeKey(p2)
+byte[] key2 = k2.exchangeKey(p1)
+
+assertEquals(key1, key2); //true
+
+/** Both CipherUtil uses same key */
+SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).build(key1); 
+SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).build(key2);
+```
+
+
 ## Utility classes
 
 Utility classes for easier use.
@@ -168,7 +208,7 @@ ct.transferFinal(); // process all bytes till the end.
 ByteArrayOutputStream dec = new ByteArrayOutputStream(); //Decrypted data
 ct = cipher.cipherDecryptTunnel(MessageProvider.from(enc.toByteArray()), MessageConsumer.to(dec));
 ct.transferFinal();
-assertEquals(Hash.hashPlain(src), Hash.hashPlain(dec.toByteArray())); //true
+assertEquals(src, dec.toByteArray()); //true
 ```
 
 ### CipherEngine
