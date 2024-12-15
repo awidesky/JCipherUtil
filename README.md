@@ -31,7 +31,7 @@ Also, it givbes simple and universial interface to specify [input](https://githu
 You can just pick a cipher/hash algorithm to use, and way to go!
 
 Most of the modern algorithms(AES/ChaCha/RSA/ECDH/XDH/SHA) are supported.
-For detail, please obtain the javadoc from [releases](https://github.com/awidesky/JCipherUtil/releases).(I spent TONs of time writting it)
+For detail, please obtain the javadoc from [releases](https://github.com/awidesky/JCipherUtil/releases) or [maven repository](https://repo1.maven.org/maven2/io/github/awidesky/JCipherUtil/).(I spent TONs of time writting it)
 
 * [Examples](#examples)  
   
