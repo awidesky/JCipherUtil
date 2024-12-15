@@ -1,16 +1,36 @@
 # JCipherUtil
 
-Java library that provides a simple and universial way to encrypt/decrypt between various sources like Streams, Files...etc.  
+Java library that provides an usefull wrapper around Java Cryptography Extension(JCE). 
 
-JCipherUtil takes all the dirty work you've been doing with Java Cryptography Extension(JCE). 
+When you use cryptography library included in java(say, javax.crypto.Cipher), you need to manually..
 
-* It generates safe key with hash iteration with any SHA algorithm you want.
-* It saves/loads password iteration count, salt and IV under the hood.
+* Create a key, salt, initial vector if needed(e.g. AES/CBC)
+
+* Hash the key(especially if it's String), hash it again at least 210,000 times([see](https://github.com/awidesky/JCipherUtil/blob/8fd332b0347748407c0670de9f989c3beefcda8b/src/main/java/io/github/awidesky/jCipherUtil/cipher/symmetric/key/KeyMetadata.java#L36)) for additional security,
+
+* Store public parameters somewhere, and write code to read and process it when decrypting.
+
+JCipherUtil takes all the dirty work you've been doing with JCE..
+
+- It generates safe key with hash iteration with any SHA algorithm you want.
+- It saves/loads password iteration count, salt and IV under the hood.
+
+
+
+Also, lack of high level features and old design of JCE might bother you, such as..
+
+* javax.crypto.CipherIn/OutputStream is [very slow](https://stackoverflow.com/questions/60575897/cipherinputstream-hangs-while-reading-data) with 512 bytes buffer and old implementation.
+
+* javax.crypto.Cipher can only work with byte arrays, which makes It quite inconvenient when you need to deal with various types of input/output(files, encoded Strings...etc.) or I/O streams.
+
+JCipherUtil provides faster/overiddable buffer and parameters with better performance.
+Also, it givbes simple and universial interface to specify [input](https://github.com/awidesky/JCipherUtil/blob/master/src/main/java/io/github/awidesky/jCipherUtil/messageInterface/InPut.java) and [output](https://github.com/awidesky/JCipherUtil/blob/master/src/main/java/io/github/awidesky/jCipherUtil/messageInterface/OutPut.java) for cipher process of many types(see examples [here](#encrypt-decrypt-with-various-forms-of-data)).
+
+
 
 You can just pick a cipher/hash algorithm to use, and way to go!
 
 Most of the modern algorithms(AES/ChaCha/RSA/ECDH/XDH/SHA) are supported.
-
 For detail, please obtain the javadoc from [releases](https://github.com/awidesky/JCipherUtil/releases).(I spent TONs of time writting it)
 
 * [Examples](#examples)  
@@ -182,7 +202,6 @@ assertEquals(key1, key2); //true
 SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).build(key1); 
 SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).build(key2);
 ```
-
 
 ## Utility classes
 
