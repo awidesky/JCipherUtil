@@ -192,6 +192,13 @@ class Test {
 			PublicKey p1 = k1.init();
 			PublicKey p2 = k2.init();
 					
+			assertArrayEquals(k1.exchangeKey(p2), k2.exchangeKey(p1));
+			assertArrayEquals(k1.exchangeKey(p2), k1.exchangeKey(p2));
+			
+			assertArrayEquals(p1.getEncoded(), k2.decodePublicKey(p1.getEncoded()).getEncoded());
+			assertArrayEquals(p2.getEncoded(), k1.decodePublicKey(p2.getEncoded()).getEncoded());
+			
+			
 			SymmetricCipherUtil c1 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(k1.exchangeKey(p2)); 
 			SymmetricCipherUtil c2 = new AES_GCMCipherUtil.Builder(AESKeySize.SIZE_256).bufferSize(CIPHERUTILBUFFERSIZE).keyMetadata(KeyMetadata.DEFAULT).build(k2.exchangeKey(p1));
 					

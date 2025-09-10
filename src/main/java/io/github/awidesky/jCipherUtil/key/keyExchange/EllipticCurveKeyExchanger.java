@@ -2,11 +2,14 @@ package io.github.awidesky.jCipherUtil.key.keyExchange;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 
 import javax.crypto.KeyAgreement;
 
@@ -23,6 +26,7 @@ public abstract class EllipticCurveKeyExchanger {
 	
 	private final KeyPairGenerator keyPairGenerator;
 	private final KeyAgreement keyAgreement;
+	private final KeyFactory keyFactory;
 	private KeyPair keyPair;
 	protected final EllipticCurveKeyExchangeProperty property; 
 	
@@ -35,6 +39,7 @@ public abstract class EllipticCurveKeyExchanger {
 		try {
 			keyPairGenerator = KeyPairGenerator.getInstance(property.KEYPAIRALGORITHM);
 			keyAgreement = KeyAgreement.getInstance(property.KEYAGREEMENTALGORITHM);
+			keyFactory = KeyFactory.getInstance(property.KEYPAIRALGORITHM);
 		} catch (NoSuchAlgorithmException e) {
 			throw new NotSupposedToThrownException(e);
 		}
@@ -74,6 +79,22 @@ public abstract class EllipticCurveKeyExchanger {
 	 * */
 	public PublicKey init() {
 		return generateKeyPair();
+	}
+	
+	/**
+	 * Decode byte encoded public key to a {@code PublicKey} object.
+	 * Useful when decode a public key received from peer during key exchange.
+	 * 
+	 * @param encodedPublicKey byte encoded public key, typically obtained via {@link PublicKey#getEncoded()}
+	 * @return constructed {@code PublicKey} object from byte array
+	 * @throws OmittedCipherException when {@link InvalidKeySpecException} occurs
+	 */
+	public PublicKey decodePublicKey(byte[] encodedPublicKey) throws OmittedCipherException {
+        try {
+			return keyFactory.generatePublic(new X509EncodedKeySpec(encodedPublicKey));
+		} catch (InvalidKeySpecException e) {
+			throw new OmittedCipherException(e);
+		}
 	}
 	
 	/**
